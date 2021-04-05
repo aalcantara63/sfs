@@ -1,0 +1,7 @@
+{
+  "name": "imenuapps",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
