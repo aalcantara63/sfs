@@ -17,6 +17,7 @@
     "@google-pay/button-element": "^2.2.0",
     "@ionic-native/core": "^5.29.0",
     "@ionic-native/geolocation": "^5.29.0",
+    "@ionic-native/printer": "^5.32.1",
     "@ionic/core": "^5.3.1",
     "@ionic/vue": "0.0.9",
     "axios": "^0.21.1",
