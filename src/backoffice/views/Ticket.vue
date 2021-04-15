@@ -51,7 +51,7 @@
     </div>
     <div v-else>
         <div v-if="screenWidth < 600">
-          <paginate
+          <paginate v-if="filterOrders.length > 0"
             name="languages"
             :list="filterOrders"
             :per="8"
@@ -66,12 +66,13 @@
                   </ion-label>
                   <ion-label position="fixed">
                       <h3>{{ order.OrderType }}</h3>
-                      <h3>{{ getOrderState(order.State) }}</h3>
+                      <h3 v-if="order.State != 0">{{ $t('frontend.order.closed') }}</h3>
+                      <h3 v-else>{{$t('frontend.reservation.open')}}</h3> 
                   </ion-label>
                   <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
                 </ion-item>
                 <ion-item-options side="end">
-                  <ion-item-option color="primary" @click="viewOrder(order._id)">
+                  <ion-item-option color="primary" @click="viewOrder(order)">
                     <ion-icon slot="icon-only" name="list"></ion-icon>
                   </ion-item-option>
                   <!-- <ion-item-option v-if="order.State != 0 && order.State != 6 && order.State != 5" color="danger" @click="cancelOrder(order, getCustomerById(order.ClientId))">
@@ -84,15 +85,20 @@
 
           </paginate>
 
-          <paginate-links for="languages" color="primary" 
-            :simple="{
-              next:'»' ,
-              prev: '« ' }"
-          ></paginate-links>
+          <div v-if="filterOrders.length > 0">
+              <paginate-links for="languages" color="primary" 
+                :simple="{
+                  next:'»' ,
+                  prev: '« ' }"
+              ></paginate-links>
+          </div>
+          <div class="emptyResult" v-else>
+              {{$t('backoffice.titles.emptyResult')}}
+          </div>
         </div>
 
         <div v-if="screenWidth >= 600">
-          <paginate
+          <paginate v-if="filterOrders.length > 0"
             name="languages"
             :list="filterOrders"
             :per="8"
@@ -107,10 +113,11 @@
                 </ion-label>
                 <ion-label position="fixed">
                     <h3>{{ order.OrderType }}</h3>
-                    <h3>{{ getOrderState(order.State) }}</h3>
+                    <h3 v-if="order.State != 0">{{$t('frontend.order.closed')}}</h3>
+                    <h3 v-else>{{$t('frontend.reservation.open')}}</h3>
                 </ion-label>
                 <ion-item-group side="end">
-                  <ion-button color="primary" @click="viewOrder(order._id)">
+                  <ion-button color="primary" @click="viewOrder(order)">
                     <ion-icon slot="icon-only" name="list"></ion-icon>
                   </ion-button>
                 </ion-item-group>
@@ -119,11 +126,16 @@
 
           </paginate>
 
-          <paginate-links for="languages" color="primary" 
-            :simple="{
-              next:'»' ,
-              prev: '« ' }"
-          ></paginate-links>
+          <div v-if="filterOrders.length > 0">
+              <paginate-links for="languages" color="primary" 
+                :simple="{
+                  next:'»' ,
+                  prev: '« ' }"
+              ></paginate-links>
+          </div>
+          <div class="emptyResult" v-else>
+              {{$t('backoffice.titles.emptyResult')}}
+          </div>
         </div>
 
     </div>
@@ -365,11 +377,25 @@ export default {
         }
 
     },
-    viewOrder: function(id){
-        this.$router.push({
-        name: 'TicketForm', 
-        params: { orderId: id }
-      });
+    viewOrder: function(order){
+
+        if (order.State === 5)
+        {
+            this.$router.push({
+              name: 'OrderDetails', 
+              params: { 
+                orderId: order._id,
+                type: 'ticket'
+              }
+            });
+        }
+        else
+        {
+          this.$router.push({
+            name: 'TicketForm', 
+            params: { orderId: order._id }
+          });
+        }
     },
     getOrderState(state){
         return this.workflowOrderStaus[state];

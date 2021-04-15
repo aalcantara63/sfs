@@ -2,7 +2,31 @@
     <div>
         <div class="ion-padding">  
 
-            <textarea id="target" style=" width: 100%;height: 100px;"  @change="noData()"></textarea>        
+            <textarea id="target" style=" width: 100%;height: 100px;"  @change="noData()"></textarea> 
+
+             <ion-item >                     
+                  <ion-label position="floating">{{addressLine1}} </ion-label>                                                                      
+                  <ion-input type="text" required=true  
+                  class="menu-col-8" 
+                  :value="address" @input="address = $event.target.value"
+                      ></ion-input>
+              </ion-item>   
+
+              <ion-item >                  
+                  <ion-label position="floating">{{postalCode}} </ion-label>                                                                                                    
+                  <ion-input type="tel" required=true  :key="key"
+                  class="menu-col-8" 
+                  :value="zipCode" @change="zipCode=ValidateCodeInModal( $event.target.value)"
+                      ></ion-input> 
+              </ion-item>  
+
+               <ion-item >                 
+                  <ion-label position="floating">{{ccode}} </ion-label>                               
+                  <ion-input type="tel" required=true  
+                  class="menu-col-8"
+                  :value="cardCode" @input="cardCode = $event.target.value"
+                      ></ion-input>
+              </ion-item>       
 
             <div style="padding: 20px 15px; text-align: center">
 
@@ -26,7 +50,7 @@
 </template>
 
 <script>
-//  import HID from 'node-hid';
+import LibCodes from 'zipcodes'
 
 export default {
     name: 'UsbCardReader',
@@ -38,13 +62,26 @@ export default {
         return {     
             interval: 2000,  
             spinner1: false,
-            canPay: false,  
+            canPay: false, 
+            cardCode: '', 
+            key: 0,
+            zipCode: '',
+            state:'',
+            city: '',
+            address: '',
         }
     }, 
     props:{
         parent: {type: Object, default: ()=> {}} ,
         Acept:  {type: String, default:"" } ,
         Cancel:  {type: String, default:"" } ,
+        ccode:  {type: String, default:"" } ,
+        postalCode:  {type: String, default:"" } ,
+        addressLine1:  {type: String, default:"" } ,
+        codeNotValid:  {type: String, default:"" } ,
+        cityText:  {type: String, default:"" } ,
+        stateText:  {type: String, default:"" } ,
+        dataRequired:  {type: String, default:"" } ,
     },   
     
     methods:{
@@ -85,11 +122,23 @@ export default {
         },
 
         senPayment(){
-            const val = document.getElementById('target').value;
+
+             const val = document.getElementById('target').value;
+
+            // if(this.cardCode=== ''|| this.zipCode=== '' || this.address === '')
+            //     return this.alertRequiredDatas();
+
+           
             if(val){
                 console.log('send payment');
                 var hex = val.toString('hex'); 
-                return this.parent.responseIDTEch(hex);
+                const data = {
+                    hex : hex,
+                    address: this.address,
+                    zip: this.zipCode,
+                    cardSecurityCode: this.cardCode,
+                }
+                return this.parent.responseIDTEch(data);
             }
             else
                 return this.error('Swipe Card and wait the info was write in te textarea.')
@@ -114,6 +163,75 @@ export default {
             })
         .then(a => a.present())
         },
+
+        ValidateCodeInModal(event){
+            this.key ++;
+            
+            var hills = LibCodes.lookup(event);   
+            if(!hills){
+                this.state = "";
+                this.city = "";
+                this.zipCode = '';      
+                this.alertCodeNotValid();  
+                return '';     
+            }     
+            else{
+                this.state = hills.state;
+                this.city = hills.city;
+                this.zipCode = event;
+                
+                this.toastCityState();
+                return event;
+            }      
+        },  
+
+        alertCodeNotValid(){
+            return  this.$ionic.alertController
+            .create({
+                cssClass: 'my-custom-class',
+                header: 'Error',
+                message: this.codeNotValid ,
+                buttons: [                   
+                {
+                    text: this.Acept,
+                    handler: () => {  },
+                },
+                ],
+            })
+            .then(a => a.present())
+                        
+        },
+
+    async toastCityState() {
+      return this.$ionic.toastController
+      
+        .create({
+          message: `${this.cityText}: ${this.city} | ${this.stateText}: ${this.state}`,
+          duration: 2000,
+          position: 'top',
+          color:'success'
+        })
+      .then(a => a.present())
+    },
+   
+      alertRequiredDatas(){
+      return  this.$ionic.alertController
+      .create({
+          cssClass: 'my-custom-class',
+          header: 'Error',
+          message: this.dataRequired,
+          buttons: [                   
+          {
+              text: this.Acept,
+              handler: () => {                                 
+                            
+              },
+          },
+          ],
+      })
+      .then(a => a.present())
+                  
+    },
 
   
       

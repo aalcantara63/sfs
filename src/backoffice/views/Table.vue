@@ -2,9 +2,7 @@
   <div id="customer" class="screen">
 
     <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link to="/table-form"><ion-button v-if="hasPermission('canCreateTable')" expand="full" color="primary"><ion-icon name="add"></ion-icon>{{$t('backoffice.list.actions.addANew')}} {{$t('backoffice.list.entitiesName.table')}}</ion-button></router-link> -->
-
-     
+    <router-link to="/table-form"><ion-button v-if="hasPermission('canCreateTable')" expand="full" color="primary"><ion-icon name="add"></ion-icon>{{$t('backoffice.list.actions.addANew')}} {{$t('backoffice.list.entitiesName.table')}}</ion-button></router-link> --> 
 
     <ion-header>
           <ion-toolbar>
@@ -20,8 +18,6 @@
             </router-link>
             </ion-label>
 
-           
-
           </ion-toolbar>
 
           <ion-searchbar  
@@ -30,24 +26,19 @@
             </ion-searchbar>
     </ion-header>
 
-      <ion-segment id="reservationSegment" 
+    <ion-segment id="reservationSegment" scrollable
       @ionChange="segmentChanged($event.target.value)"
-     
        :value="segmentValue"
-        @input="value=segmentValue">
+        @input="value=segmentValue"
+        style="widht: 100%">
         <ion-segment-button value="table">
-            <ion-label style="padding: 20px 100px;">
-              <h4>{{$t('backoffice.titles.tables')}}</h4>            
-            </ion-label>              
+              {{$t('backoffice.titles.tables')}}                   
         </ion-segment-button>
         <ion-segment-button value="orderTable">
-          <ion-label style="padding: 20px 100px;">
-              <h4>{{$t('backoffice.titles.tables')}} - Order</h4>            
-            </ion-label>                
+              {{$t('backoffice.titles.tables')}} - Order           
         </ion-segment-button>
-      </ion-segment>
+    </ion-segment>
 
-   
     <ion-spinner  v-if="spinnerState"></ion-spinner>                  
 
     <div v-if="spinner">

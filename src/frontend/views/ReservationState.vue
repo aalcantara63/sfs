@@ -9,7 +9,11 @@
             <ion-label style="padding: 20px 100px;">
                 <h1> Detalles de la Reservación</h1>            
                        
-            </ion-label>           
+            </ion-label>    
+            <ion-chip color="primary" slot="end" @click="sendReservationEmail(reservation)" v-if="clientId !==''" v-tooltip="$t('frontend.tooltips.forward')">
+                <span  class="iconify" data-icon="carbon:mail-all" data-inline="false"></span>
+                <ion-spinner v-if="spinnerEmail"></ion-spinner>
+            </ion-chip>       
             <ion-chip color="primary" slot="end" @click="sendPrint" v-tooltip="$t('frontend.tooltips.printRes')">
                 <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false">
             </span></ion-chip>
@@ -44,6 +48,21 @@
                             text-align: left; padding-left: 20px;color: black;margin: 5px !important;">
                             {{$t('frontend.orderType.phone')}}:<strong>  {{reservation.CustomerPhone}} </strong> </h2>
                         </ion-label></p>
+
+                        <div v-if="reservation.QuotationPayment">
+                            <ion-label class="ion-text-wrap">
+                                <h2  style="width: 100%;float: left;font-size: 16px;
+                                text-align: left; padding-left: 20px;color: black;margin: 5px !important;">
+                                    {{$t('frontend.order.payment')}}:  </h2>
+                            </ion-label>
+                                <h2 v-if="reservation.QuotationPayment" style="width: 100%;float: left;font-size: 16px;
+                                text-align: left; padding-left: 40px;color: black;margin: 5px !important;">
+                                    {{$t('frontend.order.total')}}: <strong>  {{ getFormatPrice(reservation.QuotationPayment)}} </strong>  |
+                                    {{$t('frontend.order.transId')}}: <strong>  {{ reservation.PaymentTransId}} </strong>  |
+                                    {{$t('frontend.order.paymentMethod')}}: <strong>  {{ reservation.PaymentMethod}} - </strong>  </h2>
+                        </div>
+
+                       
                          
                       
                         
@@ -240,6 +259,7 @@ export default {
             restaurantActive: {},
             googleData: {},
             spinnerPayment: false,
+            spinnerEmail: false,
         }
     },
     computed:{
@@ -326,6 +346,7 @@ export default {
                     returnTo: 'ReservationState',
                     qrPayment: this.$t('frontend.payment.qrPayment'),
                     cardPayment: this.$t('frontend.payment.tjtPayment'),
+                    cashPayment: this.parent.$t('frontend.payment.cashPayment'),
                     googleData: this.googleData,
                     doingPayment: this.$t('frontend.payment.doingPayment'),
                     staffName: '',
@@ -368,10 +389,19 @@ export default {
                 this.reservation.expirationCard = res.expirationCard ; 
                 const response = await Api.putIn('Reservation', this.reservation);
                 if(response.status === 200 && response.statusText === "OK"){
-                this.chargeReservation(); 
-                this.getReservations();
-                this.sendReservationEmail(this.reservation);
-                this.spinner2 = false;
+                    this.chargeReservation(); 
+                    this.getReservations();
+                    this.sendReservationEmail(this.reservation);
+                    this.spinner2 = false;
+                   
+                   const paymentEntry = {                       
+                        "Method": res.method,
+                        "Payment": res.total,
+                        "InvoiceNumber": res.transId,
+                        "ModelId": response.data._id,
+                        "ModelFrom": "Reservation"                   
+                   }
+                   await Api.postIn('allpayments', paymentEntry);
                 }
                 
             } catch (error) {            
@@ -494,7 +524,9 @@ export default {
             winimp.close();
          },
 
-        sendReservationEmail(reservation){
+        async sendReservationEmail(reservation){
+
+            this.spinnerEmail = true
            
             var html =' <html><head>';    
             html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
@@ -565,7 +597,8 @@ export default {
                 "mess": html,
                 "subject": subject
             }
-            Api.sendEmail(items);
+            await Api.sendEmail(items);
+            this.spinnerEmail = false;
         },
 
         async errorPaymentDetail(msg) {

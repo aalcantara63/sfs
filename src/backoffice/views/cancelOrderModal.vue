@@ -198,7 +198,7 @@ export default {
     },
     async pushToken(pay, restaurantID){
 
-          const invoiceInformation = await payAuthorizeNet.invoiceInformation(pay.paymentInfo.transId,
+          const invoiceInformation = await payAuthorizeNet.invoiceInformation(pay.paymentInfo.transId, pay.paymentInfo.moto,
                                                                                       restaurantID, 'SHIFT4')
           if (invoiceInformation.data.length > 0)
           {
@@ -219,38 +219,27 @@ export default {
           console.log("PAY STATE" + pay.state , index)
           if (pay.state == 1)
           { 
-              console.log("3 - R")
-              //Hay que obtener el token.
-              // const invoiceInformation = await payAuthorizeNet.invoiceInformation(pay.paymentInfo.transId,
-                //                                                                       restaurantID, 'SHIFT4')
-              // console.log("invoiceInformation")
-              // console.log(invoiceInformation)
-              // return;
-              // if (invoiceInformation.data.length > 0)
-              // {
-                    console.log("4 - R")
-                    const datas = {
-                        "restaurantId": restaurantID,
-                        "payMethod": 'SHIFT4',
-                        "total": pay.paymentInfo.total,
-                        // "cardExpirationDateF1": this.order.expirationCard,
-                        // "cardNumber": this.order.accountNumber,
-                       // "token": invoiceInformation.data[0].card.token.value,
-                        "token": this.tokens[index],
-                        "invoiceNumber": pay.paymentInfo.transId
-                    }
+           
+            const datas = {
+                "restaurantId": restaurantID,
+                "payMethod": 'SHIFT4',
+                "total": pay.paymentInfo.total,
+                // "cardExpirationDateF1": this.order.expirationCard,
+                // "cardNumber": this.order.accountNumber,
+                // "token": invoiceInformation.data[0].card.token.value,
+                "token": this.tokens[index],
+                "invoiceNumber": pay.paymentInfo.transId
+            }
 
-                    const resRefund = await payAuthorizeNet.refundOrder(datas)
-                    console.log("REFUND")
-                    console.log(resRefund)
-                    // this.parent.$router.push({
-                    //   name: 'OrderDetails', 
-                    //   params: { orderId: this.order._id } 
-                    // });
-              // }
-              // else{
-              //     this.showToastMessage('The invoice is not found in payment gateway. The order cant be refund', 'danger')
-              // }
+            const resRefund = await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto)
+            console.log("REFUND")
+            console.log(resRefund)
+            const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+            if(paymeD){                              
+                const payUpd = paymeD.data[0];
+                payUpd.Refund = pay.paymentInfo.total;
+                await Api.putIn('Allpayments', payUpd);
+            }                
           }
     },
     // PARA PASAR AL MODAL
@@ -283,7 +272,10 @@ export default {
 
         if (this.order.Payment && this.order.Payment.length > 0)
         {
-            this.order.Payment.forEach(pay => async function() {
+          // for (const pay of this.order.Payment) {
+            
+          // }
+            for (const pay of this.order.Payment) {
 
                 if (pay.state == 1) //Si el pago no está en estado pagado
                 {
@@ -308,19 +300,47 @@ export default {
                         const port = '10009'
                         try{
                             Devices.a930.DoCredit(ip, port, data, this.callbackVoid)
+
+                            const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                            if(paymeD){
+                                console.log('paymenD')
+                                console.log(paymeD.data[0])
+                                const payUpd = paymeD.data[0];
+                                payUpd.Void = pay.paymentInfo.total;
+                                await Api.putIn('Allpayments', payUpd);
+                            }
                         }
                         catch(e){
                             console.log(e)
                         }
                     }
+
+                    else if(pay.paymentInfo.method === "Cash" || pay.paymentInfo.method === "Check"){
+                      const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                        console.log('paymeD in VOID')
+                        console.log(paymeD)
+                        if(paymeD){                              
+                            const payUpd = paymeD.data[0];
+                            payUpd.Void = pay.paymentInfo.total;
+                            await Api.putIn('Allpayments', payUpd);
+                        }
+                    }
                     else
                     {
-                        const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, restaurantID, 'SHIFT4')
+                        const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4')
                         console.log("Response Void")
                         console.log(resVoid)
+                        const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                        console.log('paymeD in VOID')
+                        console.log(paymeD)
+                        if(paymeD){                              
+                            const payUpd = paymeD.data[0];
+                            payUpd.Void = pay.paymentInfo.total;
+                            await Api.putIn('Allpayments', payUpd);
+                        }
                     }   
                 }
-            })    
+            }
         }
 
         this.cancelOrder('void')

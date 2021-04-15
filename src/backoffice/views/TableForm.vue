@@ -25,7 +25,6 @@
             <ion-label>{{$t('backoffice.form.fields.name')}}: <strong>{{name}}</strong></ion-label>            
         </ion-item>
      
-
         <div v-if="!id">
             <ion-radio-group :value="type"  @ionChange="changeType($event.target.value)">
               <ion-item>
@@ -46,7 +45,6 @@
             </ion-radio-group>
         </div>
         
-
         <ion-item>
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.tableNumber')}}</ion-label>
             <ion-input type="number" name="tableNumber"
@@ -54,8 +52,6 @@
             v-bind:value="tableNumber">
           </ion-input>
         </ion-item>
-
-      
 
         <ion-item>
           <ion-label position="floating">{{$t('backoffice.form.fields.description')}}</ion-label>
@@ -383,6 +379,8 @@ export default {
           this.state = 'Busy'
     },
     formatSeat(seat){
+       console.log("SEATs")
+       console.log(seat)
        let name = seat.name.split('-')
        return name[1] 
     },
@@ -393,8 +391,12 @@ export default {
         console.log(eventVal);
         this.type = eventVal;
         let provisionalName = this.type + this.tableNumber;
+        console.log("STEP-2")
+        console.log("Provisional number: " + provisionalName)
         if (this.validateUniqueName(provisionalName))
         {
+            console.log("STEP-3")
+            console.log("Unique name")
             this.name = provisionalName;
             this.changeAllSeatName();
         }
@@ -411,9 +413,12 @@ export default {
     changeAllSeatName(){
         this.name + 'seat_' + (this.seats.length + 1)
         for (let i = 0; i < this.seats.length; i++) {
-          const name = this.name + 'seat_' + (i + 1);
+          // const name = this.name + 'seat_' + (i + 1);
+          const name = this.id + "-" + this.name + "_" + (i + 1)
           this.seats[i].name = name
         }
+        console.log("STEP-4: Seat names")
+        console.log(this.seats)
     },
     seeQrCode(seat){
         console.log(seat);
@@ -436,6 +441,8 @@ export default {
     },
     changeNumber(val){
        this.tableNumber = val;
+       console.log("STEP-1")
+       console.log("Number: " + this.tableNumber)
        this.changeType(this.type);
     },
     validateUniqueName(name){

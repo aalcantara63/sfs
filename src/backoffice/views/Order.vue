@@ -118,14 +118,16 @@
 
         </div> -->
         <div v-if="screenWidth < 600">
-          <paginate
+          <paginate v-if="filterOrders.length > 0"
             name="languages"
             :list="filterOrders"
             :per="8"
           >
             <ion-list>
               <ion-item-sliding v-for="order in paginated('languages')" v-bind:key="order._id">
-                <ion-item :color="order.State == 5 ? 'success' : order.State == 6 ? 'danger' : order.State == 0 ? 'warning' : order.State == 4 ? 'primary' : 'light'">
+                <ion-item 
+                 @click="viewOrder(order._id)"
+                :color="order.State == 5 ? 'success' : order.State == 6 ? 'danger' : order.State == 0 ? 'warning' : order.State == 4 ? 'primary' : 'light'">
                   <ion-label>
                       <h2 v-if="order.ClientId">{{ getCustomerById(order.ClientId).Name }}</h2>
                       <h2 v-else>{{ order.CustomerName }}</h2>
@@ -162,21 +164,27 @@
 
           </paginate>
 
-          <paginate-links for="languages" color="primary" 
-            :simple="{
-              next:'»' ,
-              prev: '« ' }"
-          ></paginate-links>
+          <div v-if="filterOrders.length > 0">
+            <paginate-links for="languages" color="primary" 
+              :simple="{
+                next:'»' ,
+                prev: '« ' }"
+            ></paginate-links>
+          </div>
+          <div v-else>
+              {{$t('backoffice.titles.emptyResult')}}
+          </div>
         </div>
 
         <div v-if="screenWidth >= 600">
-          <paginate
+          <paginate v-if="filterOrders.length > 0"
             name="languages"
             :list="filterOrders"
             :per="8"
           >
             <ion-item-sliding  v-for="order in paginated('languages')" v-bind:key="order._id">
               <ion-item
+              @click="viewOrder(order._id)"
                 :color="order.State == 5 ? 'success' : order.State == 6 ? 'danger' : order.State == 0 ? 'warning' : order.State == 4 ? 'primary' : 'light'">
                 <ion-label class="menu-col-4 elipsis-menu">
                     <h6 v-if="order.ClientId">{{ getCustomerById(order.ClientId).Name }}</h6>
@@ -226,11 +234,16 @@
 
           </paginate>
 
-          <paginate-links for="languages" color="primary" 
-            :simple="{
-              next:'»' ,
-              prev: '« ' }"
-          ></paginate-links>
+          <div v-if="filterOrders.length > 0">
+              <paginate-links for="languages" color="primary" 
+                :simple="{
+                  next:'»' ,
+                  prev: '« ' }"
+              ></paginate-links>
+          </div>
+          <div class="emptyResult" v-else>
+              {{$t('backoffice.titles.emptyResult')}}
+          </div>
         </div>
 
     </div>
@@ -299,6 +312,7 @@ export default {
     initialize(){
         this.fetchOrders();
         this.fetchCustomers();
+        this.changeFilterStatus('all');
         console.log("Update order");
     },
     loadColors(){
@@ -550,6 +564,7 @@ export default {
               Api.fetchAll(this.modelName).then(response => {
                 this.orders = response.data.filter(order => !order.Deleted);
                 this.orders = this.orders.filter(order => order.OrderForCatering != true);
+                this.orders = this.orders.filter(order => order.isTicket == false || (order.isTicket == true && order.State == 5));
                 this.orders.reverse();
                 this.filterOrders = this.orders; 
                 loading.dismiss();
@@ -744,6 +759,10 @@ export default {
 </script>
 
 <style>
+
+.emptyResult{
+    padding: 20px;
+}
 
 .menu-col-3{
     flex: 0 0 calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);

@@ -556,6 +556,7 @@
                               <ion-button  fill="outline" @click="goHome">{{$t('frontend.home.cancel')}}</ion-button>    
                               <ion-button v-if="!isTicket" fill="outline"  @click="openCardPayment()">{{$t('frontend.order.pay')}}</ion-button>
                               <ion-button  v-if="isTicket" fill="outline"  @click="openCardPayment()">{{$t('frontend.order.payAsTicket')}}</ion-button>                           
+                              <ion-button  v-if="isTicket && staffName != ''" fill="outline"  @click="saveAsTicket()">{{$t('frontend.order.saveAsTicket')}}</ion-button>                           
                             </div>
                                             
                         </ion-card>
@@ -940,7 +941,7 @@ export default {
                 canSplitPayment: !this.isTicket,          
                 Acept: this.$t('frontend.home.acept'),
                 Cancel: this.$t('frontend.home.cancel'), 
-                Total: this.order.Total,
+                Total: parseFloat(this.order.Total).toFixed(2),
                 Tax:  this.taxes.toString(),
                 TaxName: this.taxesName,     
                 restaurantId: this.restaurantSelectedId,
@@ -1081,6 +1082,30 @@ export default {
        }       
     },
 
+    async saveAsTicket(){      
+        try {           
+            
+           if(this.isTicket){  
+             
+              const flag = this.validateBeforePay();
+              if(!flag )
+                  return this.alertRequiredDatas();
+              this.buildOrder()
+            this.order.State = 0;
+            this.order.isTicket = true;           
+           }           
+           const response = await Api.postIn('Order', this.order)
+           if(response.status === 200 && response.statusText === "OK"){
+             this.finishPayment(response.data, false);
+           }
+            
+        } catch (error) {            
+            console.log(error)
+            this.spinner = false;
+        }
+
+    },
+
    
     recivePayment: async function(res){  
 
@@ -1105,6 +1130,8 @@ export default {
             }]   ;        
             this.order.State = 1;
 
+            // if(res.method==='Cash')   this.order.Payment[0].state = 0;
+
              for(var i=0; i< this.order.Products.length; i++){
               this.order.Products[i].State = 1;
             }  
@@ -1112,10 +1139,25 @@ export default {
            }
            const response = await Api.postIn('Order', this.order)
            if(response.status === 200 && response.statusText === "OK"){
-                
+
+             if(!this.order.isTicket){
+               const paymentEntry = {                       
+                        "Method": res.method,
+                        "Payment": res.total,
+                        "InvoiceNumber": res.transId,
+                        "ModelId": response.data._id,
+                        "ModelFrom": "Order",
+                        "StaffName": this.order.StaffName,               
+                   }
+                   console.log('paymentEntry')
+                   console.log(paymentEntry);
+                   await Api.postIn('allpayments', paymentEntry);                
+             }
+
+                 
                 this.spinner = false;
                 if(this.order.Payment)
-                  this.finishPayment(response.data);
+                  this.finishPayment(response.data, true);
                 else{
                   await this.$store.commit('setOrder', response.data);
                   await this.getTickets();
@@ -1132,13 +1174,16 @@ export default {
       
     },
 
-    async finishPayment(value){
+    async finishPayment(value, flag){
       if(this.clientId != '')  await this.getOrders();  
+      if(flag){
         this.sendEmail(value);
         this.goodPaymentToast();                  
         if(this.discount > 0 && this.theCodeToDiscount != '');{
               this.closeReservation(); 
         }  
+      }
+        
         this.order = {};
         this.cart = [];   
         this.$store.commit('setCart', [] );
@@ -1148,6 +1193,10 @@ export default {
                                              
         if(this.clientId !='')                                    
             return this.$router.push({ name: 'ListOrder', params: {customerId: this.clientId, CustomerName: this.CustomerName} })                                                                  
+        else if(this.order.StaffName !==''){
+          if (this.isTicket)  return this.$router.replace({ name: 'Ticket' });
+          else return this.$router.replace({ name: 'Order' });
+        }    
         else {                   
             return this.$router.replace({ name: 'Home' })  
         }  
@@ -1172,7 +1221,7 @@ export default {
         if(order.OrderType == 'Curbside'){
             orderInfo = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' |  ' + moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A')
             if(order._id)
-              urlCurbside = `https://restaurantmenuappwindows.azurewebsites.net/?rid=${this.restaurantSelectedId}&curbside=${order._id}`;
+              urlCurbside = `https://imenuapps.net/?rid=${this.restaurantSelectedId}&curbside=${order._id}`;
               // urlCurbside = `http://localhost:8080/?rid=${this.restaurantSelectedId}&curbside=${order._id}`;
         }
 

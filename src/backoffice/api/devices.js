@@ -1,4 +1,4 @@
-// import axios from 'axios';
+import axios from 'axios';
 import { Api } from '../api/api.js';
 
 function StrToHex(response){
@@ -46,7 +46,7 @@ export var Devices = {
     
     a930: {
 
-        endPointURL: 'http://192.168.50.174:10009?',
+        endPointURL: 'https://192.168.4.53:10009?',
         // endPointURL: '192.168.100.166:10009?'
 
         mStx : {
@@ -69,6 +69,9 @@ export var Devices = {
 			code : "1F"
 		},
 
+        getDeviceInfoBySN: async function(number){
+            return await axios.get('https://poslink.com/poslink/ws/process2.asmx/GetDeviceLocalIP?TerminalId=&Token=&SerialNo=' + number)
+        },
         //Get LRC
 		getLRC : function(params){
 			var lrc = 0;
@@ -262,7 +265,7 @@ export var Devices = {
                     }
                 } 
             };
-            xhr.send(null);  
+            xhr.send(null);
         },
 
         DoCredit: async function(ip, port, data, callback){
@@ -451,7 +454,7 @@ export var Devices = {
                 console.log("Base64: " + final_b64);
 
                 //Communication
-                const endPointURL = 'http://'+ip+':'+port+'?'+final_b64
+                const endPointURL = 'https://'+ip+':'+port+'?'+final_b64
                 console.log(endPointURL)
 
                 // return await axios.get(endPointURL, {headers: {'accessControlAllowed': 'Y'}})
@@ -485,7 +488,7 @@ export var Devices = {
             console.log("COMMAND_HEX: " + command_hex + " VERSION_HEX: " + version_hex);
 			
              //Communication
-            const endPointURL = 'http://'+ip+':'+port+'?'+final_b64
+            const endPointURL = 'https://'+ip+':'+port+'?'+final_b64
             console.log(endPointURL)
             // return await axios.get(endPointURL, {headers: {'accessControlAllowed': 'Y'}})
             this.HttpCommunication('Initialize',endPointURL,function(response){

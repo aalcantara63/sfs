@@ -155,7 +155,7 @@ export default {
   },
  data () {
     return { 
-          staticUrl:`https://restaurantmenuappwindows.azurewebsites.net/?rid=${this.restaurantSelectedId}&share=`, 
+          staticUrl:`https://imenuapps.net/?rid=${this.restaurantSelectedId}&share=`, 
           // staticUrl:`http://localhost:8080?rid=${this.restaurantSelectedId}&share=`, 
           logoFacebook, 
           logoInstagram,

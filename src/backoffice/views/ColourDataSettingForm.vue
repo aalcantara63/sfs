@@ -38,7 +38,7 @@
             </div> -->
         
             <div><ion-button color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
-            <ion-button color="secondary" @click="setDefault()">{{$t('backoffice.form.buttons.defaultColor')}}</ion-button>
+            <ion-button color="secondary" :disabled="id === null" @click="setDefault()">{{$t('backoffice.form.buttons.defaultColor')}}</ion-button>
             </div>
         </div>
         <ion-item>
@@ -47,7 +47,7 @@
         </ion-item>
         <ion-item>
             <slider-picker style="width: 100%" 
-            @input="primaryBackground = $event; setColorPreview()"
+            @input="primaryBackground = $event"
             v-bind:value="primaryBackground" />
         </ion-item>
         <ion-item>
@@ -213,8 +213,9 @@ export default {
   },
   methods: {
       init(){
-            this.setColorPreview();
             this.id = this.$route.params.settingId;
+            console.log("SETTING_ID")
+            console.log(this.id)
             if (this.id){
                 this.$ionic.loadingController
             .create({

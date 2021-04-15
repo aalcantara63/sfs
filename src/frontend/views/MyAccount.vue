@@ -173,6 +173,10 @@
             </ion-item>
 
              <ion-item-options side="end">
+                <ion-item-option color="primary" @click="sendReservationCustomer(reservation)" v-tooltip="$t('frontend.tooltips.forward')">
+                     <span  class="iconify" data-icon="carbon:mail-all" data-inline="false"></span>
+                     <ion-spinner v-if="spinnerEmail"></ion-spinner>
+                </ion-item-option>  
                 <ion-item-option color="primary" @click="sendPrint(reservation)" v-tooltip="$t('frontend.tooltips.printRes')">
                     <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false"></span>
                 </ion-item-option>  
@@ -434,6 +438,66 @@ export default {
             winimp.print();
             winimp.close();
           },
+
+       htmlToUse(reservation){
+        var html =' <html><head>';    
+            html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
+            html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
+            html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
+            html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
+            html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
+            html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
+            html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
+            
+            html += '</head><body><div >';
+            html += '<table  align=center style="width: 90%;">';
+            html += '<tr><td colspan=6 style="text-align: center;">';
+            html += `<h2>${this.$t('frontend.reservation.create')}</h2>  `;
+            html +=`</td>`;     
+            html += `</tr>`;          
+            html += '<tr><td colspan=6 >'
+            if(reservation.CustomerName)
+              html += `<br> <h4> ${this.$t('frontend.orderType.name')}: ${reservation.CustomerName}</h4>`;
+            if(reservation.CustomerEmail)
+              html += `<br> <h4> ${this.$t('frontend.orderType.email')}: ${reservation.CustomerEmail}</h4>`;
+            if(reservation.CustomerPhone)
+              html += `<br> <h4> ${this.$t('frontend.orderType.phone')}: ${reservation.CustomerPhone}</h4>`;
+            if(reservation.Capacity)
+              html += `<br> <h4> ${this.$t('frontend.reservation.peoples')}: ${reservation.Capacity}</h4>`;
+            if(reservation.Date)
+              html += `<br> <h4> ${this.$t('frontend.reservation.reservationDate')}: ${this.getReservationDate(reservation.Date)}</h4>`;
+            if(reservation.Hour)
+              html += `<br> <h4> ${this.$t('frontend.reservation.reservationHour')}: ${this.getReservationHour(reservation.Hour)}</h4>`;
+            if(reservation.Note)
+              html += `<br> <h4> ${this.$t('frontend.order.notes')}: ${reservation.Note}</h4>`;
+            if(reservation.Reason)
+              html += `<br> <h4> ${this.$t('frontend.reservation.reason')}: ${reservation.Reason}</h4>`;
+            if(reservation.QuotationPayment)
+              html += `<h4> ${this.$t('frontend.order.quotationPayment')}: ${reservation.QuotationPayment}</h4>`;
+
+              
+           
+            html += `</td></tr>`;      
+           
+            html += `</table></div></body></html>`;
+
+            return html;
+      },
+
+      async sendReservationCustomer(reservation){
+
+            this.spinnerEmail = true;
+            const html = this.htmlToUse(reservation); 
+            let subject = this.$t('frontend.reservation.create') ;            
+                    
+            var items = {
+                "email": reservation.CustomerEmail,
+                "mess": html,
+                "subject": subject
+            }
+            await Api.sendEmail(items);
+            this.spinnerEmail = false;
+      },
 
        onLangsPageChange () {   
                 this.currentPageReservation = this.$refs.paginator.currentPage + 1;        

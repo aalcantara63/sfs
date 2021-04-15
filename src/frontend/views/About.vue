@@ -13,7 +13,8 @@
                     </div>
                     
                     <ion-select interface="popover" icon="add" class="menu-col-6" style="margin-top: 20px;text-align: right;"
-                        :ok-text="$t('backoffice.form.messages.buttons.ok')"
+                       v-if="allRestaurants.length > 0"
+                       :ok-text="$t('backoffice.form.messages.buttons.ok')"
                         :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
                         :value="restaurantSelectedId"
                         :placeholder="$t('frontend.menu.restaurant')"

@@ -16,7 +16,7 @@
                 <br/>
 
                 <ion-button fill="outline" @click="dismissModal()">CLOSE</ion-button>
-                <ion-button fill="outline" @click="doCredit()"><span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span> PAY</ion-button>
+                <ion-button :disabled="sn === ''" fill="outline" @click="doCredit()"><span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span> PAY</ion-button>
 
                 <div v-if="spinner" style="margin: 10px; padding: 30px 0;">
                     <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
@@ -41,13 +41,14 @@
             sn: '',
             serverId: '',
             transactionType: this.deviceTransactionType,
-            ip: '192.168.50.74',
+            ip: '192.168.4.53',
             port: '10009',
             spinner: false,
         }
         
     },
     created(){
+        // this.getDeviceInfoBySerialNo('1170174939')
         this.serverId = this.grandfather.$store.state.user.ServerId.toString()
         this.datas.ClerkID = this.serverId
         this.datas.transactionType = this.transactionType
@@ -59,6 +60,54 @@
         deviceTransactionType: { type: String, default: '01' },
     },
     methods: {
+        async getDeviceInfoBySerialNo(number){
+            const res = await Devices.a930.getDeviceInfoBySN(number)
+
+            if (res.data){
+                if (window.DOMParser)
+                {
+                    console.log("Caso1");
+                    let parser = new DOMParser();
+                    let xmlDoc = parser.parseFromString(res.data, "text/xml");
+                    const code = xmlDoc.getElementsByTagName("ResultCode")[0].childNodes[0].nodeValue
+                    if (code == 0)
+                    {
+                        const ipaddres = xmlDoc.getElementsByTagName("IPaddress")[0].childNodes[0].nodeValue
+                        const port = xmlDoc.getElementsByTagName("Port")[0].childNodes[0].nodeValue
+                        this.ip = ipaddres
+                        this.port = port
+                        return true
+                    }
+                    else{
+                        return false
+                    }
+                }
+                else // Internet Explorer
+                {
+                    console.log("Caso2");
+                    let xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
+                    xmlDoc.async = false;
+                    xmlDoc.loadXML(res.data);
+                    const code = xmlDoc.getElementsByTagName("ResultCode")[0].childNodes[0].nodeValue
+                    if (code == 0)
+                    {
+                        const ipaddres = xmlDoc.getElementsByTagName("IPaddress")[0].childNodes[0].nodeValue
+                        const port = xmlDoc.getElementsByTagName("Port")[0].childNodes[0].nodeValue
+                        this.ip = ipaddres
+                        this.port = port
+                        return true
+                    }
+                    else{
+                        return false
+                    }
+
+                    
+                }   
+            }
+            else{
+                return false
+            }
+        },
         callback(res){
             console.log("SUCCESSFULLY---RESPONSE:")
             console.log(res)
@@ -115,29 +164,29 @@
         async doCredit(){
             console.log(this.grandfather.$store.state.user.ServerId.toString())
 
-            // const data = {
-            //     'transactionType': '01', //SALE
-            //     'amountInformation': {
-            //         'TransactionAmount': 250.00,
-            //         'TipAmount': 20.00,
-            //         'TaxAmount': 25.00,
-            //     },
-            //     'ClerkID': this.$store.state.user.ServerId.toString(),
-            //     'accountInformation':{
-            //         'FirstName': 'Miguel'
-            //     }
-            // } 
+            const val = await this.getDeviceInfoBySerialNo(this.sn) 
 
-            try{
-              this.spinner = true
-              await  Devices.a930.DoCredit(this.ip, this.port, this.datas, this.callback);
-              
+            if (val){
+                console.log("VAL1")
+                console.log(val)
+                console.log("IP address: " + this.ip)
+                console.log("Port: " + this.port)
+                try{
+                    this.spinner = true
+                    const anw = await Devices.a930.DoCredit(this.ip, this.port, this.datas, this.callback);
+                    console.log(anw)
+                }
+                catch(e){
+                    console.log(e)
+                    this.showToastMessage(e, 'danger')
+                    this.spinner = false;
+                }
             }
-            catch(e){
-                console.log(e)
-                 this.showToastMessage( e, 'danger')
-                 this.spinner = false;
+            else{
+                console.log("VAL0")
+                this.showToastMessage('ERROR: There was an error get IP address and port of the device.', 'danger')
             }
+            
         },
         dismissModal() {
             this.$ionic.modalController.dismiss(null);

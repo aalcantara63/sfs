@@ -275,9 +275,14 @@
             </ion-item>
 
              <ion-item-options side="end">
+                <ion-item-option color="primary" @click="sendReservationCustomer(reservation)" v-tooltip="$t('frontend.tooltips.forward')">
+                     <span  class="iconify" data-icon="carbon:mail-all" data-inline="false"></span>
+                     <ion-spinner v-if="spinnerEmail"></ion-spinner>
+                </ion-item-option>  
+                
                 <ion-item-option color="primary" @click="sendPrint(reservation)" v-tooltip="$t('frontend.tooltips.printRes')">
                     <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false" ></span>
-                </ion-item-option>  
+                </ion-item-option>
 
             </ion-item-options>
 
@@ -318,6 +323,7 @@ export default {
   },
      data () {
       return {
+        spinnerEmail: false,
          camera: true,
          bookmark: false,
          heart: false,
@@ -551,9 +557,8 @@ export default {
           return this.$router.push({ name: 'ReservationDetail', params: {reservation: reservation, currentPageReservation: this.currentPageReservation } })    
       },
 
-      sendReservationEmail(reservation){
-           
-            var html =' <html><head>';    
+      htmlToUse(reservation){
+        var html =' <html><head>';    
             html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
             html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
             html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
@@ -594,15 +599,37 @@ export default {
            
             html += `</table></div></body></html>`;
 
-            let subject = this.$t('frontend.reservation.create') ;
-            
+            return html;
+      },
+
+      async sendReservationEmail(reservation){
+
+            this.spinnerEmail = true;
+            const html = this.htmlToUse(reservation); 
+            let subject = this.$t('frontend.reservation.create') ;            
                     
             var items = {
                 "email": this.restaurantActive.restaurantEmail,
                 "mess": html,
                 "subject": subject
             }
-            Api.sendEmail(items);
+            await Api.sendEmail(items);
+            this.spinnerEmail = false;
+      },
+
+        async sendReservationCustomer(reservation){
+
+            this.spinnerEmail = true;
+            const html = this.htmlToUse(reservation); 
+            let subject = this.$t('frontend.reservation.create') ;            
+                    
+            var items = {
+                "email": reservation.CustomerEmail,
+                "mess": html,
+                "subject": subject
+            }
+            await Api.sendEmail(items);
+            this.spinnerEmail = false;
       },
 
       validateHour(){

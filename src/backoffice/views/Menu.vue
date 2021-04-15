@@ -1,6 +1,21 @@
 <template>
   <div id="menu" class="screen">
 
+         <modal name="my-first-modal" height="80%">
+            <ion-header>
+            <ion-toolbar>
+                <ion-title>Menu Qr</ion-title>
+            </ion-toolbar>
+            </ion-header>
+
+            <div style="    margin-top: 50px;">            
+            <qrcode-vue :value="qrMenu" :size=280 level="H"></qrcode-vue>
+             <ion-button style="text-align: center; padding: 5px 20px;" @click="printQr()"  >
+              <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false"></span>
+              <ion-spinner v-if="spinnerPrint" name="dots"></ion-spinner></ion-button>
+            </div>
+        </modal>
+
     <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link> -->
     <!-- <router-link to="/menu-form"><ion-button v-if="hasPermission('canCreateMenu')" expand="full" color="primary"><ion-icon name="add"></ion-icon>{{$t('backoffice.list.actions.addANew')}} {{$t('backoffice.list.entitiesName.menu')}}</ion-button></router-link> -->
     <ion-header>
@@ -18,6 +33,13 @@
                     <ion-label><ion-icon name="add"></ion-icon></ion-label>
                 </ion-chip>
             </router-link>
+            </ion-label>
+             <ion-label slot="end">            
+                <ion-chip style="font-size: 30px" outline color="primary" 
+                @click="show()" v-tooltip="'Show Menu Qr'">
+                    <ion-label> <span class="iconify" data-icon="ion:qr-code-sharp" data-inline="false"></span></ion-label>
+                </ion-chip>
+          
             </ion-label>
           </ion-toolbar>
 
@@ -114,6 +136,7 @@
 
 import { Api } from '../api/api.js';
 import { Utils } from '../utils/utils.js'
+import QrcodeVue from 'qrcode.vue';
 
 export default {
 
@@ -133,8 +156,13 @@ export default {
 
       spinner: false,
       screenWidth : 0,
+      qrMenu: `https://imenuapps.net/?menu=${this.$store.state.user.RestaurantId}`,    
+      spinnerPrint: false,
     }
   }, 
+  components: {
+      QrcodeVue,
+  },
   methods: {
     // showLoading(){
     //     return this.$ionic.loadingController
@@ -146,6 +174,14 @@ export default {
     //     })
     //     .then(a => a.present())
     // },
+    show () {
+      console.log(this.qrMenu)
+      this.$modal.show('my-first-modal');
+        },
+    
+    hide () {
+      this.$modal.hide('my-first-modal');
+        },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
           title: this.$t('backoffice.list.messages.connectionError'),
@@ -339,6 +375,51 @@ export default {
       .then(a => a.present());  
 
      },
+
+    async printQr(){
+
+      try {
+        this.spinnerPrint = true;
+        const response = await Api.fetchById("Restaurant", this.$store.state.user.RestaurantId)         
+        if(response.status === 200){
+          const name = response.data.Name;
+          let qrList = document.getElementsByTagName('canvas')
+          let dataUrl = qrList[0].toDataURL();
+
+          var html =' <html><head>';    
+          html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
+          html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
+          html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
+          html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
+          html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
+          html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
+          html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
+          
+          html += '</head><body><div >';
+          html += '<table  align=center style="width: 90%;">';
+          html += `<div style="text-align:center"><h4 >Menu Qr "${name}"</h4>`;
+          html += `<img src="${dataUrl}" style="width: 50%; margin: 0px auto"></img> <div>`;  
+            html += `</table></div></body></html>`;
+          
+          var winimp = window.open('/print', 'popimpr');
+          winimp.document.open();
+          winimp.document.write( html );
+          winimp.document.close();
+          winimp.focus();
+          winimp.print();
+          winimp.close();
+          this.spinnerPrint = false;
+
+        }
+         this.spinnerPrint = false;
+      } catch (error) {
+        console.log(error); 
+         this.spinnerPrint = false;       
+      }
+
+     
+
+   },
   },
 
 }

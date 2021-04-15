@@ -44,6 +44,20 @@
                             text-align: left; padding-left: 20px;color: black;margin: 5px !important;">
                             {{$t('frontend.orderType.phone')}}:<strong>  {{reservation.CustomerPhone}} </strong> </h2>
                         </ion-label></p>
+
+                          <div v-if="reservation.QuotationPayment">
+                            <ion-label class="ion-text-wrap">
+                                <h2  style="width: 100%;float: left;font-size: 16px;
+                                text-align: left; padding-left: 20px;color: black;margin: 5px !important;">
+                                    {{$t('frontend.order.payment')}}:  </h2>
+                            </ion-label>
+                                <h2 v-if="reservation.QuotationPayment" style="width: 100%;float: left;font-size: 16px;
+                                text-align: left; padding-left: 40px;color: black;margin: 5px !important;">
+                                    {{$t('frontend.order.total')}}: <strong>  {{ getFormatPrice(reservation.QuotationPayment)}} </strong>  |
+                                    {{$t('frontend.order.transId')}}: <strong>  {{ reservation.PaymentTransId}} </strong>  |
+                                    {{$t('frontend.order.paymentMethod')}}: <strong>  {{ reservation.PaymentMethod}} - </strong>  </h2>
+                        </div>
+
                             
                                                      
                         <ion-item-divider style="margin-bottom: 15px;"/>
@@ -253,6 +267,7 @@ export default {
             spinner1: false,
             key:0,  
             key1: 0, 
+            currency:'USD',
             allState : [this.$t('frontend.reservation.state0'), this.$t('frontend.reservation.state1'),
                     this.$t('frontend.reservation.state2'), this.$t('frontend.reservation.state3'),
                     this.$t('frontend.reservation.state4'), this.$t('frontend.reservation.state5'),
@@ -463,6 +478,13 @@ export default {
             winimp.print();
             winimp.close();
          },
+
+           getFormatPrice(price){
+            let result = price
+            if(this.currency !== '')
+            result = new Intl.NumberFormat('en', {style: "currency", currency: this.currency} ).format(price);
+            return result;
+        },
 
         
 

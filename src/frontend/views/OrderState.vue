@@ -20,6 +20,10 @@
                      <ion-chip color="primary" slot="end" @click="sendReorder" v-if="clientId !==''" v-tooltip="$t('frontend.tooltips.reOrder')">
                         <span class="iconify" data-icon="mi:shopping-cart-add" data-inline="false">
                     </span></ion-chip>
+                    <ion-chip color="primary" slot="end" @click="sendEmail(order)" v-if="clientId !==''" v-tooltip="$t('frontend.tooltips.forward')">
+                        <span  class="iconify" data-icon="carbon:mail-all" data-inline="false"></span>
+                        <ion-spinner v-if="spinnerEmail"></ion-spinner>
+                        </ion-chip>
                     <ion-chip color="primary" slot="end" @click="sendPrint" v-if="clientId !==''" v-tooltip="$t('frontend.tooltips.printOrder')">
                         <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false">
                     </span></ion-chip>
@@ -665,6 +669,7 @@ export default {
             licencePlate: '',
             vehicleModel: '',
             vehicleColor: '',
+            spinnerEmail: false,
 
         }
     },
@@ -717,11 +722,20 @@ export default {
                 this.order.AccountCheckNumber = res.accountCheckNumber;        
                 this.order.BankName = res.bankName;        
                 this.order.PaymentMethod = 'CHECK';
-                await Api.putIn('Order', this.order).then(response => { 
+                await Api.putIn('Order', this.order).then(async response => { 
                     this.sendEmail(response.data);
                     this.chargeOrder();    
                     this.getOrders();                    
                     this.spinner1 = false;
+                     const paymentEntry = {                       
+                        "Method": res.method,
+                        "Payment": res.total,
+                        "InvoiceNumber": res.transId,
+                        "ModelId": response.data._id,
+                        "ModelFrom": "Catering",
+                         "StaffName": this.order.StaffName                    
+                   }
+                    await Api.postIn('allpayments', paymentEntry); 
                 })
                 .catch(e => {  
                     let msg = e;
@@ -813,7 +827,6 @@ export default {
         async recivePayment(res){  
 
         try {
-            console.log('in recivePayment in OrderState');
            
             this.spinner1 = true;          
 
@@ -832,6 +845,16 @@ export default {
                 this.chargeOrder();     
                 this.sendEmail(response.data);                 
                 this.spinner1 = false;
+
+                const paymentEntry = {                       
+                        "Method": res.method,
+                        "Payment": res.total,
+                        "InvoiceNumber": res.transId,
+                        "ModelId": response.data._id,
+                        "ModelFrom": "Catering",
+                         "StaffName": this.order.StaffName                    
+                   }
+                   await Api.postIn('allpayments', paymentEntry);
             }            
             } catch (error) {            
                 console.log(error)
@@ -980,7 +1003,8 @@ export default {
         
         },
 
-       sendEmail(order){
+       async sendEmail(order){
+           this.spinnerEmail = true;
             var date = moment.tz(order.Date, moment.tz.guess()).format('MM-DD-YYYY hh:mm A');
                if(order.OrderForCatering === true)
                   date = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;
@@ -1148,7 +1172,8 @@ export default {
                 "mess": html,
                 "subject": subject
             }
-            Api.sendEmail(items);
+            await Api.sendEmail(items);
+            this.spinnerEmail = false;
 
          },
 

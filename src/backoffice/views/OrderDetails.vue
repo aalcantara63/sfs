@@ -71,6 +71,16 @@
             </ion-row>
         </ion-grid>
         <br/>
+
+        <ion-grid v-if="order.StaffName">
+            <ion-row class="left">
+                <ion-col>
+                    <div><span class="title">{{$t('backoffice.form.fields.serverName')}}:</span> {{order.StaffName}}</div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <br v-if="order.StaffName" />
+        
         <ion-grid>
             <ion-row class="left">
                 <ion-col>
@@ -247,19 +257,24 @@
                     </ion-col>
                     
                     <ion-col size="4" v-if="pay.paymentInfo">
-                        <div v-if="pay.state == 1">
-                            <div style="float: left" v-if="pay.paymentInfo.method != 'Device'">
-                                <ion-button color="danger" @click="setRefund(pay, order.Payment.indexOf(pay))">Refund</ion-button>
+                        <div v-if="pay.state == 1" >
+                            <div style="float: left; text-align: center;" v-if="pay.paymentInfo.method != 'Device'">
+                               <ion-input type="number" :value="count=pay.total" @ionChange="count= $event.target.value"></ion-input>
+                                <ion-button color="danger" @click="setRefund(pay, order.Payment.indexOf(pay), count)">Refund</ion-button>
                             </div>
-                            <div>
-                                <ion-button color="danger" @click="setVoid(pay, order.Payment.indexOf(pay))">Void</ion-button>
+                            <div style="text-align: center;padding-top: 38.75px;">
+                                <ion-button color="danger" @click="setVoid(pay, order.Payment.indexOf(pay), count)">Void</ion-button>
                             </div>
+
+                
                         </div>
                         <div v-if="pay.state == 2">
-                            <span class="title">{{$t('frontend.home.state')}}: </span>Refund
+                            <span class="title" v-if="pay.refundValue">{{$t('frontend.home.state')}}: Refund: {{getFormateNumber(pay.refundValue)}}</span> 
+                            <span class="title" v-else>{{$t('frontend.home.state')}}: Refund: {{getFormateNumber(pay.total)}}</span> 
                         </div>
                         <div v-if="pay.state == 3">
-                            <span class="title">{{$t('frontend.home.state')}}: </span>Void
+                            <span class="title" v-if="pay.voidValue">{{$t('frontend.home.state')}}: Void: {{getFormateNumber(pay.voidValue)}}</span>
+                            <span class="title" v-else>{{$t('frontend.home.state')}}: Void: {{getFormateNumber(pay.total)}}</span>
                         </div>
                     </ion-col>
                 </ion-row>
@@ -357,10 +372,7 @@
         <ion-button v-if="order.State != 0 && order.State != 6 && order.State != 5 && order.State != 7 && order.State != 8" expand="full" color="success" @click="changeStatus()">Change State</ion-button>
         <ion-button v-if="order.State == 4 && order.IsAccept" expand="full" color="warning" @click="showDeliveringLocation(order)">Show delivering location</ion-button>
         <ion-button v-if="order.State != 0 && order.State != 6 && order.State != 5 && order.State != 7 && order.State != 8" expand="full" color="danger" @click="candelOrder()">{{$t('backoffice.form.buttons.cancelOrder')}}</ion-button>
-        <!-- <ion-button color="success" @click="payExample()">PAY EXAMPLE</ion-button> -->
-
-        <!-- <ion-button color="danger" @click="setRefund()">REFUND</ion-button>
-        <ion-button color="success" @click="setVoid()">VOID</ion-button> -->
+       
     </div>
     </div>
 </template>
@@ -475,14 +487,47 @@ export default {
   },
   methods:{
 
-      async setRefund(pay, key){
+      async setRefund(pay, key, count){
 
           //Obtengo el restaurante
             this.spinner = true
             const restaurantID = this.$store.state.user.RestaurantId
             const restaurant = await Api.fetchById('restaurant', restaurantID)
 
-            if (restaurant.data.PayMethod == 'SHIFT4')
+            console.log(pay.paymentInfo)
+
+          if (pay.paymentInfo.method === "Cash" || pay.paymentInfo.method === "Check"){
+
+                this.order.Payment[key]["state"] = 2;
+                this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
+                let item = {
+                    "_id": this.order._id,
+                    "Payment": this.order.Payment,
+                };
+                Api.putIn('order', item)
+                .then(response => {
+                    console.log(response)
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+
+                const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                if(paymeD){
+                    console.log('paymenD')
+                    console.log(paymeD.data[0])
+                    const payUpd = paymeD.data[0];
+                    payUpd.Refund = parseFloat(count).toFixed(2);
+                    await Api.putIn('Allpayments', payUpd);
+                }
+
+                this.spinner = false
+                
+                return true;
+
+          }
+
+           else if (restaurant.data.PayMethod == 'SHIFT4')
             {
 
                 //Hay que obtener el token.
@@ -490,7 +535,7 @@ export default {
 
                     console.log("Invoice information")
                     console.log(pay.paymentInfo.transId)
-                    const invoiceInformation = await payAuthorizeNet.invoiceInformation(pay.paymentInfo.transId,
+                    const invoiceInformation = await payAuthorizeNet.invoiceInformation(pay.paymentInfo.transId, pay.paymentInfo.moto,
                                                                                             restaurantID, 'SHIFT4')
                     console.log("invoiceInformation")
                     console.log(invoiceInformation)
@@ -500,7 +545,7 @@ export default {
                             const datas = {
                                 "restaurantId": restaurantID,
                                 "payMethod": 'SHIFT4',
-                                "total": pay.paymentInfo.total,
+                                "total": parseFloat(count).toFixed(2),
                                 // "cardExpirationDateF1": this.order.expirationCard,
                                 // "cardNumber": this.order.accountNumber,
                                 "token": invoiceInformation.data[0].card.token.value,
@@ -508,10 +553,19 @@ export default {
                             }
 
                             console.log(datas)
-                           const resRefund = await payAuthorizeNet.refundOrder(datas)
+                           const resRefund = await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto)
+                           const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                           if(paymeD){
+                               console.log('paymenD')
+                               console.log(paymeD.data[0])
+                               const payUpd = paymeD.data[0];
+                               payUpd.Refund = parseFloat(count).toFixed(2);
+                               await Api.putIn('Allpayments', payUpd);
+                           }
                            console.log(resRefund)
 
-                            this.order.Payment[key]["state"] = 2
+                            this.order.Payment[key]["state"] = 2;
+                            this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
                             let item = {
                                 "_id": this.order._id,
                                 "Payment": this.order.Payment,
@@ -543,7 +597,38 @@ export default {
             const restaurantID = this.$store.state.user.RestaurantId
             const restaurant = await Api.fetchById('restaurant', restaurantID)
 
-            if (pay.paymentInfo.method == 'Device'){ //Si el pago se hizo a traves del dispositivo, 
+            if (pay.paymentInfo.method === "Cash" || pay.paymentInfo.method === "Check"){
+
+                this.order.Payment[key]["state"] = 2;
+                this.order.Payment[key]["voidValue"] = pay.paymentInfo.total;
+                let item = {
+                    "_id": this.order._id,
+                    "Payment": this.order.Payment,
+                };
+                Api.putIn('order', item)
+                .then(response => {
+                    console.log(response)
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+
+                 const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                if(paymeD){
+                    console.log('paymenD')
+                    console.log(paymeD.data[0])
+                    const payUpd = paymeD.data[0];
+                    payUpd.Void = pay.paymentInfo.total;
+                    await Api.putIn('Allpayments', payUpd);
+                }
+
+                this.spinner = false
+                 
+                return;
+
+            }
+
+            else if (pay.paymentInfo.method == 'Device'){ //Si el pago se hizo a traves del dispositivo, 
                                 //el void debe ser a traves del dispositivo.
                 const data = {
                     'transactionType': '17',
@@ -564,34 +649,51 @@ export default {
                 const port = '10009'
                 try{
                     Devices.a930.DoCredit(ip, port, data, this.callbackVoid)
+
+                    const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                    if(paymeD){
+                        console.log('paymenD')
+                        console.log(paymeD.data[0])
+                        const payUpd = paymeD.data[0];
+                        payUpd.Void = pay.paymentInfo.total;
+                        await Api.putIn('Allpayments', payUpd);
+                    }
                 }
                 catch(e){
                     console.log(e)
                 }
             }
-            else{
-                if (restaurant.data.PayMethod == 'SHIFT4')
-                {
-                    const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, restaurantID, 'SHIFT4')
-                    console.log("Response Void")
-                    console.log(resVoid)
-
-                    this.order.Payment[key]["state"] = 3
-                    let item = {
-                    "_id": this.order._id,
-                    "Payment": this.order.Payment,
-                    };
-                    Api.putIn('order', item)
-                    .then(response => {
-                        console.log(response)
-                    })
-                    .catch(e => {
-                        console.log(e)
-                    })
-
-                    this.spinner = false
+            else if(restaurant.data.PayMethod == 'SHIFT4') {
+                
+                const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4')
+                console.log("Response Void")
+                console.log(resVoid)
+                const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                if(paymeD){
+                    console.log('paymenD')
+                    console.log(paymeD.data[0])
+                    const payUpd = paymeD.data[0];
+                    payUpd.Void = pay.paymentInfo.total;
+                    await Api.putIn('Allpayments', payUpd);
                 }
+
+                this.order.Payment[key]["state"] = 3
+                this.order.Payment[key]["voidValue"] = pay.paymentInfo.total;
+                let item = {
+                "_id": this.order._id,
+                "Payment": this.order.Payment,
+                };
+                Api.putIn('order', item)
+                .then(response => {
+                    console.log(response)
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+
+                this.spinner = false
             }
+            
             
       },
       callbackVoid(res){
@@ -706,6 +808,8 @@ export default {
       goToBack(){
           if (this.cType == 'order')
             this.$router.push({ path: '/order'})
+          else if (this.cType == 'ticket')
+            this.$router.push({path: '/ticket'})
           else
             this.$router.push({ path: '/cateringOrder'})
       },

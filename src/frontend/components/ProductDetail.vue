@@ -194,7 +194,7 @@ export default {
       content: 'Content',
       result: '',
       error: ''  ,
-      staticUrl:"https://restaurantmenuappwindows.azurewebsites.net/?share=",
+      staticUrl:"https://imenuapps.net/?share=",
       thisCant: this.ProductCant,
       thisNote: this.Note,
       thisPrice: this.SalePrice,

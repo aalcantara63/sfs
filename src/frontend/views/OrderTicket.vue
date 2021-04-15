@@ -110,9 +110,7 @@
                               <p class="subtitles-order menu-col-4" style=" padding: 10px; margin: 0; float: left;">{{$t('frontend.order.location') }}  <strong style="color: red">*</strong></p>
                               <ion-label @click="show()" style=" float: left;text-align: left;" class="subtitles-order menu-col-4">{{ order.tableService }}</ion-label>
                                
-                            </ion-item>  
-
-
+                            </ion-item>
                         </ion-card>
 
                                 
@@ -728,12 +726,13 @@ export default {
 
             this.spinner = true;            
             data.invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
+            const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
             if(this.order.AuthorizationPayment[0].paymentInfo.accountNumber)
               data.cardNumber = this.order.AuthorizationPayment[0].paymentInfo.accountNumber;
 
             console.log('data');
             console.log(data);
-            const response = await payAuthorizeNet.firstAuthorizeOrder(data);
+            const response = await payAuthorizeNet.firstAuthorizeOrder(data, moto);
             if(response){
               console.log('response');
               console.log(response);
@@ -806,6 +805,15 @@ export default {
             const response = await Api.putIn('Order', this.order)
             if(response.status === 200 && response.statusText === "OK"){
                   this.spinner = false;
+                  const paymentEntry = {                       
+                            "Method": res.method,
+                            "Payment": res.total,
+                            "InvoiceNumber": res.transId,
+                            "ModelId": response.data._id,
+                            "ModelFrom": "Order",
+                             "StaffName": this.order.StaffName,                    
+                    }
+                    await Api.postIn('allpayments', paymentEntry);
                   this.finishPayment(this.order);  
             }
             
@@ -1029,9 +1037,10 @@ export default {
         const autho =  await this.generalAuthorization();
         if(autho){
           const invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
+          const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
           console.log('Capture del Authorization'  + invoiceNumber);
 
-          const response = await payAuthorizeNet.captureOrder(invoiceNumber,  this.restaurantSelectedId, this.restaurantActive.payMethod,);      
+          const response = await payAuthorizeNet.captureOrder(invoiceNumber, moto, this.restaurantSelectedId, this.restaurantActive.payMethod,);      
           delete this.order.AuthorizationPayment;
           this.recivePayment(response);
         }
@@ -1918,6 +1927,7 @@ sinPickAction() {
       try {
         const response = await Api.fetchById("Order", this.order._id)  
         if(response.status === 200){
+           if(response.data.State === 5 ) return this.finishPayment(response.data)
           console.log('actualizado el ticket');
           console.log(JSON.parse(JSON.stringify(this.cart)));
           this.$store.commit('setOrder', response.data);

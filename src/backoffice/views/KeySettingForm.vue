@@ -18,10 +18,10 @@
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
     <div v-else>
-        <ion-item>
+        <!-- <ion-item>
             <ion-label>{{$t('backoffice.form.titles.paymentConfiguration')}}</ion-label>    
-        </ion-item> 
-        <ion-item>
+        </ion-item>  -->
+        <!-- <ion-item>
             <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.endPointUrl')}}</ion-label>
             <ion-input type="text" name="endPointUrl"
             @input="endPointUrl = $event.target.value" 
@@ -43,12 +43,12 @@
             v-bind:value="transactionKey">
             </ion-input>
             <ion-chip slot="end" color="primary" outline="true" @click="changeTransactionKey()"><ion-icon name="eye"></ion-icon></ion-chip>
-        </ion-item>
+        </ion-item> -->
 
-        <ion-item>
-        </ion-item>
+        <!-- <ion-item>
+        </ion-item> -->
 
-        <ion-item>
+        <!-- <ion-item>
             <ion-label>{{$t('backoffice.form.titles.emailConfiguration')}}</ion-label> 
         </ion-item>
         <ion-item>
@@ -88,9 +88,9 @@
         </ion-item>
 
         <ion-item>
-        </ion-item>
+        </ion-item> -->
 
-        <ion-item>
+        <!-- <ion-item>
             <ion-label>{{$t('backoffice.form.titles.twilioSMS')}}</ion-label> 
         </ion-item>
         <ion-item>
@@ -115,10 +115,10 @@
             v-bind:value="twToken">
             </ion-input>
             <ion-chip slot="end" color="primary" outline="true" @click="changeTwToken()"><ion-icon name="eye"></ion-icon></ion-chip>
-        </ion-item>
+        </ion-item> -->
 
-        <ion-item>
-        </ion-item>
+        <!-- <ion-item>
+        </ion-item> -->
 
         <ion-item>
             <ion-label>{{$t('backoffice.form.titles.eposConfiguration')}}</ion-label>    
@@ -167,14 +167,14 @@
                 endPointUrl : '',
                 apiLoginId: '',
                 transactionKey:'',
-                smtpHost: '',
-                port: 0,
-                secure: false,
-                email: '',
-                password: '',
-                twFromNumber: '',
-                twAccountSid: '',
-                twToken: '',
+                // smtpHost: '',
+                // port: 0,
+                // secure: false,
+                // email: '',
+                // password: '',
+                // twFromNumber: '',
+                // twAccountSid: '',
+                // twToken: '',
                 eposIntegrate: false,
                 ePosEndPointUrl: '',
                 eposToken: '',
@@ -182,8 +182,8 @@
 
                 showApiLoginId: "password",
                 showTransactionKey: "password",
-                showTwAccountSid: "password",
-                showTwToken: "password",
+                // showTwAccountSid: "password",
+                // showTwToken: "password",
                 showePosToken: "password",
 
                 isBackdrop: false,
@@ -209,14 +209,14 @@
                             this.endPointUrl = response.data.EndPointUrl;
                             this.apiLoginId = response.data.ApiLoginId;
                             this.transactionKey = response.data.TransactionKey;
-                            this.smtpHost = response.data.SmtpHost;
-                            this.port = response.data.Port;
-                            this.secure = response.data.Secure;
-                            this.email = response.data.EmailHost;
-                            this.password = response.data.Password;
-                            this.twFromNumber = response.data.TwFromNumber;
-                            this.twAccountSid = response.data.TwAccountSid;
-                            this.twToken = response.data.TwToken;
+                            // this.smtpHost = response.data.SmtpHost;
+                            // this.port = response.data.Port;
+                            // this.secure = response.data.Secure;
+                            // this.email = response.data.EmailHost;
+                            // this.password = response.data.Password;
+                            // this.twFromNumber = response.data.TwFromNumber;
+                            // this.twAccountSid = response.data.TwAccountSid;
+                            // this.twToken = response.data.TwToken;
                             if (response.data.EposIntegrate == true)
                             {
                                 this.eposIntegrate = true;
@@ -281,36 +281,36 @@
                     // errors.push(this.$t('backoffice.form.validate.transactionKey'));
                     return false
                 }
-                if (this.smtpHost == "")
-                {
-                    // errors.push(this.$t('backoffice.form.validate.smtpHost'));
-                    return false
-                }
-                if (this.email == "")
-                {
-                    // errors.push(this.$t('backoffice.form.validate.email'));
-                    return false
-                }
-                if (this.password == "")
-                {
-                    // errors.push(this.$t('backoffice.form.validate.password'));
-                    return false
-                }
-                if (this.twFromNumber == "")
-                {
-                    // errors.push(this.$t('backoffice.form.validate.twFromNumber'));
-                    return false
-                }
-                if (this.twAccountSid == "")
-                {
-                    // errors.push(this.$t('backoffice.form.validate.twAccountSid'));
-                    return false
-                }
-                if (this.twToken == "")
-                {
-                    // errors.push(this.$t('backoffice.form.validate.twToken'));
-                    return false
-                }
+                // if (this.smtpHost == "")
+                // {
+                //     // errors.push(this.$t('backoffice.form.validate.smtpHost'));
+                //     return false
+                // }
+                // if (this.email == "")
+                // {
+                //     // errors.push(this.$t('backoffice.form.validate.email'));
+                //     return false
+                // }
+                // if (this.password == "")
+                // {
+                //     // errors.push(this.$t('backoffice.form.validate.password'));
+                //     return false
+                // }
+                // if (this.twFromNumber == "")
+                // {
+                //     // errors.push(this.$t('backoffice.form.validate.twFromNumber'));
+                //     return false
+                // }
+                // if (this.twAccountSid == "")
+                // {
+                //     // errors.push(this.$t('backoffice.form.validate.twAccountSid'));
+                //     return false
+                // }
+                // if (this.twToken == "")
+                // {
+                //     // errors.push(this.$t('backoffice.form.validate.twToken'));
+                //     return false
+                // }
 
                 if (this.eposIntegrate)
                 {
@@ -356,30 +356,30 @@
                     showCloseButton: false
                 }).then(a => a.present())
             },
-            changeApiLoginId(){
-                if (this.showApiLoginId == "password")
-                    this.showApiLoginId = "text"
-                else
-                    this.showApiLoginId = "password"
-            },
-            changeTransactionKey(){
-                if (this.showTransactionKey == "password")
-                    this.showTransactionKey = "text"
-                else
-                    this.showTransactionKey = "password"
-            },
-            changeTwAccountSid(){
-                if (this.showTwAccountSid == "password")
-                    this.showTwAccountSid = "text"
-                else
-                    this.showTwAccountSid = "password"
-            },
-            changeTwToken(){
-                if (this.showTwToken == "password")
-                    this.showTwToken = "text"
-                else
-                    this.showTwToken = "password"
-            },
+            // changeApiLoginId(){
+            //     if (this.showApiLoginId == "password")
+            //         this.showApiLoginId = "text"
+            //     else
+            //         this.showApiLoginId = "password"
+            // },
+            // changeTransactionKey(){
+            //     if (this.showTransactionKey == "password")
+            //         this.showTransactionKey = "text"
+            //     else
+            //         this.showTransactionKey = "password"
+            // },
+            // changeTwAccountSid(){
+            //     if (this.showTwAccountSid == "password")
+            //         this.showTwAccountSid = "text"
+            //     else
+            //         this.showTwAccountSid = "password"
+            // },
+            // changeTwToken(){
+            //     if (this.showTwToken == "password")
+            //         this.showTwToken = "text"
+            //     else
+            //         this.showTwToken = "password"
+            // },
             changeePosToken(){
                 if (this.showePosToken == "password")
                     this.showePosToken = "text"
@@ -394,14 +394,14 @@
                         "EndPointUrl": this.endPointUrl,
                         "ApiLoginId": this.apiLoginId,
                         "TransactionKey": this.transactionKey,
-                        "SmtpHost": this.smtpHost,
-                        "Port": this.port,
-                        "Secure": this.secure,
-                        "EmailHost": this.email,
-                        "Password": this.password,
-                        "TwFromNumber": this.twFromNumber,
-                        "TwAccountSid": this.twAccountSid,
-                        "TwToken": this.twToken,
+                        // "SmtpHost": this.smtpHost,
+                        // "Port": this.port,
+                        // "Secure": this.secure,
+                        // "EmailHost": this.email,
+                        // "Password": this.password,
+                        // "TwFromNumber": this.twFromNumber,
+                        // "TwAccountSid": this.twAccountSid,
+                        // "TwToken": this.twToken,
                         "EposIntegrate": this.eposIntegrate
                     }
                     if (this.eposIntegrate)

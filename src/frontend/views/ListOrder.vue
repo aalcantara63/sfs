@@ -154,13 +154,20 @@
 
                      <ion-item-options side="end">
 
-                      <ion-item-option color="primary" @click="printOrder(order)"  v-tooltip="$t('frontend.tooltips.printOrder')" >
+                     <ion-item-option color="primary"  @click.stop="reOrder(order)" v-tooltip="$t('frontend.tooltips.reOrder')">                        
+                        <span class="iconify" data-icon="mi:shopping-cart-add" data-inline="false"></span>   
+                      </ion-item-option>
+
+                       <ion-item-option                      
+                      color="primary"  @click="sendEmail(order)" v-tooltip="$t('frontend.tooltips.forward')" >
+                          <span  class="iconify" data-icon="carbon:mail-all" data-inline="false"></span>
+                          <ion-spinner v-if="spinnerEmail"></ion-spinner>
+                      </ion-item-option>                          
+
+                       <ion-item-option 
+                      color="primary" @click="printOrder(order)"  v-tooltip="$t('frontend.tooltips.printOrder')" >
                           <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false"></span>
                       </ion-item-option> 
-
-                       <ion-item-option color="primary"  @click.stop="reOrder(order)" v-tooltip="$t('frontend.tooltips.reOrder')">                        
-                        <span class="iconify" data-icon="mi:shopping-cart-add" data-inline="false"></span>   
-                      </ion-item-option>  
 
                   </ion-item-options>
 
@@ -273,6 +280,7 @@ export default {
       configuration: {},
       restaurantActive: {},
       refreshKey: 1,
+      spinnerEmail: false,
       
     }
   }, 
@@ -505,9 +513,24 @@ export default {
           winimp.focus();
           winimp.print();
           winimp.close();
-         
-          
-       
+
+   },
+
+       async sendEmail(order){
+
+         this.spinnerEmail = true;
+        
+        var html = await this.htmlToUse(order, true)
+        
+          var items = {
+            "email": order.CustomerEmail,
+            "mess": html,
+            "subject": this.$t('frontend.order.invoice') + '-'+ order.Payment[0].paymentInfo.transId +' ' + this.restaurantActive.restaurantName
+          }
+         await Api.sendEmail(items);   
+         this.spinnerEmail = false;
+
+         return true;
 
    },
 

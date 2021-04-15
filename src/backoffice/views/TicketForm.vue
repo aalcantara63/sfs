@@ -1,4 +1,4 @@
-x|<template>
+<template>
     <div class="screen">
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
     <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
@@ -50,6 +50,14 @@ x|<template>
             </ion-row>
         </ion-grid>
         <br/>
+        <ion-grid v-if="order.StaffName">
+            <ion-row class="left">
+                <ion-col>
+                    <div><span class="title">{{$t('backoffice.form.fields.serverName')}}:</span> {{order.StaffName}}</div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <br v-if="order.StaffName" />
         <ion-grid>
             <ion-row class="left">
                 <ion-col style="border-right: none">
@@ -363,7 +371,8 @@ x|<template>
             </ion-row>
             <ion-row class="left">
                 <ion-col>
-                    <div><span class="title">{{$t('backoffice.form.titles.state')}}:</span> {{getOrderState(order.State)}}</div> 
+                    <div v-if="order.State != 0"><span class="title">{{$t('backoffice.form.titles.state')}}:</span> {{$t('frontend.order.closed')}}</div> 
+                    <div v-else><span class="title">{{$t('backoffice.form.titles.state')}}:</span> {{$t('frontend.reservation.open')}}</div>
                 </ion-col>
             </ion-row>
         </ion-grid>
@@ -385,6 +394,7 @@ import Modal from './addProductSeviceModal.vue';
 import { EventBus } from '../../frontend/event-bus';
 // import Moment from 'moment';
 import { payAuthorizeNet } from '../api/payments.js';
+import PaymentModal from '../../frontend/components/PaymentModal'
 
 export default {
 
@@ -452,7 +462,10 @@ export default {
     EventBus.$on('ProductsSelected', (productsSelected) => {
       console.log(productsSelected)
       productsSelected.forEach(prod => {
-          this.products.push(prod) 
+          prod.State = 0
+          this.products.push(prod)
+          console.log("El Product")
+          console.log(prod)
       })
       this.calcTotal()
     });
@@ -463,9 +476,9 @@ export default {
     //   })  
     // });
   },
-  created: function(){
+  created: async function(){
     console.log(this.order)
-    this.init();
+    await this.init();
     this.screenWidth = screen.width;
   },
   computed: {
@@ -480,17 +493,17 @@ export default {
         }
   },
   methods: {
-    init(){
+    async init(){
         this.id = this.$route.params.orderId;
-        this.getTaxName();
-        this.getCurrency();
-        this.getOrder();
+         this.getTaxName();
+        await this.getCurrency();
+         this.getOrder();
 
     },
-    getCurrency(){
+    async getCurrency(){
         const restaurantID = this.$store.state.user.RestaurantId
         if (restaurantID){
-            Api.fetchById('Restaurant', restaurantID).then(response => {
+           await Api.fetchById('Restaurant', restaurantID).then(response => {
                 this.currency = response.data.Currency
                 this.restaurantActive = response.data
                 //Restaurant Active.
@@ -566,7 +579,7 @@ export default {
         partialTotal += parseFloat(this.calcTip)
         partialTotal += parseFloat(this.shipping)
 
-        this.total = partialTotal.toString()
+        this.total = partialTotal.toFixed(2)
         console.log("TOTAL")
         console.log(this.total)
     },
@@ -887,12 +900,16 @@ export default {
 
                 this.spinner = true;            
                 data.invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
+                const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
                 if(this.order.AuthorizationPayment[0].paymentInfo.accountNumber)
                     data.cardNumber = this.order.AuthorizationPayment[0].paymentInfo.accountNumber;
 
                 console.log('data');
                 console.log(data);
-                const response = await payAuthorizeNet.firstAuthorizeOrder(data);
+                console.log("1");
+                const response = await payAuthorizeNet.firstAuthorizeOrder(data, moto);
+                console.log("2");
+                console.log(response)
                 if(response){
                     console.log('response');
                     console.log(response);
@@ -906,7 +923,14 @@ export default {
                     //Build order.
 
                     this.save('The payment was authorize successfully.');
-                }           
+                    return true;
+                   
+                } 
+                else{
+                    this.showToastMessage('An error has occurred during payment authorization', 'danger')
+                    this.spinner = false
+                    return false;          
+                } 
             } 
             catch (error) {
                 this.spinner = false;
@@ -922,27 +946,97 @@ export default {
             }
         }
         else{
+            this.save('The payment was authorize successfully.');
             return false;
         }
         
     },
     async closeTicket(){
         try {
-            this.spinner = true;
-            const autho =  await this.addToTicket();
-            if(autho)
-            {
-                const invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
-                console.log('Capture del Authorization'  + invoiceNumber);
-                const response = await payAuthorizeNet.captureOrder(invoiceNumber,  this.restaurantActive._id, this.restaurantActive.payMethod);      
-                delete this.order.AuthorizationPayment;
-                this.recivePayment(response);
-                this.showToastMessage('The payment was complete successfully', 'success')
-            }
-            else
-            {
-                this.showToastMessage('Payment denied', 'danger')
-            }
+             if(this.order.AuthorizationPayment){
+                 this.spinner = true;
+                const autho =  await this.addToTicket();
+                console.log('autho in TICKET FORM: ' + autho)
+                if(autho)
+                {
+                    const invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
+                    const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
+                    console.log('Capture del Authorization '  + invoiceNumber + ' '+ moto , ' '+ this.restaurantActive.PayMethod);
+                    const response = await payAuthorizeNet.captureOrder(invoiceNumber, moto,  this.restaurantActive._id, this.restaurantActive.PayMethod);      
+                    console.log('RESPONSE CAPTURE');
+                    console.log(response);
+                    delete this.order.AuthorizationPayment;
+                    this.recivePayment(response);
+                    this.showToastMessage('The payment was complete successfully', 'success')
+                }
+                else
+                {
+                    this.spinner = false
+                    this.showToastMessage('An error has occurred during payment authorization. Payment denied', 'danger')
+                }
+
+             }
+             else{
+                 //Lanzar el modal de Pago de Order
+
+                 const modalProps = { 
+                            parent: this, 
+                            order: this.order,   
+                            canSplitPayment: true,          
+                            Acept: this.$t('frontend.home.acept'),
+                            Cancel: this.$t('frontend.home.cancel'), 
+                            Total: parseFloat(this.order.Total).toFixed(2),
+                            Tax:  this.taxe.toString(),
+                            TaxName: this.taxName,     
+                            restaurantId: this.$store.state.user.RestaurantId,
+                            payMethod: this.restaurantActive.PayMethod  ,  
+                            RestaurantName: this.restaurantActive.RestaurantName,              
+                            errorPaymentHeader: this.$t('frontend.order.transictionTitle'),
+                            errorPaymentMss: this.$t('frontend.order.transictionError'),
+                            gooPaymentHeader: this.$t('frontend.order.transictionTitle'),
+                            gooPaymentMss: this.$t('frontend.order.transictionOk'),
+                            notValidEmail: this.$t('frontend.home.notValidEmail'),
+                            codeNotValid: this.$t('frontend.home.zipCodeNotValid'),
+                            notValidCC: this.$t('frontend.order.notValidCC'),
+                            dataRequired: this.$t('frontend.home.errorRequired'),
+                            paymentByCard: this.$t('frontend.order.paymentByCard'),
+                            totalForPay: this.$t('frontend.order.totalForPay'),
+                            currency: this.restaurantActive.Currency,
+                            ccard: this.$t('frontend.order.ccard'),
+                            expcard: this.$t('frontend.order.expcard'),
+                            ccode: this.$t('frontend.order.ccode'),
+                            cityText: this.$t('frontend.home.city'),
+                            stateText: this.$t('frontend.home.state'),
+                            firstNameText: this.$t('frontend.order.firstName'),
+                            lastNameText: this.$t('frontend.order.lastName'),
+                            postalCode: this.$t('frontend.order.postalCode'),
+                            addressLine1: this.$t('frontend.order.addressLine1'),
+                            payText: this.$t('frontend.order.pay'),
+                            verifyText: this.$t('frontend.order.verify'),
+                            returnTo: 'Ticket',
+                            isTicket: true,
+                        }
+
+                    console.log("PROPS DATA")
+                    console.log(modalProps)
+
+                 return this.$ionic.modalController
+                    .create({
+                        component: PaymentModal,
+                        backdropDismiss: false,
+                        keyboardClose: false,
+                        cssClass: 'my-custom-class',
+                        componentProps: {
+                        data: {
+                            content: 'New Content',
+                        },
+                        propsData: modalProps,
+                        },
+                    })
+                    .then(m => m.present()) 
+                        }
+
+            
         }
         catch (error)
         {
@@ -969,8 +1063,15 @@ export default {
             if(response.status === 200 && response.statusText === "OK")
             {
                   this.spinner = false;
-                //   this.finishPayment(this.order);
-                //   enviar email
+                    const paymentEntry = {                       
+                            "Method": res.method,
+                            "Payment": res.total,
+                            "InvoiceNumber": res.transId,
+                            "ModelId": response.data._id,
+                            "ModelFrom": "Order" ,
+                             "StaffName": this.order.StaffName                  
+                    }
+                    await Api.postIn('allpayments', paymentEntry);
             }    
         } 
         catch (error) {            

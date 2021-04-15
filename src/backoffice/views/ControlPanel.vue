@@ -21,19 +21,26 @@
                             </ion-item>
                         </ion-list>
                     </div>
+
+                    <ion-title v-if="!online" style="color: rgb(172 127 14)">
+                        <span class="iconify" data-icon="twemoji:warning" data-inline="false" style="margin: 5px 0 0 15px; width: 18px;height: 18px;"></span>
+                        {{$t('backoffice.form.fields.onlineMss')}}</ion-title>
+                     <ion-title v-if="online" style="color: rgb(44 172 14)">
+                        <span class="iconify" data-icon="emojione-v1:left-check-mark" data-inline="false" style="margin: 5px 0 0 15px; width: 18px;height: 18px;"></span>
+                        {{$t('backoffice.form.fields.onlineMss1')}}</ion-title>
                                      
-                    <ion-card v-if="!scope.noMatch && options.series[0].data.length > 0">
-                        <ion-card-header>
-                            Restaurant's Rating
-                        </ion-card-header>
-                        <div 
-                        :class="scope.isSmall || scope.noMatch || scope.isMedium  ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" >                         
+                    <ion-card v-if="!scope.noMatch && options.series[0].data.length > 0">  
+
+                        <div                         
+                           :class="scope.isSmall || scope.noMatch || scope.isMedium  ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" >  
+                           <ion-label> Payments</ion-label>                     
                            <v-chart    style="margin: 0 auto;"                                                
-                           :options="options"  />
+                           :options="optionsPayment"  />
                         </div>
 
                         <div
-                        :class="scope.isSmall || scope.noMatch || scope.isMedium  ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" >
+                            :class="scope.isSmall || scope.noMatch || scope.isMedium  ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" >
+                           <ion-la> Restaurant's Rating </ion-la>
                             <v-chart   style="margin: 0 auto;"                                                     
                              :options="options2"  />
                         </div>                        
@@ -162,6 +169,10 @@
                                     <span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePaymentSettings') }}</ion-label>
                                 </ion-chip>
+                                  <ion-chip v-tooltip="'Payments.'" v-if="hasPermission('canChangeSetting')" @click="$router.push('/payment')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                    <span class="iconify" data-icon="ic:twotone-attach-money" data-inline="false"></span>
+                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePyments') }}</ion-label>
+                                </ion-chip>
                         </div>
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
@@ -236,6 +247,26 @@ import 'echarts';
 export default {
     data(){
         return{
+            optionsPayment: {
+                xAxis: {
+                    type: 'category',
+                    data: []
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    data: [],
+                    type: 'line',
+                    smooth: true
+                }],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                    type: 'shadow',
+                    },
+                },
+            },
             options: {
                 xAxis: {
                     type: 'category',
@@ -305,6 +336,7 @@ export default {
             restaurantId: -1,
             
             item: 0,
+            online: false,
         }
     },
     created: function(){  
@@ -334,10 +366,27 @@ export default {
                 let fourStart = 0;              
                 let fiveStart = 0; 
 
+                Api.fetchAll('Allpayments').then(response => {
+                const payments= response.data; 
+                 if(payments.length > 0)
+                        {
+                            payments.forEach(r =>{
+                                this.optionsPayment.xAxis.data.push(Moment(r.date).format('YYYY-MM-DD')),                               
+                                this.optionsPayment.series[0].data.push( parseFloat(r.Payment) - r.Refund - r.Void) ;                                              
+                            });
+                        }              
+              })
+              .catch(e => {
+                console.log(e)
+                
+               
+              });
+
                 Api.fetchById("Restaurant",  this.restaurantId).then(response => {
                     console.log(0)                        
                     if(response.status === 200){ 
                         const rating =  response.data.rating 
+                        this.online = response.data.Online; 
                                     
                         if(rating.length > 0)
                         {
@@ -350,17 +399,15 @@ export default {
                                 if(r.rating >=3 && r.rating <=3.9) threeStart++;
                                 if(r.rating >=4 && r.rating <=4.9) fourStart++;
                                 if(r.rating ===5) fiveStart++;                          
-                                }
-                                
-                                
-                                );
+                            });
                         }
                         this.options2.series[0].data['0'].value = oneStart            
                         this.options2.series[0].data['1'].value = twoStart            
                         this.options2.series[0].data['2'].value = threeStart            
                         this.options2.series[0].data['3'].value = fourStart            
                         this.options2.series[0].data['4'].value = fiveStart
-                        this.spinner = false;           
+                        this.spinner = false;   
+                                
                     }  
                 })
                 .catch(e => {
@@ -639,7 +686,8 @@ export default {
                     this.$router.push({
                         name: 'ColourSettingForm',
                         params: {
-                            "settingId": colSettings[colSettings.length - 1]._id,
+                            // "settingId": colSettings[colSettings.length - 1]._id,
+                            "settingId": colSettings[0]._id,
                         }
                     });
                 }

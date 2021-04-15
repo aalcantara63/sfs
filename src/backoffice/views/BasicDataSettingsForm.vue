@@ -20,13 +20,20 @@
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
     <div v-else>
+      <ion-item>
+          <ion-label >{{$t('backoffice.form.fields.online')}}
+          <ion-toggle name="online" style="top: 12px;"
+          @ionChange="online = !online" 
+          :checked ="online">
+          </ion-toggle></ion-label>
+        </ion-item>
         <ion-item>
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.name')}}</ion-label>
           <ion-input type="text" name="name"
           @input="name = $event.target.value" 
           v-bind:value="name">
           </ion-input>
-        </ion-item>
+        </ion-item>        
         <ion-item>
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.address')}}</ion-label>
           <ion-textarea name="address" 
@@ -292,6 +299,7 @@ export default {
       id: null,
       name: '',
       address: '',
+      online: false,
       email: '',
       phone: '',
       web: '',
@@ -378,6 +386,7 @@ export default {
                   .then(response => {
                     this.name = response.data.Name;
                     this.address = response.data.Address;
+                    this.online = response.data.Online;
                     this.email = response.data.Email;
                     this.phone = response.data.Phone;
                     this.web = response.data.Web;
@@ -671,6 +680,7 @@ export default {
             let item = {
               "Name": this.name,
               "Address": this.address,
+              "Online": this.online,
               "Email": this.email,
               "Phone": this.phone,
               "Web": this.web,

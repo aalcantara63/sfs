@@ -24,6 +24,10 @@
                     <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.titles.shift4')}}</span>
                 </ion-segment-button>
+                <ion-segment-button value="auth">
+                    <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
+                    <span>{{$t('backoffice.form.titles.auth')}}</span>
+                </ion-segment-button>
                 <ion-segment-button value="user">
                     <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.titles.supportUsers')}}</span>
@@ -109,6 +113,33 @@
             </ion-item>
             <br/>
             <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="save()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
+        </div>
+        <!-- Authorize.net -->
+        <div v-if="auth">
+          <ion-item>
+              <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.endPointUrl')}}</ion-label>
+              <ion-input type="text" name="endPointUrl"
+              @input="endPointUrl = $event.target.value" 
+              v-bind:value="endPointUrl">
+              </ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.apiLoginId')}}</ion-label>
+              <ion-input :type="showApiLoginId" name="apiLoginId"
+              @input="apiLoginId = $event.target.value" 
+              v-bind:value="apiLoginId">
+              </ion-input>
+              <ion-chip slot="end" color="primary" outline="true" @click="changeApiLoginId()"><ion-icon name="eye"></ion-icon></ion-chip>
+          </ion-item>
+          <ion-item>
+              <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.transactionKey')}}</ion-label>
+              <ion-input :type="showTransactionKey" name="transactionKey"
+              @input="transactionKey = $event.target.value" 
+              v-bind:value="transactionKey">
+              </ion-input>
+              <ion-chip slot="end" color="primary" outline="true" @click="changeTransactionKey()"><ion-icon name="eye"></ion-icon></ion-chip>
+          </ion-item>
+
         </div>
         <!-- Shift4 -->
         <div v-if="shift4">
@@ -295,6 +326,14 @@ export default {
       showTwAccountSid: "password",
       showTwToken: "password",
 
+      //Authorize.net
+      endPointUrl : '',
+      apiLoginId: '',
+      transactionKey:'',
+
+      showApiLoginId: "password",
+      showTransactionKey: "password",
+
       //Shift4
       EndPointURLShift4: '',
       ClientGUIDShift4: '',
@@ -310,6 +349,7 @@ export default {
       segmentValue: 'email',
       email: true,
       twilio: false,
+      auth: false,
       shift4: false,
       user: false,
 
@@ -326,6 +366,18 @@ export default {
       this.init();
   },
   methods: {
+    changeApiLoginId(){
+        if (this.showApiLoginId == "password")
+            this.showApiLoginId = "text"
+        else
+            this.showApiLoginId = "password"
+    },
+    changeTransactionKey(){
+        if (this.showTransactionKey == "password")
+            this.showTransactionKey = "text"
+        else
+            this.showTransactionKey = "password"
+    },
     changeTwAccountSid(){
         if (this.showTwAccountSid == "password")
             this.showTwAccountSid = "text"
@@ -343,24 +395,35 @@ export default {
         if(value === 'email'){
             this.email = true
             this.twilio = false
+            this.auth = false
             this.shift4 = false
             this.user = false
         }
         if(value === 'twilio'){
             this.email = false
             this.twilio = true
+            this.auth = false
             this.shift4 = false
             this.user = false
-        }  
+        }
+        if(value === 'auth'){
+            this.email = false
+            this.twilio = false
+            this.auth = true
+            this.shift4 = false
+            this.user = false          
+        }
         if(value === 'shift4'){
             this.email = false
             this.twilio = false
+            this.auth = false
             this.shift4 = true
             this.user = false          
         }
         if(value === 'user'){
             this.email = false
             this.twilio = false
+            this.auth = false
             this.shift4 = false
             this.user = true
         }

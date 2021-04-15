@@ -2,33 +2,33 @@
   <div style="overflow: overlay;padding: 0 25px 0 0;">
     <ion-header color="primary">
       <ion-toolbar  color="primary" >
-         <ion-button expand="full" style="float: right;" @click="dismissModal">
+         <ion-button expand="full" style="float: right;" @click="dismissModal()">
             <span class="iconify" data-icon="ion:close"  ></span></ion-button>
+          <ion-button expand="full" style="float: right;" @click="printOrder(order)"  v-if="staffName !==''">
+            <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false"></span></ion-button> 
         <p 
           style="text-align: center;padding: 10px;color: white;font-size: 32px; margin:0">
           {{ totalForPay }}: {{getFormatPrice(Total)}}
         </p>      
       </ion-toolbar>
-    </ion-header>
-
       <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner">
-            <ion-button @click="changePayment(), cardPay = true" style="float: left" 
+            <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'"
              v-tooltip="cardPayment"
             :class="cardPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
             <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>
             </ion-button> 
 
-            <ion-button @click="changePayment(), devicePay = true" style="float: left" 
+            <ion-button @click="changePayment(), devicePay = true" :style="devicePay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
               v-if="payMethod==='SHIFT4' && staffName !==''"
               v-tooltip="'Device'"             
               :class="devicePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
              <span class="iconify" data-icon="emojione-monotone:mobile-phone" data-inline="false"></span>
-              <!--   -->
+            
             </ion-button>
 
-               <!--  -->
-            <ion-button @click="changePayment(), idtechPay = true" style="float: left;" 
+             
+            <ion-button @click="changePayment(), idtechPay = true" :style="idtechPay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
               v-tooltip="'IDTech'"
               v-if="payMethod==='SHIFT4' && staffName !==''"
@@ -36,10 +36,18 @@
             <span class="iconify" data-icon="gg:usb" data-inline="false"></span>           
             </ion-button> 
 
+             <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
+              :disabled="spinner"
+               v-tooltip="cashPayment"
+               v-if="payMethod==='SHIFT4' && staffName !==''"
+              :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+            <span class="iconify" data-icon="ic:baseline-attach-money" data-inline="false"></span>          
+            </ion-button> 
+
           <ion-button  
            @click="changePayment(), qrPay = true"
            v-if="payMethod==='SHIFT4' && staffName!== ''"
-            style="float: left;" 
+            :style="qrPay? 'float: left;border: solid' : 'float: left'"
              v-tooltip="qrPayment"
             :class="qrPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
             <span class="iconify" data-icon="ion:qr-code-sharp" data-inline="false"></span>
@@ -50,13 +58,11 @@
               :key="keyShare+3"
               :disabled="spinner"
               v-tooltip="'Share Payment'"
-              style="float: left;" 
+               :style="sharePay? 'float: left;border: solid' : 'float: left'"
               :class="sharePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <ion-spinner v-if="spinnerShare" name="lines"></ion-spinner>
               <span v-if="!spinnerShare" class="iconify" data-icon="fe:share" data-inline="false" ></span> 
             </ion-button>
-
-
 
           <google-pay-split  style="float: left; margin: 2px" 
           v-if="payMethod==='SHIFT4' && staffName==='' && googleData.merchantId"
@@ -68,13 +74,13 @@
           ></google-pay-split>
 
       </ion-toolbar>
+    </ion-header>
+
+      
 
       <div v-if="spinner" style="margin: 10px">
           <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
       </div>
-
-      <div>
-        
     
         <ion-card  v-if="cardPay" class="scroll" style="height: auto" >  
 
@@ -136,7 +142,7 @@
             <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >
               
 
-              <ion-button :disabled="spinner? true: false"  color="light" @click="dismissModal">{{Cancel}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="light" @click="dismissModal()">{{Cancel}}</ion-button>
               <ion-button :disabled="spinner? true: false"  color="light"  @click="sendPayment('')">{{payText}}</ion-button>
 
             </ion-toolbar>
@@ -209,15 +215,31 @@
             :parent="this"
             :Acept="this.Acept"
             :Cancel="this.Cancel"
+            :ccode="this.ccode" 
+            :cityText="this.cityText"  
+            :stateText="this.stateText"
+            :postalCode="this.postalCode"
+            :addressLine1="this.addressLine1"
+            :codeNotValid="this.codeNotValid"
+            :dataRequired="this.dataRequired"
             ></UsbCardReader>              
             
         </ion-card>
 
-       
-
-        
-        
-      </div>
+         <ion-card  v-if="cashPay"  class="scroll" style="height: auto">                 
+               <UsbCashDoor
+               :parent="this"
+               :Acept="this.Acept"
+               :Cancel="this.Cancel"
+               :ccode="this.ccode" 
+                :cityText="this.cityText"  
+                :stateText="this.stateText"
+                :postalCode="this.postalCode"
+                :addressLine1="this.addressLine1"
+                :codeNotValid="this.codeNotValid"
+                :dataRequired="this.dataRequired"
+               ></UsbCashDoor> 
+         </ion-card>
   </div>
 </template>
 
@@ -225,7 +247,7 @@
 
 import { eye } from "ionicons/icons";
 import { addIcons } from "ionicons";
-// import { Api } from '../../backoffice/api/api'
+import { Api } from '../../backoffice/api/api'
 
 addIcons({
   "ios-eye": eye.ios,
@@ -243,6 +265,7 @@ import QrModal from './QrPaymentModal'
 import { Plugins } from '@capacitor/core';
  const { Share } = Plugins;
  import UsbCardReader from './UsbCardReader'
+ import UsbCashDoor from './UsbCashDoor'
 
 export default {
    name: 'PaymentSplitedModal',
@@ -288,6 +311,7 @@ export default {
     staffName: {type: String, default:"" } ,
     qrPayment: {type: String, default:"" } ,
     cardPayment: {type: String, default:"" } ,
+    cashPayment: {type: String, default:"" } ,
     doingPayment: {type: String, default:"" } ,
     deviceTransactionType: {type: String, default:"02" } ,
     deviceData: {type: Object, default: ()=> {}} ,
@@ -302,6 +326,7 @@ export default {
    GooglePaySplit,
    DevicePayment,
    UsbCardReader,
+   UsbCashDoor
   },
    data () {
     return {                       
@@ -325,6 +350,7 @@ export default {
         sharePay: false,   
         devicePay: false, 
         idtechPay: false,
+        cashPay: false,
         spinnerShare: false, 
         hasQrPayment: '',
         googleKey: 0,
@@ -476,10 +502,17 @@ export default {
       return this.$ionic.toastController      
         .create({
             header: this.gooPaymentHeader,
-            message:  this.gooPaymentMss,
-            duration: 2000,
+            message:  this.gooPaymentMss,            
             position: 'middle',
-            color:'success'
+            color:'success',
+             buttons: [
+            {
+              text: 'Done',
+              role: 'cancel',
+              handler: () => {
+              }
+            }
+          ]
             })
       .then(a => a.present())
     },
@@ -488,10 +521,17 @@ export default {
       return this.$ionic.toastController      
         .create({
             header: this.errorPaymentHeader,
-            message:  this.errorPaymentMss,
-            duration: 2000,
+            message:  this.errorPaymentMss,            
             position: 'middle',
-            color:'danger'
+            color:'danger',
+             buttons: [
+            {
+              text: 'Done',
+              role: 'cancel',
+              handler: () => {
+              }
+            }
+          ]
             })
       .then(a => a.present())
     },
@@ -501,9 +541,16 @@ export default {
         .create({
             header:'Error',
             message:  msg,
-            duration: 5000,
             position: 'middle',
-            color:'danger'
+            color:'danger',
+             buttons: [
+            {
+              text: 'Done',
+              role: 'cancel',
+              handler: () => {
+              }
+            }
+          ]
             })
       .then(a => a.present())
     },
@@ -527,7 +574,7 @@ export default {
     },
 
     dismissModal(){
-         return this.$ionic.modalController.dismiss()
+         return this.$ionic.modalController.dismiss();
     }, 
 
     responseIDTEch(response){
@@ -541,14 +588,17 @@ export default {
           const partialTax =  taxGeneral /  partOfTotal;
 
           const  data =  {         
-          restaurantId: this.restaurantId,
-          payMethod: this.payMethod,
-          total: parseFloat(this.Total).toFixed(2),
-          tax:   partialTax,
-          tip: partialTip,
-          taxName: this.TaxName,         
-          products: this.order.Products,
-          p2pe: response
+            restaurantId: this.restaurantId,
+            payMethod: this.payMethod,
+            total: parseFloat(this.Total).toFixed(2),
+            tax:   partialTax,
+            tip: partialTip,
+            taxName: this.TaxName,         
+            products: this.order.Products,
+            address: response.address,
+            zip: response.zip,
+            cardSecurityCode: response.cardSecurityCode,
+            p2pe: response.hex
         }
         return this.sendPayment(data);
       }
@@ -602,6 +652,45 @@ export default {
                     }                   
                 })
             })
+    },
+
+     async responseCashPayment(response){
+      if(response){
+         
+        this.$ionic.loadingController
+        .create({
+          cssClass: 'my-custom-class',
+          message:  this.doingPayment,
+          backdropDismiss: false
+        })
+        .then ( loading =>{
+            loading.present()
+            setTimeout( async() => {
+                try {
+                   const invoiceSequence = await Api.getInvoiceSequence(this.restaurantId)
+                  const response1 = {
+                          "total": this.Total,
+                          "transId": invoiceSequence.data,
+                          "accountNumber": '',
+                          "expirationCard": '',
+                          "accountType": '',
+                          "method": 'Cash',
+                          "moto": false,
+                      }                
+                  response1.returnTo = this.returnTo;
+                  this.parent.makeSplitPayment(response1)
+                  this.dismissModal();						
+                  loading.dismiss();
+                  
+                } catch (error) {
+                  loading.dismiss();
+                  return this.errorPaymentDetail(error); 
+                  
+                }
+            })
+          })
+        }
+
     },
 
     sendPayment: async function(googleToken){  
@@ -668,6 +757,8 @@ export default {
 
     },
 
+
+
      changePayment(){
       this.cardPay = false;
       this.qrPay = false;
@@ -675,6 +766,7 @@ export default {
       this.checkPay = false;
       this.devicePay = false;
       this.idtechPay= false;
+      this.cashPay = false;
     },
 
     shareQrPayment: async function(){
@@ -702,7 +794,7 @@ export default {
      
      try {       
         var response = await payAuthorizeNet.payQrOrder(data); 
-        if(response){
+        if(response !=='Error'){
            this.hasQrPayment = response; 
           await Share.share({
             title: `${this.customerName}${this.shareText1}${this.restaurantName} (${this.getFormatPrice(this.Total)})${this.shareText2}`,
@@ -793,12 +885,146 @@ export default {
     
       .create({
         message: message,
-        duration: 2000,
         position: 'top',
-        color:'danger'
+        color:'danger',
+         buttons: [
+            {
+              text: 'Done',
+              role: 'cancel',
+              handler: () => {
+              }
+            }
+          ]
       })
     .then(a => a.present())
   },
+
+     async htmlToUse(order){
+
+        const partOfTotal = order.Total / this.Total
+        const taxGeneral = (parseFloat(order.Taxe) * parseFloat(order.SubTotal) )/ 100;
+        const tipGeneral =  (parseFloat(order.Tip) * parseFloat(order.SubTotal) )/ 100;
+        const partialTip =  tipGeneral /  partOfTotal;
+        const partialTax =  taxGeneral /  partOfTotal;
+
+      let totalWithoutQuotation = 0;
+      if(order.QuotationPayment)        
+            totalWithoutQuotation = this.Total - order.QuotationPayment;
+        else
+            totalWithoutQuotation = this.Total;
+
+       var date = moment.tz(order.Date, moment.tz.guess()).format('MM-DD-YYYY hh:mm A');
+        if(order.OrderForCatering === true)
+          date = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;
+       
+    
+
+
+        
+
+    
+
+      
+
+        var html =' <html><head>';    
+        html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
+        html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
+        html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
+        html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
+        html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
+        html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
+        html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
+        
+        html += '</head><body><div >';
+        html += '<table  align=center style="width: 90%;">';
+        html += '<tr><td colspan=6 style="text-align: center;">';
+        html += `<h2>${this.restaurantName}</h2>  `;          
+        html +=`</td>`;     
+        html += `</tr>`;          
+        html += '<tr><td colspan=6 >'       
+        html += `<h4>Date: ${date} </h4><hr>`;
+        html += `<h4>Customer: ${order.CustomerName} </h4>`;
+        html += `<h4>Phone: ${order.CustomerPhone} </h4>`;   
+       
+        html += '<hr>';  
+        html += '<br>'; 
+        html += `<tr><br><td colspan=6 style="border-top: 1px solid black;"><h4 ><strong>Items</strong></h4></td></tr> <tr></tr>`;
+        for(var i = 0; i<order.Products.length ; i++){
+            html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><strong >${order.Products[i].Name}</strong>` ;
+            if(order.Products[i].Note !='')
+                html +=`<p style="background: #f1f1004d;">${order.Products[i].Note}</p> `;
+            html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p >( ${order.Products[i].Cant} X ${this.getFormatPrice(order.Products[i].Price)})</p> </td>`;
+            html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p >${ this.getFormatPrice( order.Products[i].Price * order.Products[i].Cant )}</p> </td>`;
+            html += `</tr>`;
+           if(order.Products[i].Aggregates.length > 0){
+                html +=`<tr style="padding: 20px 35px;"> Free Sides: ${order.Products[i].CantAggr=order.Products[i].AggregatesCant * order.Products[i].Cant} </tr>`;
+
+                 for(var a=0; a<order.Products[i].Aggregates.length; a++){
+                    let agg = order.Products[i].Aggregates[a]
+                    html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><p style="padding-left: 20px;">${agg.Name} <br>${this.getFormatPrice(agg.SalePrice)}</p>` ;
+                    html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p > ${agg.Cant}</p> </td>`;
+                    html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p > ${ this.getFormatPrice( agg.AllTotal ) }</p> </td></tr >`;            
+                 }
+            }
+            
+        }
+       
+        if(order.OtherCharges.length >0){
+            html += `<tr ><td colspan=6 ><h4 ><strong>Other Charges</strong></h4></td></tr>`;
+            for(var e = 0; e< order.OtherCharges.length ; e++){
+                html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p>${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
+            }
+        }
+       
+        
+        html += `<tr ><td colspan=5 ><br><p ><strong>Subtotal</strong></p></td> <td ><br> <p >${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;      
+       html += `<tr><td  colspan=5 ><p  ><strong>Taxes ${order.Taxe}%</strong></p></td> <td > <p >${ this.getFormatPrice(partialTax) } </p> </td></tr>`;      
+        if(order.OrderType == 'Delivery' && order.Shipping)
+            html +=  `<tr ><td colspan=5  ><p  ><strong>Deliver</strong></p></td><td  ><p >${this.getFormatPrice(order.Shipping)}</p></td></tr>`;
+        if(order.Tip)
+            html += `<tr ><td  colspan=5 ><p ><strong>Tip ${order.Tip}%</strong></p></td><td ><p>${ this.getFormatPrice(partialTip) } </p> </td></tr>`;
+        html += `<tr><td colspan=5 style="border-bottom: 1px solid #dbd1d1;"><p  ><strong>Total </strong></p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <strong > ${this.getFormatPrice(this.Total)}</strong> </td></tr>`;
+        
+        if(order.QuotationPayment)
+          html += `<tr style="border-bottom: 1px solid #399922;"><td colspan=5 ><p  ><strong>Quotation</strong></p></td> <td > <strong >${this.getFormatPrice(order.QuotationPayment)}</strong> </td></tr>`;
+        if(order.PendingPayment)
+          html += `<tr style="border-bottom: 1px solid #ff5500;"><td colspan=5 style="border-bottom: 1px solid #ff5500;"><p  ><strong>Pending</strong></p></td> <td  style="border-bottom: 1px solid #ff5500;"> <strong >${this.getFormatPrice(order.PendingPayment)}</strong> </td></tr>`;
+        if(order.PendingPayment > 0 && order.Deadline){
+            html += `<tr ><td colspan=6 ><h4 ><strong>Parcial Payment</strong></h4></td></tr>`;
+            for(var dead = 0; dead < order.Deadline.length ; dead ++){
+                html += ` <tr ><td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><p >${order.Deadline[dead].Date}  </p></td> `
+                html += ` <td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><strong >  ${order.Deadline[dead].Percent}%  =  ${ this.getFormatPrice((totalWithoutQuotation * order.Deadline[dead].Percent) / 100)}</strong></td> `
+                if(order.Deadline[dead].State === 1)
+                html += ` <td style="border-bottom: 1px solid #dbd1d1;"> <strong  style= "color: #399922;  ">Payed</strong></td>`;
+                else html += ` <td style="border-bottom: 1px solid #dbd1d1;"><strong  style= "color: #ff5500; ">Pending</strong> </td>`;
+                html += ` </tr>`;
+            }
+          }        
+        if(order.Note)
+            html += `<tr ><td style="width: 20%;border-bottom: 1px solid grey;"><h4 >Notes</h4></td><td colspan=5 style="width: 80%;border-bottom: 1px solid grey;" ><p >${order.Note}</p></td></tr>`;
+        html += '<tr><td colspan=6 style=" text-align: center;">';
+        html += `<h2>${this.restaurantName}</h2>  `;      
+        if(this.restaurantWeb)  
+            html += `<h4>${this.restaurantWeb}  </h4>`;   
+        html +=`</td>`;     
+        html += `</tr>`;       
+        html += `</table></div></body></html>`;
+        return html;
+    },
+
+   async printOrder(order){
+        
+        var html = await this.htmlToUse(order)
+        
+          var winimp = window.open('/print', 'popimpr');
+          winimp.document.open();
+          winimp.document.write( html );
+          winimp.document.close();
+          winimp.focus();
+          winimp.print();
+          winimp.close();
+
+   },
 
    
 
@@ -839,6 +1065,7 @@ export default {
     background: white;
     --box-shadow: 0;
     margin: 2px;
+    --color: black
 }
 
 .button-menu-hover{    
@@ -855,6 +1082,7 @@ export default {
     min-height: 40px;
     padding: 11px 5px;
     margin: 2px;
+     --color: black
 } 
 
 .gpay-button.short, .gpay-button.plain {

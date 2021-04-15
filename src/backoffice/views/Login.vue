@@ -35,7 +35,7 @@
                 v-bind:value="forgotEmail">
                 </ion-input>
               </ion-item>
-              <ion-button expand="full" color="primary" @click="sendNewPass()">{{$t('backoffice.options.sendNewPassword')}}</ion-button>
+              <ion-button :disabled="forgotEmail === ''" expand="full" color="primary" @click="sendNewPass()">{{$t('backoffice.options.sendNewPassword')}}</ion-button>
               <ion-item>
               <a class="forgotPass" @click="back()">Back</a>
               </ion-item>
@@ -86,7 +86,7 @@ export default {
       },
       sendNewPass(){
           this.spinner = true
-          if (this.forgotEmail == "")
+          if (this.forgotEmail === "")
           {
               this.ShowMessage(this.$t('backoffice.form.validate.validate'), this.$t('backoffice.form.validate.email'), this.$t('backoffice.options.sendNewPassword'));
               return;
@@ -124,7 +124,7 @@ export default {
           })
         .then(a => a.present())
       },
-      login(){
+      login: async function(){
           this.spinner = true
           if (this.email == "")
           {
@@ -152,6 +152,8 @@ export default {
               console.log(this.userLogin.token);
               Api.setTokenId(this.userLogin.token);
               Api.setRestaurantId(this.userLogin.RestaurantId);
+              console.log("RESTAURANT")
+              console.log(Api.getRestaurant())
               this.getConfig();
 
               console.log("roles")
@@ -167,6 +169,7 @@ export default {
               this.$store.commit("setRoles", roles);
               document.querySelector('ion-menu-controller').close('end')
               EventBus.$emit('blockScreen', 'true')
+              EventBus.$emit('staffName', this.userLogin.FirstName + ' ' + this.userLogin.LastName)
               this.spinner = false
               if (this.userLogin.IsSupport){
                   this.$router.push({

@@ -152,7 +152,7 @@ export default {
   data() {
     return {
       content: 'Content',
-      staticUrl:"https://restaurantmenuappwindows.azurewebsites.net/?share=",
+      staticUrl:"https://imenuapps.net/?share=",
       thisCant:1,
       thisNote: this.Note,
       thisPrice: this.SalePrice,

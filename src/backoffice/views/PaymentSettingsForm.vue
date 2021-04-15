@@ -31,13 +31,21 @@
                     @ionChange="changePayMethod($event.target.checked, 'SHIFT4')"
                     :checked="payShift4"></ion-toggle>
                 </ion-item>
-                <ion-item v-if="!testActiveMethods('SHIFT4')">
+                <!-- <ion-item v-if="!testActiveMethods('SHIFT4')"> -->
+                <ion-item>
                     <ion-label position="floating">
                         <span style="color: red" >*</span>{{$t('backoffice.form.fields.authenticationToken')}}
                     </ion-label>
                     <ion-input type="text" name="tokenShift4"
                     @input="tokenShift4 = $event.target.value" 
                     v-bind:value="tokenShift4">
+                    </ion-input>
+                    <ion-label position="floating">
+                        {{$t('backoffice.form.fields.authenticationTokenMoto')}}
+                    </ion-label>
+                    <ion-input type="text" name="tokenMotoShift4"
+                    @input="tokenMotoShift4 = $event.target.value" 
+                    v-bind:value="tokenMotoShift4">
                     </ion-input>
                     <ion-button color="primary" :disabled="!isValidToken('SHIFT4')" @click="submitShift4Token()">{{$t('backoffice.form.fields.submitToken')}}</ion-button>
                 </ion-item>
@@ -82,6 +90,7 @@ export default {
             //Shift4
             payShift4: false,
             tokenShift4: '',
+            tokenMotoShift4: '',
 
             //Authorize.net
             payAuth: false,
@@ -186,7 +195,8 @@ export default {
             {
                 let items = {
                     "payMethod": "SHIFT4",
-                    "authToken": this.tokenShift4
+                    "authToken": this.tokenShift4,
+                    "authTokenMoto": this.tokenMotoShift4
                 }
                 this.$ionic.loadingController
                 .create({

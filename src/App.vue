@@ -11,7 +11,7 @@
           </ion-toolbar>
         </ion-header>
         <ion-content padding class="menu ion-page">  
-          <ion-content>
+          <ion-content v-show="restaurantSelected">
             <ion-item> </ion-item>
             <!-- <div style="margin-top: 20px">
                 <Language />
@@ -32,7 +32,7 @@
                 </ion-select>
             </div>
 
-            <ion-card>
+            <ion-card >
               <div class="logo" style="margin-bottom: 5px;">
                 <img  :src="restaurantActive.restaurantLogo" >
               </div>
@@ -109,6 +109,10 @@
            <ion-item v-if="hasPermission('canSuperUser')" @click="closeEnd()"><router-link to="/support" >{{ $t('backoffice.options.supportSettings') }}</router-link></ion-item>
            <ion-item v-if="accessToControlPanel()" @click="closeEnd()"><router-link to="/controlPanel" >{{ $t('backoffice.options.controlPanel') }}</router-link></ion-item>
            <ion-item v-if="hasPermission('canViewMenu')" @click="closeEnd()"><router-link to="/menu" >{{ $t('backoffice.options.manageMenus') }}</router-link></ion-item>
+         
+          <ion-item  @click="closeEnd()"><router-link to="/payment" >{{ $t('backoffice.options.managePyments') }}</router-link></ion-item>
+
+
            <ion-item v-if="hasPermission('canViewOrder')" @click="closeEnd()"><router-link to="/order" >{{ $t('backoffice.options.viewOrders') }}</router-link></ion-item>
            <ion-item v-if="hasPermission('canViewOrder')" @click="closeEnd()"><router-link to="/ticket" >{{ $t('backoffice.titles.tickets') }}</router-link></ion-item>
            <ion-item v-if="hasPermission('canViewOrder')" @click="closeEnd()"><router-link to="/cateringOrder" >{{ $t('backoffice.options.viewCateringOrders') }}</router-link></ion-item>
@@ -210,8 +214,8 @@
             <ion-list  >
 
               <ion-item  @click="changeRestaurant(res._id)">                      
-                <div class="menu-col-2" >
-                    <img :src="res.ImageUrl" style="width: 150px; max-height: 150px;">
+                <div class="menu-col-2" style="text-align: center;" >
+                    <img :src="res.ImageUrl" style=" max-height: 60px;">
                 </div>
                 <ion-label class="ion-text-wrap menu-col-3" >
                     <h3>{{res.Name}} <br> 
@@ -245,12 +249,9 @@
             </ion-list>
           </div>
 
-           
-
-        </div>
           
-       
-      
+
+        </div> 
         <router-view style="padding:0 12px"
         :key="key"
         v-if="!spinner"     
@@ -283,7 +284,7 @@
 
     <ion-footer class="ion-no-border">
       <ion-toolbar >
-        <ion-title class="menu-col-12">iMenuApps</ion-title>
+        <ion-title class="menu-col-12"><a href="https://imenuapps.com/" style="text-decoration: none;">iMenuApps</a></ion-title>
       </ion-toolbar>
     </ion-footer>
   </ion-app>
@@ -328,7 +329,8 @@ import ChangeModal from './backoffice/views/changeServerId.vue';
 import LockModal from './backoffice/views/LockScreen.vue';
 import { Plugins } from '@capacitor/core';
 const { Share } = Plugins;
-
+import {Printer} from '@ionic-native/printer'
+import axios from 'axios';
 
 
 export default {
@@ -339,10 +341,17 @@ export default {
  
   mounted: async function(){
 
+      
+
     await this.getAllRestaurant();
+
+    console.log('ROUTE');
+      console.log(this.$route)
     
-    if(this.$route.path !== '/'){
-      if(this.$route.params.url){
+   
+    if(this.$route.params.url){
+      console.log('PARAMS');
+      console.log(this.$route.params)    
       const urlRoute = this.$route.params.url;
       const restByRouteIndex = this.allRestaurant.findIndex(r => r.Url === urlRoute);
       if(restByRouteIndex === -1){
@@ -351,16 +360,16 @@ export default {
       }         
         else{
           this.changeRestaurant(this.allRestaurant[restByRouteIndex]._id);
-        }
-      }
-      else{
-        this.$router.push({ name: 'AppVue' })  
-        return this.alertNotRestaurantFound();
-      }
+        }   
     }
    
     if (this.$route.query.share && this.$route.query.rid)   {      
     this.productDetail(this.$route.query.share, this.$route.query.rid)
+   }
+
+    if (this.$route.query.menu)   {  
+      console.log('OPEN RESTAURANT MENU con id '+this.$route.query.menu);
+      this.showMenuRestaurant(this.$route.query.menu);
    }
 
     if (this.$route.query.curbside && this.$route.query.rid)   {      
@@ -383,9 +392,14 @@ export default {
           this.changeRestaurant(value);
     });
 
-    EventBus.$on('staffName', (value) => {
-      this.staffName = value;   
-      EventBus.$off('staffName');  
+    EventBus.$on('staffName', async (value)  => {
+      this.staffName = value;
+      if(value !== '' && this.$store.state.user)
+       this.staffAllRestaurant = this.$store.state.user.AllRestaurant;
+      else 
+        this.staffAllRestaurant = [];
+
+      await this.getAllRestaurant();
     });
 
     EventBus.$on('clientHasId', (value) => {    
@@ -413,7 +427,7 @@ export default {
       if(value === true){  
         return  this.$router.push({name: 'Home', params: {cart: this.cart, order: this.order  }})
       } 
-      EventBus.$off('openHome');
+      // EventBus.$off('openHome');
     }); 
 
     EventBus.$on('updateAllOrders', (value) => {      
@@ -439,8 +453,7 @@ export default {
        if(value && this.email !='')   
         this.logIng(this.email, '');
       EventBus.$off('editInfoClient');
-    });
-            
+    });            
   
   },
 
@@ -457,6 +470,7 @@ export default {
       filterRestaurantSelect: [],
       staffName: '',
       staffId: '',
+      staffAllRestaurant: [],
 
       modelName: 'Customer',
       clientId: this.$store.state.customer._id || '',
@@ -542,6 +556,7 @@ export default {
     }
   },
   methods: { 
+
     
     async doRefresh(event) {
     
@@ -785,7 +800,9 @@ export default {
         document.querySelector('ion-menu-controller').close('start')
       },
 
-    logOut: function(){
+    logOut: async function(){
+      this.closeEnd ();
+      const rest = Api.getRestaurant()
       Api.setRestaurantId('');
       this.$store.commit("setAuthentication", false);
       this.$store.commit("setUser", null);
@@ -840,14 +857,21 @@ export default {
       this.staffName = '';
       this.staffId = '';
 
-      if (this.restaurantSelectedId)
-      {         
+      let onLine = rest != null ? rest.Online : false
+      console.log(rest)
+      console.log("OnLine: " + onLine)
+      if (this.restaurantSelectedId && onLine)
+      {    
+          console.log("CASO 1")     
           this.changeRestaurant(this.restaurantSelectedId)
       }
       else
       {
-          this.getAllRestaurant();
-          this.$router.push({path: '/' });
+          // await this.getAllRestaurant();
+          this.restaurantSelectedId = '';
+          this.$router.push({ name: 'AppVue' });
+          console.log("CASO 2") 
+          // console.log(this.filterRestaurantSelect);
       }
       this.isBackLocked = false;
       this.idleTrackerBack.end();
@@ -861,9 +885,17 @@ export default {
         const response = await Api.fetchAll('Restaurant');
           if(response.status === 200){
           this.spinner = false;
-          this.$store.commit('setAllRestaurant', JSON.parse(JSON.stringify(response.data)))
+          let allRest;
+          if(this.staffName !== ''){
+            allRest = response.data.filter(r => this.staffAllRestaurant.includes(r._id) );
+          }
+          else
+            allRest = response.data.filter(r => r.Online === true)
+          this.$store.commit('setAllRestaurant', JSON.parse(JSON.stringify(allRest)))
           this.allRestaurant = this.$store.state.allRestaurant;
-          this.filterRestaurantSelect = JSON.parse(JSON.stringify(response.data))          
+          this.filterRestaurantSelect = this.$store.state.allRestaurant;   
+          console.log('XX')
+          console.log(this.filterRestaurantSelect)     
         }
         
       } catch (error) {
@@ -895,6 +927,8 @@ export default {
       this.cart = []  
          
       this.order = {}  
+
+      // this.staffName = ''
       
       this.products=[],
       this.variants=[],
@@ -926,7 +960,7 @@ export default {
 
       await this.fetchMenus();
   
-      await this.restaurantData(restaurantId);
+      const flag = await this.restaurantData(restaurantId);
 
       await this.fetchProducts();  
        
@@ -937,11 +971,12 @@ export default {
       await this.getTax();
 
       await this.getShipping();
+
+
+      return flag;
     },
 
     changeRestaurant: async function(restaurantId){
-
-    
 
        this.$ionic.loadingController
           .create({
@@ -1227,6 +1262,7 @@ export default {
   
     goHome: function(){
       this.closeStart();
+      console.log('GOIN HOME');
       return this.$router.push({ name: 'Home', params: {cart:this.cart, order: this.order, clientId: this.clientId } })
     },
 
@@ -1282,6 +1318,48 @@ export default {
       .then(a => a.present())
                   
     },
+
+     async showMenuRestaurant(restaurantId) {
+
+        const response = await Api.fetchById("Restaurant", restaurantId)  
+       if(response.status === 200){
+         const flag = response.data.Online;
+         console.log(response.data)
+         if(flag){
+            this.spinner = true;     
+            this.restaurantSelected = true;      
+            this.restaurantSelectedId = restaurantId;
+            Api.setRestaurantId(restaurantId);
+            await this.defaultData(restaurantId); 
+            this.$router.push({ name: 'Home', params: {url: this.restaurantActive.restaurantUrl}})   
+         }
+         else{
+           this.alertRestaurantOffline();
+            this.$router.push({ name: 'AppVue' })
+         }
+         
+       }
+      // this.$router.push({ name: 'Home', params: {url: this.restaurantActive.restaurantUrl}}) 
+   },
+
+     alertRestaurantOffline(){
+      this.email =''
+      return  this.$ionic.alertController
+      .create({
+          cssClass: 'my-custom-class',
+          header: 'Error',
+          message: this.$t('frontend.tooltips.errorRestaurantOffline'),
+          buttons: [                   
+          {
+            text: this.buttonAcept,
+            handler: () => {                                 
+                          
+            },
+          },
+          ],
+      })
+      .then(a => a.present())                
+  },
 
    async setCurbsideArrive(orderId, restaurantId) {
 
@@ -1397,6 +1475,8 @@ export default {
 
     restaurantData: async function(restaurantId){
 
+      let flag = false;
+
       try{
         const response = await Api.fetchById("Restaurant", restaurantId)         
         if(response.status === 200){
@@ -1420,6 +1500,8 @@ export default {
             Fax: response.data.Fax || '',
           };
 
+          flag = response.data.Online || false;
+
           const fcb = response.data.Sociasls.findIndex(pr => pr.SocialName === 'Facebook');
           if (fcb !== -1)  dataRestaurant.restaurantFacebok=  response.data.Sociasls[fcb].SocialUrl;
           const twt = response.data.Sociasls.findIndex(pr => pr.SocialName === 'Twitter');
@@ -1434,8 +1516,11 @@ export default {
            
           } 
 
+          return flag;
+
         }
         catch (error) {
+          return flag;
         console.log(error);
       }
 

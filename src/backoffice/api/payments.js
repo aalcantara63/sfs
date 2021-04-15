@@ -32,12 +32,12 @@ export var payAuthorizeNet = {
         throw new Error("Debe especificar en método de pago")
     },
 
-    captureOrder: async function(invoice, restaurantId, payMethod){
+    captureOrder: async function(invoice, moto, restaurantId, payMethod){
         if (payMethod === 'SHIFT4')
         {
             try {
 
-                const res = await Api.captureShift4(invoice, restaurantId);
+                const res = await Api.captureShift4(invoice, moto, restaurantId);
                 if (res.status == 200 && res.statusText === "OK"){ 
                     const response1 = {
                         "total": res.data[0].amount.total,
@@ -46,6 +46,7 @@ export var payAuthorizeNet = {
                         "expirationCard": '',
                         "accountType": res.data[0].card.type,
                         "method": 'Authorization',
+                        "moto": moto,
                     } 
                     console.log(response1)
                     return response1;
@@ -60,7 +61,7 @@ export var payAuthorizeNet = {
         return false
     },
 
-    firstAuthorizeOrder: async function(datas)
+    firstAuthorizeOrder: async function(datas, moto)
     {
         const restaurantId = datas.restaurantId
         const payMethod = datas.payMethod
@@ -76,7 +77,7 @@ export var payAuthorizeNet = {
 
             if(datas.invoiceNumber){                
                 invoiceNumber = datas.invoiceNumber;                
-                const invoiceCreated = await this.invoiceInformation(invoiceNumber, restaurantId,payMethod );
+                const invoiceCreated = await this.invoiceInformation(invoiceNumber, moto, restaurantId,payMethod );
                 if(invoiceCreated){
                     
                     items = JSON.parse(JSON.stringify(invoiceCreated.data[0])) ; 
@@ -109,7 +110,7 @@ export var payAuthorizeNet = {
             else{
                 const invoiceSequence = await Api.getInvoiceSequence(restaurantId)
                 invoiceNumber = invoiceSequence.data;
-                const resObj = await Api.fetchById('Restaurant', restaurantId);            
+                const resObj = await Api.fetchById('Restaurant', restaurantId);                           
 
                 items = {
                     "amount": {
@@ -154,11 +155,11 @@ export var payAuthorizeNet = {
             }
 
             try {
-                const ipClient = await Api.getClientIp();
+                const ipClient = await Api.getClientIp();                
                 console.log('ip client: ');
                 console.log(ipClient.data.ip);
                 console.log(JSON.stringify(items));
-                const res = await Api.authorizeShift4(items, restaurantId, ipClient.data.ip); 
+                const res = await Api.authorizeShift4(items, moto, restaurantId, ipClient.data.ip); 
                 console.log(res);
 
 
@@ -173,11 +174,12 @@ export var payAuthorizeNet = {
                         "expirationCard": datas.cardExpirationDateF1,
                         "accountType": res.data[0].card.type,
                         "method": 'Card',
+                        "moto": moto,
                     }
                     if(datas.googlePayToken)
                         response1.method = 'Google Pay'
                     if(datas.applePayToken)
-                        response1.method = 'Apple Pay'
+                        response1.method = 'Apple Pay'                    
 
                     console.log(response1)
                     return response1;
@@ -269,8 +271,7 @@ export var payAuthorizeNet = {
 
                 const res = await Api.payShift4(items, restaurantId, ipClient.data.ip); 
 
-                // const res = await Api.invoiceInformationShift4(invoiceSequence.data, restaurantId);
-                // console.log('RESPUESTA DEL INVOICE INFORMATION');
+             
                 console.log(res);
 
 
@@ -283,11 +284,14 @@ export var payAuthorizeNet = {
                         "expirationCard": datas.cardExpirationDateF1,
                         "accountType": res.data[0].card.type,
                         "method": 'Card',
+                        "moto": false,
                     }
                     if(datas.googlePayToken)
                         response1.method = 'Google Pay'
                     if(datas.applePayToken)
                         response1.method = 'Apple Pay'
+                    if(datas.p2pe)
+                        response1.moto = true;
 
                     console.log(response1)
                     return response1;
@@ -343,6 +347,7 @@ export var payAuthorizeNet = {
                         "expirationCard": datas.cardExpirationDateF2,
                         "accountType": res.data.transactionResponse.accountType,
                         "method": 'Card',
+                        "moto": false,
                     }
                 }
                 else
@@ -390,7 +395,7 @@ export var payAuthorizeNet = {
                 const res = await Api.payQrShift4(items, restaurantId);   
                 console.log(res.status)             
                 console.log(res.data.value)             
-                if (res.status == 200 && res.data.value){                    
+                if (res.status == 200 && res.data.value !== undefined){                    
                     return res.data.value;
                 }
                 else
@@ -442,6 +447,7 @@ export var payAuthorizeNet = {
                         "expirationCard": "",
                         "accountType": res.data.result[0].card.type,
                         "method": 'Qr',
+                        "moto": false,
                     }
                     console.log(response1)
                     return response1;  
@@ -513,7 +519,7 @@ export var payAuthorizeNet = {
         cardExpirationDateF2: ''
         invoiceNumber: "",
     }*/
-    refundOrder: async function(datas){
+    refundOrder: async function(datas, moto){
         console.log("REFUND en Payment")
         const restaurantId = datas.restaurantId
         const invoiceSequence = await Api.getInvoiceSequence(restaurantId)
@@ -546,7 +552,7 @@ export var payAuthorizeNet = {
             console.log("Object Shift Para refound")
             console.log(items)
             // return;
-            return Api.refoundShift4(items, restaurantId)
+            return Api.refoundShift4(items, moto, restaurantId)
         }
 
         if (payMethod === 'AUTH')
@@ -569,12 +575,12 @@ export var payAuthorizeNet = {
         throw new Error("Debe especificar en metodo de pago")
     },
 
-    invoiceInformation: async function(invoice, restaurantId, payMethod){
+    invoiceInformation: async function(invoice, moto, restaurantId, payMethod){
         if (payMethod === 'SHIFT4')
         {
             try {
 
-                const res = await Api.invoiceInformationShift4(invoice, restaurantId);
+                const res = await Api.invoiceInformationShift4(invoice, moto, restaurantId);
                 return res;
                 
             } catch (error) {
@@ -586,12 +592,12 @@ export var payAuthorizeNet = {
         return false
     },
 
-    void: async function(invoice, restaurantId, payMethod){
+    void: async function(invoice, moto, restaurantId, payMethod){
         if (payMethod === 'SHIFT4')
         {
             try {
 
-                const res = await Api.voidShift4(invoice, restaurantId);
+                const res = await Api.voidShift4(invoice, moto, restaurantId);
                 return res;
                 
             } catch (error) {

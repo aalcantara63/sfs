@@ -907,7 +907,18 @@ export default {
                     this.$store.commit('setOrder', {});  
                     await this.getOrders();
                     this.goodPaymentToast();  
-                    this.spinner = false;                                          
+                    this.spinner = false;       
+                    
+                     const paymentEntry = {                       
+                        "Method": res.method,
+                        "Payment": res.total,
+                        "InvoiceNumber": res.transId,
+                        "ModelId": response.data._id,
+                        "ModelFrom": "Catering",
+                        "StaffName": this.order.StaffName                    
+                   }
+                   await Api.postIn('allpayments', paymentEntry);
+                    
                     return this.$router.push({ name: 'ListOrder' })                                                                             
                 
                 }
