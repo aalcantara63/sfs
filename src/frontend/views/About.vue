@@ -13,7 +13,7 @@
                     </div>
                     
                     <ion-select interface="popover" icon="add" class="menu-col-6" style="margin-top: 20px;text-align: right;"
-                       v-if="allRestaurants.length > 0"
+                       v-if="allRestaurants.length > 0 && hasOptionToShowOtherRestaurants()"
                        :ok-text="$t('backoffice.form.messages.buttons.ok')"
                         :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
                         :value="restaurantSelectedId"
@@ -502,6 +502,12 @@ export default {
       if(!this.restaurantActive.hasPaymentCardConfig && !this.configuration.viewOnTable)
         return false;
       return true;      
+    },
+
+    hasOptionToShowOtherRestaurants(){
+      if(this.configuration.showOtherRestaurant)
+        return true;
+      return false;      
     },
 
       async shareUrlLocation(){

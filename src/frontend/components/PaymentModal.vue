@@ -113,8 +113,11 @@
                v-tooltip="parent.$t('frontend.payment.idtechPayment')"
                v-if="payMethod==='SHIFT4' && staffName !==''"
               :class="idtechPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
-            <span class="iconify" data-icon="gg:usb" data-inline="false"></span>           
+            <span class="iconify" data-icon="gg:usb" data-inline="false"></span>        
             </ion-button> 
+
+            
+         
 
              <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
@@ -284,6 +287,10 @@
                ></UsbCardReader>              
                 
             </ion-card>
+
+            
+
+         
             
 
              <ion-card  v-if="cashPay"  class="scroll" style="height: auto">                 
@@ -417,6 +424,7 @@ import { eye } from "ionicons/icons";
 import { addIcons } from "ionicons";
  import { Api } from '../../backoffice/api/api'
 import UsbCardReader from './UsbCardReader'
+
 import UsbCashDoor from './UsbCashDoor'
 
 addIcons({
@@ -448,9 +456,13 @@ export default {
    created: async function(){   
      
      let status = await Network.getStatus();
+
+    if(this.order.StaffName)
+      if(this.order.StaffName !=='')
+        this.staffName = this.order.StaffName
     
      if(this.staffName ===''){
-       
+       console.log('staffName getWalletInformation')
         await this.getWalletInformation();
        
         this.keyGoogle ++;
@@ -480,9 +492,7 @@ export default {
         }
       }
 
-     if(this.order.StaffName)
-      if(this.order.StaffName !=='')
-        this.staffName = this.order.StaffName
+
 
      EventBus.$on('resposeSplitPayment', (value) => { this.makeSplitPayment(value)});
 
@@ -557,12 +567,12 @@ export default {
         address:'',       
         state: '',
         city:'',   
-        key: 0, 
+        key: 1, 
         domain: window.location.protocol + '//' + window.location.host,
         split: false, 
         defaultSlplit: 2,
-        keySplit: 0,
-        keyValidateCount: 0 ,
+        keySplit: 2,
+        keyValidateCount: 3 ,
         // order: {},
         readyPayment: false,
         readySplit: true,
@@ -844,7 +854,7 @@ export default {
       
     },
 
-     responseIDTEch(response){
+    responseIDTEch(response){
       console.log('response de responseIDTEch')
       console.log(response);
       if(response){
@@ -860,6 +870,25 @@ export default {
           zip: response.zip,
           cardSecurityCode: response.cardSecurityCode,
           p2pe: response.hex
+        }
+        return this.sendPayment(data);
+      }
+      
+    },
+
+     responseSwipeCard(response){
+      console.log('response de responseSwipeCard')
+      console.log(response);
+      if(response){
+         const data =  {         
+          restaurantId: this.restaurantId,
+          payMethod: this.payMethod,
+          total: parseFloat(this.Total).toFixed(2),
+          tax: (parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100,
+          tip:  (parseFloat(this.order.Tip) * parseFloat(this.order.SubTotal) )/ 100,
+          taxName: this.TaxName,         
+          products: this.order.Products,         
+          trackData: response.hex
         }
         return this.sendPayment(data);
       }
@@ -1008,7 +1037,7 @@ export default {
                 var response = {}
                 if(this.isTicket){
                   let moto = false;
-                  if(data.p2pe) moto = true;
+                  if(data.p2pe && data.zip && data.cardSecurityCode && data.address ) moto = true;
                    response = await payAuthorizeNet.firstAuthorizeOrder(data, moto);                   
                    if(!response) {
                      this.dismissModal();

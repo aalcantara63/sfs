@@ -17,7 +17,7 @@
                 <Language />
             </div> -->
 
-            <div style="margin-top: 20px">
+            <div style="margin-top: 20px" v-if="hasOptionToShowOtherRestaurants()">
                 <ion-select interface="popover" icon="add"
                  :ok-text="$t('backoffice.form.messages.buttons.ok')"
                  :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
@@ -1064,6 +1064,7 @@ export default {
             viewCurbside : response.data[0].ViewCurbside || false,                     
             hasReservationQuotation : response.data[0].HasReservationQuotation || false, 
             payForReservationQuotation : response.data[0].PayForReservationQuotation || 0,
+            showOtherRestaurant: response.data[0].ShowOtherRestaurant || false,
           }
 
           this.$store.commit('setConfiguration', configuration)
@@ -1698,6 +1699,11 @@ export default {
       if(!this.restaurantActive.hasPaymentCardConfig && !this.configuration.viewOnTable)
         return false;
       return true;      
+    },
+     hasOptionToShowOtherRestaurants(){
+      if(this.configuration.showOtherRestaurant)
+        return true;
+      return false;      
     },
 
     //USING STORE

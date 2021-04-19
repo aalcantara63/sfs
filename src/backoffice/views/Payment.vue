@@ -201,7 +201,7 @@ export default {
       requestAnimationFrame(() => {       
         let cat2 = this.orders.filter(p => p.Method.toLowerCase().indexOf(query) > -1
                                     ||  p.ModelFrom.toLowerCase().indexOf(query) > -1
-                                    ||  p.InvoiceNumber.toLowerCase().indexOf(query) > -1
+                                    ||  p.InvoiceNumber.toLowerCase().indexOf(query) > -1                                 
                                     ||  p.Date.toLowerCase().indexOf(query) > -1)
         if(cat2.length> 0)
           this.filterOrders = cat2

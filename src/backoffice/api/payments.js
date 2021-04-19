@@ -290,7 +290,7 @@ export var payAuthorizeNet = {
                         response1.method = 'Google Pay'
                     if(datas.applePayToken)
                         response1.method = 'Apple Pay'
-                    if(datas.p2pe)
+                    if(datas.p2pe && datas.zip && datas.cardSecurityCode && datas.address )
                         response1.moto = true;
 
                     console.log(response1)

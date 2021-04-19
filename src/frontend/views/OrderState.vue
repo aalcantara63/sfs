@@ -3,7 +3,7 @@
 
            <ion-header>
           <ion-toolbar>
-            <ion-buttons slot="start" @click="allOrder()" v-if="clientId !==''">
+            <ion-buttons slot="start"  @click="allOrder()" v-if="clientId !==''">
               <ion-back-button default-href="home"></ion-back-button>
             </ion-buttons>
             <ion-label style="padding: 20px 100px;">

@@ -172,6 +172,7 @@
                 console.log("IP address: " + this.ip)
                 console.log("Port: " + this.port)
                 try{
+                    
                     this.spinner = true
                     const anw = await Devices.a930.DoCredit(this.ip, this.port, this.datas, this.callback);
                     console.log(anw)

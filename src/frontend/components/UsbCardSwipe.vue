@@ -1,51 +1,9 @@
 <template>
     <div>
-        <div class="ion-padding">  
+        <div class="ion-padding">  SWIPE A CARD
 
-              <ion-item v-if="!moto"> 
-                <h2 class="titles-order" >SWIPE</h2>                              
-            </ion-item>
-
-            <ion-item>
-                <h4 class="titles-order">MOTO</h4>
-                <ion-toggle color="primary" 
-                @ionChange="moto = !moto" 
-                :checked="moto"></ion-toggle> 
-            </ion-item>
-
-            <ion-item style="padding: 10px 0;">
-                <textarea id="target" style=" width: 100%;height: 80px;"  @change="noData()"></textarea> 
-            </ion-item>
-
-            <div v-if="moto">
-
-                <ion-item >                     
-                  <ion-label position="floating">{{addressLine1}} <strong style="color: red">*</strong></ion-label>                                                                      
-                  <ion-input type="text" required=true  
-                  class="menu-col-8" 
-                  :value="address" @input="address = $event.target.value"
-                      ></ion-input>
-                 </ion-item>   
-
-              <ion-item >                  
-                  <ion-label position="floating">{{postalCode}} <strong style="color: red">*</strong></ion-label>                                                                                                    
-                  <ion-input type="tel" required=true  :key="key"
-                  class="menu-col-8" 
-                  :value="zipCode" @change="zipCode=ValidateCodeInModal( $event.target.value)"
-                      ></ion-input> 
-              </ion-item>  
-
-               <ion-item >                 
-                  <ion-label position="floating">{{ccode}} <strong style="color: red">*</strong></ion-label>                               
-                  <ion-input type="tel" required=true  
-                  class="menu-col-8"
-                  :value="cardCode" @input="cardCode = $event.target.value"
-                      ></ion-input>
-              </ion-item>   
-
-            </div>
-
-    
+            <textarea id="target" style=" width: 100%;height: 100px;"  @change="noData()"></textarea> 
+               
 
             <div style="padding: 20px 15px; text-align: center">
 
@@ -83,7 +41,6 @@ export default {
             spinner1: false,
             canPay: false, 
             cardCode: '', 
-            moto: false,
             key: 0,
             zipCode: '',
             state:'',
@@ -94,13 +51,7 @@ export default {
     props:{
         parent: {type: Object, default: ()=> {}} ,
         Acept:  {type: String, default:"" } ,
-        Cancel:  {type: String, default:"" } ,
-        ccode:  {type: String, default:"" } ,
-        postalCode:  {type: String, default:"" } ,
-        addressLine1:  {type: String, default:"" } ,
-        codeNotValid:  {type: String, default:"" } ,
-        cityText:  {type: String, default:"" } ,
-        stateText:  {type: String, default:"" } ,
+        Cancel:  {type: String, default:"" } ,       
         dataRequired:  {type: String, default:"" } ,
     },   
     
@@ -143,26 +94,18 @@ export default {
 
         senPayment(){
 
-             const val = document.getElementById('target').value;
+            const val = document.getElementById('target').value;
 
-            if(this.moto)
-                if(this.cardCode=== ''|| this.zipCode=== '' || this.address === '')
-                    return this.alertRequiredDatas();
-
-           
             if(val){
                 console.log('send payment');
                 var hex = val.toString('hex'); 
                 const data = {
-                    hex : hex,
-                    address: this.address,
-                    zip: this.zipCode,
-                    cardSecurityCode: this.cardCode,
+                    hex : hex                    
                 }
-                return this.parent.responseIDTEch(data);
+                return this.parent.responseSwipeCard(data);
             }
             else
-                return this.error('Enter manualy Card number and wait the info was write in te textarea.')
+                return this.error('Swipe Card and wait the info was write in te textarea.')
             
         },
 
