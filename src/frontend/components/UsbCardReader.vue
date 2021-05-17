@@ -113,7 +113,6 @@ export default {
                  try {                     
                     let device = await navigator.usb.requestDevice({ filters: [{ vendorId: 0xACD }]});
                     if(device){
-                        //console.log(device);
                         document.getElementById('target').focus();
                     }
                     else
@@ -151,7 +150,6 @@ export default {
 
            
             if(val){
-                console.log('send payment');
                 var hex = val.toString('hex'); 
                 const data = {
                     hex : hex,

@@ -13,7 +13,7 @@
                     <div>
                         <ion-list>
                             <ion-item>
-                                <ion-label>Select a restaurant</ion-label>
+                                <ion-label>{{$t('frontend.menu.restaurant')}}</ion-label>
                                 <ion-select interface="popover" :ok-text="$t('backoffice.form.messages.buttons.ok')" :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
                                 @ionChange="changeRestaurant($event.target.value)" v-bind:value="restaurantId">
                                     <ion-select-option v-for="restaurant in allRestaurant" v-bind:key="restaurant._id" v-bind:value="restaurant._id" >{{restaurant.Name}}</ion-select-option>
@@ -33,7 +33,7 @@
 
                         <div                         
                            :class="scope.isSmall || scope.noMatch || scope.isMedium  ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" >  
-                           <ion-label> Payments</ion-label>                     
+                           <ion-label>{{$t('backoffice.titles.payments')}}</ion-label>                     
                            <v-chart    style="margin: 0 auto;"                                                
                            :options="optionsPayment"  />
                         </div>
@@ -98,11 +98,6 @@
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageMenus') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <!-- <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewVariantGroup')"  @click="$router.push('/variantGroup')" color="secondary" style=" width: 70%;border: 1px solid grey;">
-                                <span class="iconify" data-icon="mdi:filter-variant-plus" data-inline="false"></span>
-                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageVariantGroup') }}</ion-label>   
-                                </ion-chip>
-                                <br> -->
                         </div>
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
@@ -154,7 +149,6 @@
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
 
                                 <!-- Aquí iba el menú -->
-                                
                                 <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewTable')" @click="$router.push('/table')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="vs:table-o" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageTables') }}</ion-label>   
@@ -183,8 +177,8 @@
                             </ion-chip>
                             <br>
                             <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')"  @click="manageFunSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
-                            <span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>
-                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageFunSettings') }}</ion-label>   
+                                <span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>
+                                <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageFunSettings') }}</ion-label>   
                             </ion-chip>
                             <br>
                             <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')" @click="manageColourSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
@@ -201,38 +195,11 @@
                                 <span class="iconify" data-icon="mdi:account-supervisor" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.supportSettings') }}</ion-label>   
                             </ion-chip>
-                        
                         </div>
-
                     </ion-card>
-                    
                 </div>
             </v-breakpoint>
            
-
-            <!-- <router-link to="/menu"><ion-button v-if="hasPermission('canViewMenu')" expand="full" round strong color="tertiary">{{ $t('backoffice.options.manageMenus') }}</ion-button></router-link>
-            <router-link to="/order"><ion-button v-if="hasPermission('canViewOrder')" expand="full" round strong color="tertiary">{{ $t('backoffice.options.viewOrders') }}</ion-button></router-link>
-            <router-link to="/orderForDelivered"><ion-button v-if="hasPermission('canViewOrderForDelivery')" expand="full" strong color="tertiary">Orders for delivered</ion-button></router-link> -->
-            <!-- <router-link to="/category"><ion-button v-if="hasPermission('canViewCategory')" expand="full" round strong color="tertiary">{{ $t('backoffice.options.manageCategories') }}</ion-button></router-link> --> 
-            <!-- <router-link to="/product"><ion-button v-if="hasPermission('canViewProduct')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageProducts') }}</ion-button></router-link> -->
-            <!-- <router-link to="/variantGroup"><ion-button expand="full" strong color="tertiary">{{ $t('backoffice.options.manageVariantGroup') }}</ion-button></router-link> -->
-            <!-- <router-link to="/variantGroup"><ion-button v-if="hasPermission('canViewVariantGroup')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageVariantGroup') }}</ion-button></router-link> -->
-            <!-- <router-link to="/customer"><ion-button v-if="hasPermission('canViewCustomer')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageCustomers') }}</ion-button></router-link> -->
-            <!-- <router-link to="/table"><ion-button v-if="hasPermission('canViewTable')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageTables') }}</ion-button></router-link> -->
-            <!-- <router-link to="/tax"><ion-button v-if="hasPermission('canViewTax')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageTaxes') }}</ion-button></router-link> -->
-            <!-- <router-link to="/shipping"><ion-button v-if="hasPermission('canViewShipping')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageShippings') }}</ion-button></router-link> -->
-            <!-- <router-link to="/otherCharge"><ion-button v-if="hasPermission('canViewOtherCharge')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageOtherCharges') }}</ion-button></router-link> -->
-            <!-- <router-link to="/user"><ion-button v-if="hasPermission('canViewUser')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageUsers') }}</ion-button></router-link> -->
-            <!-- <router-link to="/occupation"><ion-button v-if="hasPermission('canViewOccupation')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageOccupation') }}</ion-button></router-link> -->
-            <!-- <router-link to="/role"><ion-button v-if="hasPermission('canViewRole')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageRoles') }}</ion-button></router-link> -->
-            <!-- <router-link to="/aboutDataSettings"><ion-button v-if="hasPermission('canChangeSetting')" expand="full" strong color="tertiary">{{ $t('backoffice.options.manageAboutSettings') }}</ion-button></router-link> -->
-            <!-- <ion-button v-if="hasPermission('canChangeSetting')" expand="full" strong color="tertiary" @click="manageBasicSettings()">{{ $t('backoffice.options.manageBasicSettings') }}</ion-button> -->
-            <!-- <ion-button v-if="hasPermission('canChangeSetting')" expand="full" strong color="tertiary" @click="manageFunSettings()">{{ $t('backoffice.options.manageFunSettings') }}</ion-button> -->
-            <!-- <ion-button v-if="hasPermission('canChangeSetting')" expand="full" strong color="tertiary" @click="manageColourSettings()">{{ $t('backoffice.options.manageColourSettings') }}</ion-button> -->
-            <!-- <ion-button v-if="hasPermission('canChangeSetting')" expand="full" strong color="tertiary" @click="manageKeySettings()">{{ $t('backoffice.options.manageKeySettings') }}</ion-button> -->
-            
-
-            <!-- <router-link to="/localization"><ion-button expand="full" strong color="tertiary">Localization</ion-button></router-link> -->
         </div>
     </div>
 </template>
@@ -241,6 +208,7 @@
 import { Api } from '../api/api.js';
 import ECharts from 'vue-echarts';
 import { VBreakpoint } from 'vue-breakpoint-component'
+import Modal from './SetDeviceDataModal.vue';
 import Moment from 'moment'
 import 'echarts';
 
@@ -350,7 +318,22 @@ export default {
         showHint(){
             alert("Hint")
         },
-
+        showSetDeviceModal(){
+            return this.$ionic.modalController
+                .create({
+                component: Modal,
+                cssClass: 'my-custom-class',
+                componentProps: {
+                    data: {
+                        
+                    },
+                    propsData: {
+                        parent: this
+                    },
+                },
+                })
+                .then(m => m.present())
+        },
         init(){
             this.spinner = true 
 
@@ -406,6 +389,10 @@ export default {
                         this.options2.series[0].data['2'].value = threeStart            
                         this.options2.series[0].data['3'].value = fourStart            
                         this.options2.series[0].data['4'].value = fiveStart
+
+                        //Load modal set device
+                        this.showSetDeviceModal();
+
                         this.spinner = false;   
                                 
                     }  

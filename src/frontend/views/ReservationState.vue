@@ -685,8 +685,6 @@ export default {
       
      
       const ipClient = await Api.getClientIp();
-
-      console.log('ip client: '+ ipClient.data.ip);      
       const res = await Api.walletInformation(basket, this.restaurantSelectedId, ipClient.data.ip); 
       if(res.status === 200 && res.statusText === "OK"){
                

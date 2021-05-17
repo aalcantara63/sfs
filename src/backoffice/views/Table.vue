@@ -155,23 +155,51 @@
 
     </div>
 
+
+
     <div  v-if="!spinner && orderTable">
+  
 
         <div  v-for="(table, index) in filterTables"  
        
         :key="index"
-               class='menu-col-4 ' style="float: left">
-                <ion-card   v-if="getListOrder(table.Name).length> 0">
-                  <ion-item @click="getOrdersDetails(table.Name)"> 
-                   <ion-label  >
-                        <h1 style="text-overflow: ellipsis; overflow: hidden;display: -webkit-box; -webkit-line-clamp: 2;-webkit-box-orient: vertical;">{{table.Name}}</h1>
-                    </ion-label>  
-                    <ion-label  >
-                      <ion-badge slot="end" color="primary">{{getListOrder(table.Name).length}}</ion-badge>                     
-                    </ion-label>  
-                  </ion-item>  
-                </ion-card>
-              </div>
+         
+        class='menu-col-3 ' style="float: left; margin-top: 15px;"  >
+       
+          <ion-card 
+            :color="table.State=='Free' ?'secondary': 'medium'" 
+            style="font-size: 18px;font-weight: 600;border: 1px solid grey;"> 
+
+                    <ion-fab horizontal="end" vertical="top" slot="fixed">
+        <ion-fab-button color="light">
+          <ion-icon md="caret-back" ios="chevron-back-circle-outline"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-list side="botton">
+          <ion-fab-button color="light">
+            <ion-icon name="logo-facebook"></ion-icon>
+          </ion-fab-button>
+          <ion-fab-button color="light">
+            <ion-icon name="logo-twitter"></ion-icon>
+          </ion-fab-button>
+          <ion-fab-button color="light">
+            <ion-icon name="logo-vimeo"></ion-icon>
+          </ion-fab-button>
+        </ion-fab-list>
+      </ion-fab>
+
+
+          <ion-badge slot="end" style="padding: 10px; margin: 10px;" @click="getOrdersDetails(table.Name)"
+              color="light">{{getListOrder(table.Name).length}} / {{table.Seats.length}}</ion-badge> 
+           {{table.Name}} 
+                <br>
+             <p style="text-align: center;">TOTAL: {{ getAmoutByTable(table.Name) }}   </p>        
+            
+          </ion-card>  
+        <!-- </ion-chip> -->
+
+   
+
+      </div>
     </div>
   </div>
 </template>
@@ -463,6 +491,21 @@ export default {
       })    
     },
 
+     getAmoutByTable(value){
+       console.log(value);
+       const listO = this.getListOrder(value);
+       console.log('listO')
+       console.log(listO)
+       let total = 0;
+
+       listO.forEach( o => { total+= parseFloat(o.Total) })
+
+        console.log('total '+ total)
+       return total.toFixed(2);
+    },
+
+    
+
      async getOrdersDetails(value){
        console.log(value);
        const listO = this.getListOrder(value);
@@ -587,6 +630,13 @@ li.disabled a {
     max-width: calc(calc(4 / var(--ion-grid-columns, 12)) * 100%);
     text-align: left;
     visibility: visible;
+    }
+
+    .table-circle{
+          width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 1px solid #e1dddd;
     }
 @media only screen and (min-width : 1024px){
 

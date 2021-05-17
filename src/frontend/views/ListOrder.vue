@@ -721,7 +721,6 @@ export default {
         buttons: [
           {text: this.$t('frontend.home.cancel'),role: 'cancel', cssClass: 'secondary',
             handler: () => {                
-              console.log('Confirm Cancel')
             },
           },
           {
@@ -768,11 +767,8 @@ export default {
 
       Api.fetchById("Table", tableId).then(response => {        
       this.spinner = false  
-      console.log('fuera de table home');
-      console.log(response);
+ 
         if(response.status === 200 && response.data.Available){
-
-          console.log('dentro de table home');
 
           const seat = response.data.Seats.findIndex(t => t.name === value)
           if(seat !== -1){

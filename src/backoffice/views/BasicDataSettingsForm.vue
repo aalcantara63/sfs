@@ -1,7 +1,6 @@
 <template>
     <div class="screen">
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link> -->
 
      <ion-header>
           <ion-toolbar>
@@ -15,18 +14,27 @@
     </ion-header>
     <br/>
 
-      <!-- <ion-card> -->
+    <!-- <ion-card> -->
     <div v-if="spinner">
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
     <div v-else>
-      <ion-item>
+        <ion-item>
           <ion-label >{{$t('backoffice.form.fields.online')}}
           <ion-toggle name="online" style="top: 12px;"
-          @ionChange="online = !online" 
+          @ionChange="online=$event.target.checked" 
           :checked ="online">
           </ion-toggle></ion-label>
         </ion-item>
+
+        <!-- <ion-item>
+          <ion-label >{{$t('backoffice.form.fields.showOtherRestaurant')}}
+          <ion-toggle name="showOthersRestaurant" style="top: 12px;"
+          @ionChange="showOthersRestaurant=$event.target.checked" 
+          :checked ="showOthersRestaurant">
+          </ion-toggle></ion-label>
+        </ion-item> -->
+
         <ion-item>
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.name')}}</ion-label>
           <ion-input type="text" name="name"
@@ -64,7 +72,7 @@
         </ion-item>
 
         <ion-item>
-          <ion-label position="floating">Url location</ion-label>
+          <ion-label position="floating">{{$t('backoffice.form.fields.urlLocation')}}</ion-label>
           <ion-input type="text" name="urlLocation"
           @input="urlLocation = $event.target.value" 
           v-bind:value="urlLocation">
@@ -72,7 +80,7 @@
         </ion-item>
 
         <ion-item>
-          <ion-label position="floating">Fax</ion-label>
+          <ion-label position="floating">{{$t('backoffice.form.fields.fax')}}</ion-label>
           <ion-input type="text" name="fax"
           @input="fax = $event.target.value" 
           v-bind:value="fax">
@@ -83,10 +91,6 @@
           <ion-card v-if="checkImage()" >
               <ion-img :src="file"></ion-img>
           </ion-card>
-          <!-- <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.image')}}</ion-label>
-          <ion-input type="file" accept=".jpg,.png,.gif" name="file"
-          @change="handleImage">
-          </ion-input> -->
         </ion-item>
         <ion-item>
             <div>
@@ -263,7 +267,6 @@
                 </ion-checkbox>
             </ion-item>
             <ion-item v-if="customHours">
-                <!-- <ion-label>Type a custom hours poster</ion-label> -->
                 <ion-textarea name="customHoursText" style="border-bottom: 1px solid lightgray; margin:5px"
                         @input="customHoursText = $event.target.value" 
                         v-bind:value="customHoursText">
@@ -300,6 +303,7 @@ export default {
       name: '',
       address: '',
       online: false,
+      // showOthersRestaurant: false,
       email: '',
       phone: '',
       web: '',
@@ -387,6 +391,7 @@ export default {
                     this.name = response.data.Name;
                     this.address = response.data.Address;
                     this.online = response.data.Online;
+                    // this.showOthersRestaurant = response.data.ShowOtherRestaurant;
                     this.email = response.data.Email;
                     this.phone = response.data.Phone;
                     this.web = response.data.Web;
@@ -681,6 +686,7 @@ export default {
               "Name": this.name,
               "Address": this.address,
               "Online": this.online,
+              // "ShowOtherRestaurant": this.showOthersRestaurant,
               "Email": this.email,
               "Phone": this.phone,
               "Web": this.web,

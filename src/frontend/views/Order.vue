@@ -149,15 +149,21 @@
                         
                         
                          <ion-card  style="padding: 0 10px 10px 0;"> 
+
+                           <div  v-if="staffName !=''" style="display: flex">                                                 
+                                <ion-label > <h2 class="titles-order" style="float: left;">  {{$t('frontend.orderType.worker')}}: {{staffName}} </h2>
+                                </ion-label>  
+                           </div>
+
                              
                             <div>
                               <ion-label class="ion-text-wrap menu-col-12">
                                 <h2 class="titles-order" style="float: left;">{{$t('frontend.order.clientInfo')}}</h2>
-                                <ion-button  v-if="clientId ===''" @click="logIng('')" fill="outline"  style="float: left; margin-right: 10px;" > <span class="iconify" data-icon="ei:user" data-inline="false" style="margin: 0 -13px;"></span> </ion-button>  
-                            </ion-label>
+                                <ion-button  v-if="clientId ==='' && staffName ===''" @click="logIng('')" fill="outline"  style="float: left; margin-right: 10px;" > <span class="iconify" data-icon="ei:user" data-inline="false" style="margin: 0 -13px;"></span> </ion-button>  
+                              </ion-label>
 
                            
-                               <p   v-if="clientId ===''"
+                               <p   v-if="clientId ==='' && staffName ===''"
                                style="display: inline-block; float: left; font-style: italic; 
                                color: #e3b030; font-weight: 500;width: 100%; text-align: left;font-size: 16px; margin: 5px;">
                                 <span class="iconify" data-icon="twemoji:warning" data-inline="false" style="margin: 5px 0 0 15px; width: 18px;height: 18px;"></span>
@@ -174,11 +180,7 @@
 
                             
 
-                             <ion-item  v-if="staffName !=''" style="width: 100%">                    
-                                <ion-label position="floating">{{$t('frontend.orderType.worker')}} </ion-label>                                                                                                                                
-                                <ion-input :value="staffName" readonly                                 
-                                 ></ion-input>
-                              </ion-item>
+                            
 
                               <ion-item :style="clientId ===''? 'border: 1px solid #262626;width: 100%' : 'width: 100%'">                    
                                 <ion-label position="floating">{{$t('frontend.orderType.name')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
@@ -547,6 +549,7 @@
                                     <h2 class="titles-order">{{$t('frontend.order.payment')}}: </h2> 
                             </ion-label>                            
 
+                            <!-- hasta saber si hay autho incremental in tsys (restaurantActive.payMethod==='SHIFT4' || restaurantActive.payMethod==='TSYS') -->
                             <ion-item v-if="(restaurantActive.payMethod==='SHIFT4' && order.OrderType === 'On Table' ) && (clientId !='' || staffName != '')">
                                 <p style=" float: left;text-align: left;padding: 0" class="subtitles-order menu-col-4">{{$t('frontend.order.isTicket')}} </p>                               
                                 <ion-toggle color="primary" :value="isTicket" @ionChange="isTicket = !isTicket"></ion-toggle>
@@ -1149,8 +1152,7 @@ export default {
                         "ModelFrom": "Order",
                         "StaffName": this.order.StaffName,               
                    }
-                   console.log('paymentEntry')
-                   console.log(paymentEntry);
+                
                    await Api.postIn('allpayments', paymentEntry);                
              }
 
@@ -1159,9 +1161,18 @@ export default {
                 if(this.order.Payment)
                   this.finishPayment(response.data, true);
                 else{
-                  await this.$store.commit('setOrder', response.data);
-                  await this.getTickets();
-                  return this.$router.replace({ name: 'Home' }) 
+                  if(this.order.isTicket && this.order.StaffName){
+                    this.$store.commit('setAllTickets',[])                
+                    this.$store.commit('setCart', []);        
+                    this.$store.commit('setOrder', {});    
+                    return this.$router.replace({ name: 'Ticket' }) 
+                  }
+                  else{
+                    await this.$store.commit('setOrder', response.data);
+                    await this.getTickets();
+                    return this.$router.replace({ name: 'Home' }) 
+                  }
+                 
                 }
                  
            }
@@ -1169,7 +1180,6 @@ export default {
         } catch (error) {            
             console.log(error)
             this.spinner = false;
-            // this.errorPaymentDetail(error); 
         }
       
     },
@@ -1188,18 +1198,16 @@ export default {
         this.cart = [];   
         this.$store.commit('setCart', [] );
         this.$store.commit('setOrder', {}); 
-        console.log('order luego de terminar el flujo')
-        console.log(this.order)
                                              
         if(this.clientId !='')                                    
             return this.$router.push({ name: 'ListOrder', params: {customerId: this.clientId, CustomerName: this.CustomerName} })                                                                  
-        else if(this.order.StaffName !==''){
-          if (this.isTicket)  return this.$router.replace({ name: 'Ticket' });
-          else return this.$router.replace({ name: 'Order' });
-        }    
-        else {                   
+        else if(this.staffName !=='' && this.isTicket)
+          return this.$router.push({ name: 'Ticket' });
+        else if(this.staffName !== '' && !this.isTicket)
+          return this.$router.push({ name: 'Order' });            
+        else                   
             return this.$router.replace({ name: 'Home' })  
-        }  
+         
     },
 
     sendEmail(order){
@@ -1797,11 +1805,8 @@ ValidateHour(value){
 
       Api.fetchById("Table", tableId).then(response => {        
       this.spinner = false  
-      console.log('fuera de table home');
-      console.log(response);
+     
         if(response.status === 200 && response.data.Available){
-
-          console.log('dentro de table home');
 
           const seat = response.data.Seats.findIndex(t => t.name === value)
           if(seat !== -1){
@@ -1894,7 +1899,6 @@ ValidateHour(value){
     
       let min1 = this.configuration.minHour;
       let response = this.checkPickTime();
-      console.log(response)
       if(!this.timeToPick )return this.alertNoTimeToPick(min1);
       if(response)  min1 = response;   
      
@@ -1957,12 +1961,9 @@ ValidateHour(value){
 
    showCurbside(){
 
-     console.log('this.thisMinHour ' + this.thisMinHour)
-    // this.thisMinHour = moment.tz( this.thisMinHour).format('HH:mm') 
      let min1 = this.configuration.minHour;
 
       let response = this.checkPickTime();
-      console.log(response)
       if(!this.timeToPick )return this.alertNoTimeToPick(min1);
       if(response)  min1 = response;
       
@@ -1999,7 +2000,6 @@ ValidateHour(value){
     this.hourToPick = Moment(this.thisMinHour, 'HH:mm').toISOString();
     // this.hourToPick = this.thisMinHour;
    
-   console.log('order.OrderType: ' + this.order.OrderType);
     
     this.changeOrderButton();
     this.order.HourToPick =  this.hourToPick;

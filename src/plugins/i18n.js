@@ -42,6 +42,8 @@ const messages = {
                 forgotPassword: 'Do you forgot your password?',
                 sendNewPassword: 'Send a new password',
                 recoveryPassword: 'Recovery password',
+                refund: 'Refund',
+                void: 'Void',
             },
             titles:{
                 controlPanel: 'Management',
@@ -77,6 +79,9 @@ const messages = {
                 payments: 'Payments',
                 ticketDetails: 'Ticket Details',
                 emptyResult: 'Empty result',
+                cancellationType: 'Tipo de cancelación',
+                changePassword: 'Cambiar contraseña',
+                restaurantName: 'Nombre del restaurante',
             },
             orderState:{
                 started: 'started',
@@ -280,6 +285,7 @@ const messages = {
                     addChoice: 'Add Variant',
                     back: 'Back',
                     save: 'Save',
+                    change: 'Change'
                 },
                 titles:{
                     customerNewTitle: 'Create a new customer',
@@ -354,6 +360,7 @@ const messages = {
                     eposConfiguration: 'EPOS CONFIGURATION',
                     emailConfiguration: 'EMAIL CONFIGURATIONS',
                     twilioSMS: 'Twilio SMS',
+                    sinchSMS: 'Sinch SMS',
                     selectAVariantGroup: 'Select a choices',
                     imageText: 'For better results please upload image size 750x750px. Make certain that you have rights to any image uploaded',
                     orderCateringForm: 'Approval of catering order',
@@ -368,7 +375,9 @@ const messages = {
                     ingredients: 'Ingredients',
                     shift4: 'Shift4',
                     auth: 'Authorize.Net',
+                    capcha: 'Capcha',
                     zipCodes: 'Zip codes',
+                    backups: 'Backups',
                 },
                 fields:{
                     name: 'Name',
@@ -406,6 +415,7 @@ const messages = {
                     title: 'Title',
                     subtitle: 'Subtitle',
                     online: 'Online',
+                    showOtherRestaurant: 'Show others restaurants',
                     onlineMss: 'Restaurant is not visible to the public ',
                     onlineMss1: 'Restaurant is visible to the public ',
                     SelectPickHour: 'Select pick hour',
@@ -427,6 +437,7 @@ const messages = {
                     occupation: 'Ocuppations',
                     confirmPassword: 'Confir password',
                     endPointUrl: 'Endpoint Url',
+                    capchaKey: 'Capcha key',
                     clientGuid: 'Client GUID',
                     interfazVersion: 'Interfaz version',
                     interfazName: 'Interfaz name',
@@ -441,6 +452,9 @@ const messages = {
                     twFromNumber: 'From number',
                     twAccountSID: 'Account SID',
                     twToken: 'Token',
+                    sinchFromNumber: 'From number',
+                    sinchAccountSID: 'Service plan id',
+                    sinchToken: 'Token',
                     web: 'Website',
                     variantGroup: 'Choices',
                     haveSides: 'Sides',
@@ -506,7 +520,13 @@ const messages = {
                     authenticationTokenMoto: "MOTO Authorization token",
                     accountType: "Account Type",
                     method: "Mrthod",
-                    serverName: 'Server name'
+                    serverName: 'Server name',
+                    urlLocation: 'Url location',
+                    fax: 'Fax',
+                    oldServerId: 'Old server id',
+                    newServerId: 'New server id',
+                    acivateTwilio: 'Activate Twilio',
+                    acivateSinch: 'Activate Sinch',
                 },
                 messages:{
                     buttons:{
@@ -673,6 +693,7 @@ const messages = {
         frontend:{
             menu:{
                 menu: 'Menu',
+                ads: 'ADS',
                 menuCatering: 'Catering Menu',
                 reservation: 'Reservations',
                 about: 'About Us',
@@ -1010,6 +1031,8 @@ const messages = {
                 forgotPassword: 'Olvidó su contraseña?',
                 sendNewPassword: 'Enviar un nuevo password',
                 recoveryPassword: 'Recuperar contraseña',
+                refund: 'Refund',
+                void: 'Void',
             },
             titles:{
                 controlPanel: 'Administración',
@@ -1018,7 +1041,7 @@ const messages = {
                 orders: 'Órdenes',
                 cateringOrders: 'Órdenes de Catering',
                 ordersForDelivery: 'Órdenes Para Entregar',
-                tickets: 'Tiques',
+                tickets: 'Tickets',
                 categories: 'Categorías',
                 products: 'Elementos de menú',
                 services: 'Servicios',
@@ -1044,8 +1067,11 @@ const messages = {
                 deliveryLocation: 'Ubicación de la entrega',
                 cateringMenus: 'Menus de catering',
                 payments: 'Pagos',
-                ticketDetails: 'Detalles del Tique',
+                ticketDetails: 'Detalles del Ticket',
                 emptyResult: 'Sin resultados',
+                cancellationType: 'Cancellation type',
+                changePassword: 'Change Password',
+                restaurantName: 'Restaurant name',
             },
             orderState:{
                 started: 'iniciada',
@@ -1249,6 +1275,7 @@ const messages = {
                     addChoice: 'Añadir Variante',
                     back: 'Atrás',
                     save: 'Guardar',
+                    change: 'Cambiar'
                 },
                 titles:{
                     customerNewTitle: 'Crear un nuevo cliente',
@@ -1323,6 +1350,7 @@ const messages = {
                     eposConfiguration: 'CONFIGURACIONES EPOS',
                     emailConfiguration: 'CONFIGURACIONES DE EMAIL',
                     twilioSMS: 'MENSAJERÍA CON TWILIO',
+                    sinchSMS: 'MENSAJERÍA CON SINCH',
                     selectAVariantGroup: 'Selecciona una opción',
                     imageText: 'Por favor suba imágenes de 200x200 para obtener mejores resultados. Asegúrese de que la imágen no esté bajo derechos de autor.',
                     orderCateringForm: 'Aprobación de la orden de catering',
@@ -1337,7 +1365,9 @@ const messages = {
                     ingredients: 'Ingredientes',
                     shift4: 'Shift4',
                     auth: 'Authorize.Net',
+                    capcha: 'Capcha',
                     zipCodes: 'Códigos postales',
+                    backups: 'Backups',
                 },
                 fields:{
                     name: 'Nombre',
@@ -1375,6 +1405,7 @@ const messages = {
                     title: 'Título',
                     subtitle: 'Subtítulo',
                     online: 'En Línea',
+                    showOtherRestaurant: 'Mostrar otros restaurantes',
                     onlineMss: 'Restaurante no está visible para el público ',
                     onlineMss1: 'Restaurante visible para el público ',
                     SelectPickHour: 'Seleccionar hora de recogida',
@@ -1396,6 +1427,7 @@ const messages = {
                     occupation: 'Puesto',
                     confirmPassword: 'Confirme contraseña',
                     endPointUrl: 'Endpoint Url',
+                    capchaKey: 'Capcha key',
                     clientGuid: 'Client GUID',
                     interfazVersion: 'Versión de la interfaz',
                     interfazName: 'Nombre de la interfaz',
@@ -1410,6 +1442,9 @@ const messages = {
                     twFromNumber: 'Número de origen',
                     twAccountSID: 'SID de la cuenta',
                     twToken: 'Token',
+                    sinchFromNumber: 'Número de origen',
+                    sinchAccountSID: 'Id del plan de servicio',
+                    sinchToken: 'Token',
                     web: 'Sitio web',
                     variantGroup: 'Opciones',
                     haveSides: 'Agregados',
@@ -1476,6 +1511,12 @@ const messages = {
                     accountType: "Tipo de cuenta",
                     method: "Método",
                     serverName: 'Nombre del dependiente',
+                    urlLocation: 'Url de la localización',
+                    fax: 'Fax',
+                    oldServerId: 'Antiguo server id',
+                    newServerId: 'Nuevo server id',
+                    acivateTwilio: 'Activar Twilio',
+                    acivateSinch: 'Activar Sinch',
                 },
                 messages:{
                     buttons:{
@@ -1642,6 +1683,7 @@ const messages = {
         frontend:{
             menu:{
                 menu: 'Menú',
+                ads: 'ADS',
                 menuCatering: 'Menú de Catering',
                 reservation: 'Reservaciones',
                 about: 'Quiénes somos',

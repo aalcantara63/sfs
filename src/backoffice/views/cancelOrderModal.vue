@@ -8,12 +8,12 @@
     <ion-content class="ion-padding">
         <ion-list>
             <ion-item>
-                <ion-label>Cancellation type</ion-label>
+                <ion-label>{{parent.$t('backoffice.titles.cancellationType')}}</ion-label>
                 <ion-select interface="popover" :ok-text="parent.$t('backoffice.form.messages.buttons.ok')" :cancel-text="parent.$t('backoffice.form.messages.buttons.dismiss')"
                 @ionChange="cancellationType = $event.target.value" v-bind:value="cancellationType">
                     <ion-select-option value="no-refund">No refund</ion-select-option>
-                    <ion-select-option value="refund" v-if="tokens.length != 0 && order.Payment.length == tokens.length && canRefund">Refund</ion-select-option>
-                    <ion-select-option value="void">Void</ion-select-option>
+                    <ion-select-option value="refund" v-if="tokens.length != 0 && order.Payment.length == tokens.length && canRefund">{{parent.$t('backoffice.options.refund')}}</ion-select-option>
+                    <ion-select-option value="void">{{parent.$t('backoffice.options.void')}}</ion-select-option>
                 </ion-select>
             </ion-item>
         </ion-list>
@@ -27,6 +27,9 @@
         <ion-item></ion-item>
         <ion-button expand="full" color="danger" :disabled="!isValidForm()" @click="refundOrder()">{{ button2 }}</ion-button>
         <ion-button expand="full" color="primary" @click="dismissModal()">X</ion-button>
+        <div v-if="spinner">
+            <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
+        </div>
     </ion-content>
   </div>
 </template>
@@ -56,7 +59,9 @@ export default {
       transactionKey: '',
       payUrl: '',
 
-      tokens: []
+      tokens: [],
+
+      spinner: false,
     }
   },
   created: async function(){
@@ -142,6 +147,7 @@ export default {
     async refundOrder(){
         if (this.isValidForm())
         {
+            this.spinner = true
             //Obtengo el restaurante
             const restaurantID = this.parent.$store.state.user.RestaurantId
             const restaurant = await Api.fetchById('restaurant', restaurantID)
@@ -175,6 +181,7 @@ export default {
                 .catch(e => {
                   console.log(e)
                   this.ifErrorOccured(this.refundOrder)
+                  this.spinner = false
                 })
             }
 
@@ -265,8 +272,7 @@ export default {
             // });
 
             this.cancelOrder('refund')
-      }
-  
+        }
     },
     async setVoid(restaurantID){
 
@@ -299,7 +305,7 @@ export default {
                         const ip = '192.168.50.74'
                         const port = '10009'
                         try{
-                            Devices.a930.DoCredit(ip, port, data, this.callbackVoid)
+                            Devices.a930.DoCredit(ip, port, false, data, this.callbackVoid)
 
                             const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                             if(paymeD){
@@ -309,9 +315,11 @@ export default {
                                 payUpd.Void = pay.paymentInfo.total;
                                 await Api.putIn('Allpayments', payUpd);
                             }
+                            this.spinner = false
                         }
                         catch(e){
                             console.log(e)
+                            this.spinner = false
                         }
                     }
 
@@ -324,6 +332,7 @@ export default {
                             payUpd.Void = pay.paymentInfo.total;
                             await Api.putIn('Allpayments', payUpd);
                         }
+                        this.spinner = false
                     }
                     else
                     {
@@ -338,6 +347,7 @@ export default {
                             payUpd.Void = pay.paymentInfo.total;
                             await Api.putIn('Allpayments', payUpd);
                         }
+                        this.spinner = false
                     }   
                 }
             }
@@ -392,6 +402,7 @@ export default {
                 //   name: 'OrderDetails', 
                 //   params: { orderId: this.order._id } 
                 // });
+                this.spinner = false
                 this.dismissModal();
 
                 // return response;
@@ -402,6 +413,7 @@ export default {
                 //         this.parent.$t('backoffice.list.messages.errorMessage'),
                 //             this.parent.$t('backoffice.list.messages.changeOrderStateMessage'));
                 this.showToastMessage('Ocurrieron errores en el proceso', "danger");
+                this.spinner = false
             })
       },
       sendEmail(email, mess){

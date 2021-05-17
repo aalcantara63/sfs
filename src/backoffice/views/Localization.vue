@@ -4,7 +4,6 @@
             <ion-toolbar>
                 <ion-buttons slot="start">
                 <ion-back-button v-if="fun == 'write'" default-href="/controlPanel" @click="$router.push({ name: 'OrderForDelivered'})"></ion-back-button>
-                <!-- v-if="fun == 'read' || 'travel'" -->
                 <ion-back-button v-else default-href="/controlPanel" @click="$router.push({ path: '/order'})"></ion-back-button>
                 </ion-buttons>
                 <ion-label style="padding: 20px 100px;">
@@ -12,9 +11,7 @@
                 </ion-label>
             </ion-toolbar>
         </ion-header>
-        <!-- <div style="padding: 20px 20px 0 20px"> -->
-            <Map :coordinates = coordinates :title = driverName :travel = order.Travel :isTravel= isTravel />
-        <!-- </div> -->
+        <Map :coordinates = coordinates :title = driverName :travel = order.Travel :isTravel= isTravel />
         <div v-if="!orderProps && !funProps">
             <h4>{{$t('frontend.order.orderDetail')}}</h4>
                 <ion-grid>

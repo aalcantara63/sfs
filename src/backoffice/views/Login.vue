@@ -51,6 +51,7 @@
 <script>
 
 import { Api } from '../api/api.js';
+import { payAuthorizeNet } from '../api/payments.js';
 import { EventBus } from '../../frontend/event-bus';
 
 export default {
@@ -101,8 +102,10 @@ export default {
               "Email": this.forgotEmail,
           }
           Api.loginForgot(item)
-          .then(() => {
+          .then(response => {
+              console.log(response)
               this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'), this.$t('backoffice.list.messages.newPasswordSent'), this.$t('backoffice.options.login'))
+
               this.forgotEmail = ''
               this.forgotP = false
               this.spinner = false
@@ -156,6 +159,9 @@ export default {
               console.log(Api.getRestaurant())
               this.getConfig();
 
+              //Set ClerkId for payments.
+              payAuthorizeNet.setClerkId(this.userLogin.ServerId)
+
               console.log("roles")
               console.log(this.userLogin.Roles);
               let roles = [];
@@ -178,7 +184,10 @@ export default {
               }
               else{
                   this.$router.push({
-                      name: 'ControlPanel'
+                      name: 'ControlPanel',
+                      params: {
+                          'firstLogin': true,
+                      }
                   });
               }
           })

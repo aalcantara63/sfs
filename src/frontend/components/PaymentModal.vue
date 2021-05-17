@@ -102,7 +102,7 @@
             <ion-button @click="changePayment(), devicePay = true" :style="devicePay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
                v-tooltip="parent.$t('frontend.payment.devicePayment')"
-               v-if="payMethod==='SHIFT4' && staffName !==''"
+               v-if="(payMethod==='SHIFT4' || payMethod==='TSYS' ) && staffName !==''"
               :class="devicePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+1">
              <span class="iconify" data-icon="emojione-monotone:mobile-phone" data-inline="false"></span>            
             </ion-button> 
@@ -122,9 +122,17 @@
              <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
                v-tooltip="parent.$t('frontend.payment.cashPayment')"
-               v-if="payMethod==='SHIFT4' && staffName !==''"
+               v-if="staffName !==''"
               :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
             <span class="iconify" data-icon="ic:baseline-attach-money" data-inline="false"></span>          
+            </ion-button> 
+
+             <ion-button @click="changePayment(), swipePay = true" :style="cashPay? 'float: left;border: solid' : 'float: left'"
+              :disabled="spinner"
+               v-tooltip="parent.$t('frontend.payment.swipePayment')"
+               v-if="payMethod==='TSYS' && staffName !==''"
+              :class="swipePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+              <span class="iconify" data-icon="wpf:bank-cards" data-inline="false"></span>
             </ion-button> 
 
             
@@ -176,9 +184,9 @@
 
              <apple-pay   
               @click="changePayment()"
-             :disabled="spinner"  
-             v-tooltip="'Apple Pay'"            
-              v-if="payMethod==='SHIFT4' && staffName==='' && googleData.merchantId"
+              :disabled="spinner"  
+              v-tooltip="'Apple Pay'"            
+              v-if="(payMethod==='SHIFT4') && staffName==='' && googleData.merchantId"
               style="float: left; margin: 2px 5px" 
               :Total="this.Total"
               :parent="this"
@@ -263,12 +271,23 @@
 
             <ion-card  v-if="devicePay"  class="scroll" style="height: auto">                 
                 <device-payment
+                v-if="payMethod==='SHIFT4'"
                   :datas="this.deviceData"
                   :grandfather="this.parent"
                   :parent="this"
                   :deviceTransactionType="this.deviceTransactionType"
                 >
-                </device-payment>                   
+                </device-payment>    
+                  
+                <olapay-device
+                 v-if="payMethod==='TSYS'"
+                  :datas="this.olapayData"
+                  :grandfather="this.parent"
+                  :parent="this"
+                  :Acept="this.Acept"
+                  :Cancel="this.Cancel"                   
+                >
+                </olapay-device>  
                 
             </ion-card>
 
@@ -289,7 +308,16 @@
             </ion-card>
 
             
+            
+             <ion-card  v-if="swipePay"  class="scroll" style="height: auto">                 
+               <UsbCardSwipe
+               :parent="this"
+               :Acept="this.Acept"
+               :Cancel="this.Cancel"             
+               ></UsbCardSwipe> 
+            </ion-card>
 
+              
          
             
 
@@ -297,14 +325,7 @@
                <UsbCashDoor
                :parent="this"
                :Acept="this.Acept"
-               :Cancel="this.Cancel"
-               :ccode="this.ccode" 
-                :cityText="this.cityText"  
-                :stateText="this.stateText"
-                :postalCode="this.postalCode"
-                :addressLine1="this.addressLine1"
-                :codeNotValid="this.codeNotValid"
-                :dataRequired="this.dataRequired"
+               :Cancel="this.Cancel"             
                ></UsbCashDoor> 
             </ion-card>
 
@@ -425,7 +446,9 @@ import { addIcons } from "ionicons";
  import { Api } from '../../backoffice/api/api'
 import UsbCardReader from './UsbCardReader'
 
+
 import UsbCashDoor from './UsbCashDoor'
+import UsbCardSwipe from './UsbCardSwipe'
 
 addIcons({
   "ios-eye": eye.ios,
@@ -441,6 +464,7 @@ import Moment from 'moment';
 // import Cripto from 'crypto-js'
 
 import DevicePayment from '../../backoffice/views/DevicePayment'
+import OlapayDevice from './OlaPayDevice'
 import QrModal from './QrPaymentModal'
 import PaymentSplited from './PaymentSplited'
 import GooglePay from './GooglePay'
@@ -448,32 +472,22 @@ import ApplePay from './ApplePay'
 import {Utils} from '../../backoffice/utils/utils'
 import { Plugins } from '@capacitor/core';
  const { Share } = Plugins;
- const { Network } = Plugins;
+//  const { Network } = Plugins;
  import  RoutingValidator from 'bank-routing-number-validator';
  
 export default {
    name: 'PaymentModal',  
    created: async function(){   
      
-     let status = await Network.getStatus();
-
     if(this.order.StaffName)
       if(this.order.StaffName !=='')
         this.staffName = this.order.StaffName
     
-     if(this.staffName ===''){
-       console.log('staffName getWalletInformation')
-        await this.getWalletInformation();
-       
+     if(this.staffName ==='' && this.payMethod==='SHIFT4'){
+        await this.getWalletInformation();       
         this.keyGoogle ++;
-     }
-        
-     console.log('network status');
-     console.log(status);
-
-     console.log('TOTAL DECIMALS');
-     console.log(this.Total);
-
+     }       
+    
    
       if(this.canSplitPayment){
         if(this.order.Payment && this.order._id){
@@ -548,8 +562,10 @@ export default {
      GooglePay,
      ApplePay,
      DevicePayment,
+     OlapayDevice,
      UsbCardReader,
      UsbCashDoor,
+     UsbCardSwipe
   },
    data () {
     return {      
@@ -586,6 +602,7 @@ export default {
         devicePay: false,
         idtechPay: false,
         cashPay: false,
+        swipePay: false,
         staffName: '',
         hasQrPayment: '',
         spinnerShare: false,
@@ -595,7 +612,7 @@ export default {
         bankName: '',
         readyButton: false,
         googleData: {},
-        mssApplePay: '',
+        
         deviceData: {
              'amountInformation': {
                     'TransactionAmount': parseFloat(this.Total).toFixed(2),
@@ -608,6 +625,12 @@ export default {
                 'traceInformation':{
                     'TransactionNumber': ''
                 }
+        },
+          olapayData: {
+            'tip': this.order.Tip,
+            'total': this.order.Total,
+            'subtotal': this.order.SubTotal,
+            'tax': this.order.Taxe.toFixed(2),   
         },
         deviceTransactionType: '01',
         shareText1: ' ',
@@ -835,9 +858,7 @@ export default {
          return this.$ionic.modalController.dismiss()
     }, 
     
-    responseApplePay(response){
-      console.log('response de responseApplePay')
-      console.log(response);
+    responseApplePay(response){   
       if(response){
          const data =  {         
           restaurantId: this.restaurantId,
@@ -854,9 +875,7 @@ export default {
       
     },
 
-    responseIDTEch(response){
-      console.log('response de responseIDTEch')
-      console.log(response);
+    responseIDTEch(response){    
       if(response){
          const data =  {         
           restaurantId: this.restaurantId,
@@ -877,8 +896,7 @@ export default {
     },
 
      responseSwipeCard(response){
-      console.log('response de responseSwipeCard')
-      console.log(response);
+    
       if(response){
          const data =  {         
           restaurantId: this.restaurantId,
@@ -896,8 +914,7 @@ export default {
     },
     
     responseGooglePay(response){
-      console.log('response de responseGooglePay')
-      console.log(response);
+     
       if(response){
          const data =  {         
           restaurantId: this.restaurantId,
@@ -930,7 +947,7 @@ export default {
           loading.present()
           setTimeout( async() => {
               try {                
-                response.returnTo = this.returnTo;
+                // response.returnTo = this.returnTo;
                 await this.parent.recivePayment(response);
                 this.dismissModal();						
                 loading.dismiss();
@@ -1012,7 +1029,6 @@ export default {
           products: this.order.Products,
         }
       }  
-      console.log(data)
       data.tax = data.tax.toFixed(2);
       data.tip = data.tip.toFixed(2)
       let mss = this.parent.$t('frontend.payment.doingPayment');
@@ -1037,7 +1053,8 @@ export default {
                 var response = {}
                 if(this.isTicket){
                   let moto = false;
-                  if(data.p2pe && data.zip && data.cardSecurityCode && data.address ) moto = true;
+                  if(data.p2pe && data.zip && data.cardSecurityCode && data.address ) moto = 'moto';
+                  if(data.p2pe && !data.zip && !data.cardSecurityCode && !data.address ) moto = 'fb';
                    response = await payAuthorizeNet.firstAuthorizeOrder(data, moto);                   
                    if(!response) {
                      this.dismissModal();
@@ -1199,11 +1216,9 @@ export default {
           
       }
       else{  
-        console.log('faltan pagos');
         try {
            const response1 = await Api.putIn('Order', this.order)
            if(response1.status === 200 && response1.statusText === "OK"){
-            console.log('se guardo bien la orden del split.')
             this.parent.$store.commit('setOrder', response1.data)             
             this.arraySplit[this.indexForPay].state = 1;
             const paymentEntry = {                       
@@ -1301,6 +1316,7 @@ export default {
       this.devicePay = false;
       this.idtechPay = false;
       this.cashPay = false;
+      this.swipePay = false;
     },
 
     shareQrPayment: async function(){
@@ -1330,8 +1346,7 @@ export default {
       if(this.isTicket) data.saleFlag = 'A'
      
      try {       
-        var response = await payAuthorizeNet.payQrOrder(data);  
-        console.log('RESPONSE QR '+ response)
+        var response = await payAuthorizeNet.payQrOrder(data);        
         if(response !=='Error'){
           this.hasQrPayment = response; 
           await Share.share({
@@ -1349,7 +1364,6 @@ export default {
        
      } catch (error) {
       this.spinnerShare = false;
-       console.log(error)
        this.paymentError(error);       
      }
   
@@ -1515,8 +1529,6 @@ export default {
         
       this.spinner = true;
       const ipClient = await Api.getClientIp();
-
-      console.log('ip client: '+ ipClient.data.ip);      
       const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
       if(res.status === 200 && res.statusText === "OK"){
                
@@ -1531,7 +1543,6 @@ export default {
          this.spinner = false;
          return false;
       } catch (error) {
-        console.log('error');
         console.log(error);
         this.spinner = false;        
       }     
@@ -1667,6 +1678,8 @@ export default {
    async printOrder(order){
         
         var html = await this.htmlToUse(order)
+
+      
         
           var winimp = window.open('/print', 'popimpr');
           winimp.document.open();

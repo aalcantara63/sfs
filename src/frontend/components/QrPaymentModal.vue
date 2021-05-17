@@ -267,9 +267,7 @@ export default {
             {
               text: 'Done',
               role: 'cancel',
-              handler: () => {
-                console.log('Cancel clicked');
-              }
+              handler: () => {}
             }
           ]
         })
@@ -322,15 +320,6 @@ export default {
        
          let qrList = document.getElementsByTagName('canvas')
          let dataUrl = qrList[0].toDataURL();
-
-         console.log('dataUrl ' + dataUrl)
-
-
-        
-
-    
-
-      
 
         var html =' <html><head>';    
         html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';

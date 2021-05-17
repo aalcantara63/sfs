@@ -1,8 +1,6 @@
 <template>
   <div id="category" class="screen">
 
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link to="/category-form"><ion-button v-if="hasPermission('canCreateCategory')" expand="full" color="primary"><ion-icon name="add"></ion-icon>{{$t('backoffice.list.actions.addANew')}} {{$t('backoffice.list.entitiesName.category')}}</ion-button></router-link> -->
     <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
@@ -82,7 +80,7 @@
                   <ion-img :src="category.ImageUrl"></ion-img>
                 </ion-thumbnail>
                 <ion-label>
-                    <h2>{{ category.Name }} | <div v-if="category.Service" style="display: inline-block">Service</div><div style="display: inline-block" v-else>Product</div></h2>
+                    <h2>{{ category.Name }} | <div v-if="category.Service" style="display: inline-block">{{$t('backoffice.form.fields.service')}}</div><div style="display: inline-block" v-else>{{$t('backoffice.form.fields.product')}}</div></h2>
                     <h3><div style="word-wrap: break-word">{{ category.Description }}</div></h3>
                 </ion-label>
                 <ion-item-group side="end">

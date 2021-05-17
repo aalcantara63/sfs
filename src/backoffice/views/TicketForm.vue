@@ -379,6 +379,7 @@
         <!-- <ion-button color="primary" :key="deadLinePercentInc" :disabled="!isValidForm() ? true : false" @click="approve()">{{$t('frontend.order.state8')}}</ion-button>
         <ion-button color="danger" @click="cancel()">{{$t('frontend.order.state6')}}</ion-button> -->
         <div v-if="order.State != 5">
+            <ion-button color="primary" @click="cancelTicket()">Cancel Ticket</ion-button>
             <ion-button color="primary" @click="addToTicket()">Add to Ticket</ion-button>
             <ion-button color="secondary" @click="closeTicket()">Close Ticket</ion-button>
             <ion-button color="tertiary" @click="save('The Ticket was saved successfully.')">Save</ion-button>
@@ -576,9 +577,7 @@ export default {
         partialTotal += parseFloat(this.subtotal)
 
         partialTotal +=  parseFloat(this.calcTax)
-        partialTotal += parseFloat(this.calcTip)
-        partialTotal += parseFloat(this.shipping)
-
+        partialTotal += parseFloat(this.calcTip)    
         this.total = partialTotal.toFixed(2)
         console.log("TOTAL")
         console.log(this.total)
@@ -874,6 +873,39 @@ export default {
             return false
         }
     },
+    async cancelTicket(){
+            console.log('IN cancel Ticket');
+
+        if(this.order.AuthorizationPayment){
+    
+            if(this.order.AuthorizationPayment[0].paymentInfo.transId){
+                try {
+                    const  transId = this.order.AuthorizationPayment[0].paymentInfo.transId;
+                    const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
+                    const  restaurantId = this.restaurantActive._id;
+                    const payMethod = this.restaurantActive.PayMethod;
+
+                    this.spinner = true; 
+                    const resVoid = await payAuthorizeNet.void(transId, moto, restaurantId, payMethod)
+                    console.log("Response Void")
+                    console.log(resVoid)
+                    if(resVoid){
+                        this.order.State = 6;
+                        await  Api.putIn('order', this.order);
+                        this.spinner = false;
+
+                    }
+                    
+                } catch (error) {
+                    console.log(error);
+                    
+                }
+            
+
+            }
+        }
+
+    },
     async addToTicket(){
 
         const data =  {         
@@ -954,8 +986,11 @@ export default {
     async closeTicket(){
         try {
              if(this.order.AuthorizationPayment){
-                 this.spinner = true;
-                const autho =  await this.addToTicket();
+                this.spinner = true;
+                let autho = true;
+                console.log('Payment Method  '+ this.restaurantActive.PayMethod )
+                if(this.restaurantActive.PayMethod !== 'TSYS')                
+                     autho =  await this.addToTicket();
                 console.log('autho in TICKET FORM: ' + autho)
                 if(autho)
                 {

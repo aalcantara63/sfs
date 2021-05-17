@@ -34,14 +34,11 @@ export default {
   },
   methods: {
     submit: function() {
-        console.log('submit')
       if (this.form.robot) {
         console.log('submit')
       }
     },
     onVerify: function (response) {
-        console.log('on verify')
-        console.log(response)
       if (response) this.form.robot = true;
     },
   },

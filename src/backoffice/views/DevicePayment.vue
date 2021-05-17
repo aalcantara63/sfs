@@ -7,6 +7,22 @@
         </ion-header>
         <div class="ion-padding">
                 <ion-item>
+                    <ion-label>Device type</ion-label>
+                    <ion-select interface="popover" ok-text="Ok" cancel-text="Cancel"
+                    @ionChange="deviceType = $event.target.value" v-bind:value="deviceType">
+                        <ion-select-option key="shift4" value="shift4" >Shift4</ion-select-option>
+                        <ion-select-option key="tsys" value="tsys" >Tsys</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item>
+                    <ion-label>Communication mode</ion-label>
+                    <ion-select interface="popover" ok-text="Ok" cancel-text="Cancel"
+                    @ionChange="modeId = $event.target.value" v-bind:value="modeId">
+                        <ion-select-option key="ipaddress" value="ipaddress" >Ip address</ion-select-option>
+                        <ion-select-option key="serial" value="serial" >Serial number</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item v-if="modeId === 'serial'">
                     <ion-label position="floating"><span style="color: red">*</span>DeviceSN</ion-label>
                     <ion-input type="text" name="name"
                     @input="sn = $event.target.value" 
@@ -14,9 +30,35 @@
                     </ion-input>
                 </ion-item>
                 <br/>
+                <ion-item v-if="modeId === 'ipaddress'">
+                    <ion-label position="floating"><span style="color: red">*</span>Ip</ion-label>
+                    <ion-input type="text" name="name"
+                    @input="ip = $event.target.value" 
+                    v-bind:value="ip">
+                    </ion-input>
+                </ion-item>
+                <br/>
+                <ion-item v-if="modeId === 'ipaddress'">
+                    <ion-label position="floating"><span style="color: red">*</span>Port</ion-label>
+                    <ion-input type="text" name="name"
+                    @input="port = $event.target.value" 
+                    v-bind:value="port">
+                    </ion-input>
+                </ion-item>
+                <br/>
+                <ion-item>
+                    <p>SSL</p>
+                    <ion-checkbox
+                        slot="end"
+                        @ionChange="ssl=$event.target.checked"
+                        :checked="ssl"
+                        >
+                    </ion-checkbox>
+                </ion-item>
+                <br/>
 
                 <ion-button fill="outline" @click="dismissModal()">CLOSE</ion-button>
-                <ion-button :disabled="sn === ''" fill="outline" @click="doCredit()"><span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span> PAY</ion-button>
+                <ion-button :disabled="(sn === '' && ip === '' && port ==='') || (sn === '' && ip === '' && port !== '') || (sn === '' && ip !== '' && port === '')"  fill="outline" @click="doCredit()"><span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span> PAY</ion-button>
 
                 <div v-if="spinner" style="margin: 10px; padding: 30px 0;">
                     <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
@@ -40,10 +82,13 @@
         return {
             sn: '',
             serverId: '',
+            modeId: 'ipaddress',
             transactionType: this.deviceTransactionType,
-            ip: '192.168.4.53',
-            port: '10009',
+            ip: '',
+            port: '',
+            ssl: false,
             spinner: false,
+            deviceType: 'shift4',
         }
         
     },
@@ -52,6 +97,13 @@
         this.serverId = this.grandfather.$store.state.user.ServerId.toString()
         this.datas.ClerkID = this.serverId
         this.datas.transactionType = this.transactionType
+
+        //loading device
+        const device = this.grandfather.$store.state.device
+        console.log(device)
+        this.ip = device.ip
+        this.port = device.port
+        this.sn = device.sn
     },
     props: {
         datas: { type: Object, default:() => {} },
@@ -60,6 +112,10 @@
         deviceTransactionType: { type: String, default: '01' },
     },
     methods: {
+        changeModeId(val){
+            console.log(val)
+            this.modeId = val
+        },
         async getDeviceInfoBySerialNo(number){
             const res = await Devices.a930.getDeviceInfoBySN(number)
 
@@ -115,11 +171,13 @@
             {
                 const resData = {
                         "total": parseInt(res[8][0])/100,
-                        "transId": res[10][0],
+                        "transId": res[6][3],
+                        "transIdDevice": res[10][0],
                         "accountNumber": res[9][0],
                         "expirationCard": res[9][2],
                         "accountType": res[9][7],
                         "method": 'Device',
+                        "moto": 'fb',
                 }
                 // const resData = {
                 //     'total': parseInt(res[8][0])/100,
@@ -128,6 +186,11 @@
                 //     'expirationCard': res[9][2],
                 //     'accountType': res[9][7],
                 // }
+                console.log('TRANS-ID')
+                console.log("res[5][3]" + res[5][3])
+                console.log("res[6][3]" + res[6][3])
+                console.log("res[4][3]" + res[4][3])
+                console.log("res[5][4]" + res[5][4])
                 console.log('RES DATA')
                 console.log(resData)
                 this.parent.responseDevicePay(resData)
@@ -153,7 +216,7 @@
         },
         initialize(){
             try{
-                Devices.a930.Initialize(this.ip, this.port, this.callback)
+                Devices.a930.Initialize(this.ip, this.port, this.ssl, this.callback)
             }
             catch(e){
                 console.log(e)
@@ -164,30 +227,68 @@
         async doCredit(){
             console.log(this.grandfather.$store.state.user.ServerId.toString())
 
-            const val = await this.getDeviceInfoBySerialNo(this.sn) 
+            if (this.modeId == 'serial'){
 
-            if (val){
-                console.log("VAL1")
-                console.log(val)
-                console.log("IP address: " + this.ip)
-                console.log("Port: " + this.port)
-                try{
-                    
-                    this.spinner = true
-                    const anw = await Devices.a930.DoCredit(this.ip, this.port, this.datas, this.callback);
-                    console.log(anw)
+                if (this.deviceType == 'shift4')
+                {
+
+                    const val = await this.getDeviceInfoBySerialNo(this.sn) 
+
+                    if (val){
+                        console.log("VAL1")
+                        console.log(val)
+                        console.log("IP address: " + this.ip)
+                        console.log("Port: " + this.port)
+                        try{
+                            
+                            this.spinner = true
+                            const anw = await Devices.a930.DoCredit(this.ip, this.port, this.ssl, this.datas, this.callback);
+                            console.log(anw)
+                        }
+                        catch(e){
+                            console.log(e)
+                            this.showToastMessage(e, 'danger')
+                            this.spinner = false;
+                        }
+                    }
+                    else{
+                        console.log("VAL0")
+                        this.showToastMessage('ERROR: There was an error get IP address and port of the device.', 'danger')
+                    }
+
                 }
-                catch(e){
-                    console.log(e)
-                    this.showToastMessage(e, 'danger')
-                    this.spinner = false;
+
+                if (this.deviceType == 'tsys')
+                {
+                     console.log('Dailenis, tu código aquí')
                 }
+
+                
             }
             else{
-                console.log("VAL0")
-                this.showToastMessage('ERROR: There was an error get IP address and port of the device.', 'danger')
-            }
-            
+
+                if (this.deviceType == 'shift4')
+                {
+
+                    try{    
+                        this.spinner = true
+                        const anw = await Devices.a930.DoCredit(this.ip, this.port, this.ssl, this.datas, this.callback);
+                        console.log(anw)
+                    }
+                    catch(e){
+                        console.log(e)
+                        this.showToastMessage(e, 'danger')
+                        this.spinner = false;
+                    }
+
+                }
+
+                if (this.deviceType == 'tsys')
+                {
+                    console.log('Dailenis, tu código aquí')
+                }
+
+            }   
         },
         dismissModal() {
             this.$ionic.modalController.dismiss(null);

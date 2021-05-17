@@ -1,8 +1,6 @@
 <template>
     <div class="screen">
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link to="/customer"><ion-button expand="full" color="tertiary"><ion-icon name="arrow-round-back"></ion-icon>{{$t('backoffice.form.buttons.backToCustomersList')}}</ion-button></router-link> -->
 
     <ion-header>
           <ion-toolbar>

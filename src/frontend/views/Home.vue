@@ -198,7 +198,7 @@
               <div  v-for="category in filterCategories"
                :key="category.Id" v-show="!category.ParentId"
                
-               :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'">
+               :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-3 card-categories'">
                 <ion-card  >
 
                   <ion-item @click="productsByCategory(category._id, category.Name, category.Description)">
@@ -286,15 +286,11 @@ export default {
     }
 
     this.order = this.$store.state.order;
-     console.log('El order in Home')
-    console.log(this.order)
     this.configuration = this.$store.state.configuration;
     this.restaurantActive = this.$store.state.restaurantActive
 
     
     this.cart = this.$store.state.cart;
-    console.log('El cart in Home')
-    console.log(this.cart)
 
 
     this.thisMinHour = this.configuration.minHour;
@@ -522,16 +518,11 @@ export default {
  
     productDetails: async function(){
 
-      console.log(JSON.stringify(this.order))
-      console.log(this.order._id && this.order.State=== 0 && this.order.isTicket=== true)
-
       
       if(this.order._id && this.order.State=== 0 && this.order.isTicket=== true){
          this.spinnerTicket = true;
           const response = await Api.fetchById("Order", this.order._id)  
-          if(response.status === 200){
-            console.log('actualizado el ticket');
-            console.log(response.data);
+          if(response.status === 200){           
             this.$store.commit('setOrder', response.data);
             const cartTicket = this.cart;
             const cartOrder = response.data.Products
@@ -606,12 +597,9 @@ export default {
 
    showPickUp(){
 
-     console.log('this.thisMinHour ' + this.thisMinHour)
-    // this.thisMinHour = moment.tz( this.thisMinHour).format('HH:mm') 
      let min1 = this.configuration.minHour;
 
       let response = this.checkPickTime();
-      console.log(response)
       if(!this.timeToPick )return this.alertNoTimeToPick(min1);
       if(response)  min1 = response;
       
@@ -637,12 +625,9 @@ export default {
 
    showCurbside(){
 
-     console.log('this.thisMinHour ' + this.thisMinHour)
-    // this.thisMinHour = moment.tz( this.thisMinHour).format('HH:mm') 
      let min1 = this.configuration.minHour;
 
       let response = this.checkPickTime();
-      console.log(response)
       if(!this.timeToPick )return this.alertNoTimeToPick(min1);
       if(response)  min1 = response;
       
@@ -711,10 +696,7 @@ export default {
     if(response){
       min = response;
     }  
-    
-    console.log('min '+ min);
-    console.log('now '+ now);
-    console.log('max '+ max);
+ 
             
     if(now < min || now > max){
       this.alertNoTimeToPick(min)
@@ -849,11 +831,7 @@ export default {
 
       Api.fetchById("Table", tableId).then(response => {        
       this.spinner = false  
-      console.log('fuera de table home');
-      console.log(response);
         if(response.status === 200 && response.data.Available){
-
-          console.log('dentro de table home');
 
           const seat = response.data.Seats.findIndex(t => t.name === value)
           if(seat !== -1){
@@ -1135,8 +1113,7 @@ export default {
   },
 
   showOrder(){
-    console.log('cart in showOrder')
-    console.log(this.cart)
+   
     if(this.cart.length > 0)
       if(this.cart[0].fromCatering === true)
         return this.$router.push({ name: 'OrderCatering' }) 

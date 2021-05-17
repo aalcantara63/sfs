@@ -16,17 +16,17 @@
                     <!-- <span class="iconify" data-icon="dashicons:businessman" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.fields.email')}}</span>
                 </ion-segment-button>
-                <ion-segment-button value="twilio">
+                <ion-segment-button value="sms">
                     <!-- <span class="iconify" data-icon="mdi:sitemap" data-inline="false"></span> -->
-                    <span>{{$t('backoffice.form.titles.twilioSMS')}}</span>
+                    <span>SMS</span>
                 </ion-segment-button>
-                <ion-segment-button value="shift4">
+                <ion-segment-button value="payments">
                     <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
-                    <span>{{$t('backoffice.form.titles.shift4')}}</span>
+                    <span>{{$t('backoffice.titles.payments')}}</span>
                 </ion-segment-button>
-                <ion-segment-button value="auth">
+                <ion-segment-button value="capcha">
                     <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
-                    <span>{{$t('backoffice.form.titles.auth')}}</span>
+                    <span>{{$t('backoffice.form.titles.capcha')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="user">
                     <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
@@ -84,9 +84,17 @@
             <br/>
             <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="save()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
-        <div v-if="twilio">
+        <div v-if="sms">
             <ion-item>
                 <ion-label>{{$t('backoffice.form.titles.twilioSMS')}}</ion-label> 
+            </ion-item>
+            <ion-item>
+                <ion-label >{{$t('backoffice.form.fields.acivateTwilio')}}
+                    <ion-toggle name="activateTwilio" style="top: 12px;" Key="other"
+                    @ionChange="setActivate($event.target.checked, 'twilio')" 
+                    :checked ="activateTwilio">
+                    </ion-toggle>
+                </ion-label>
             </ion-item>
             <ion-item>
                 <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.twFromNumber')}}</ion-label>
@@ -111,76 +119,133 @@
                 </ion-input>
                 <ion-chip slot="end" color="primary" outline="true" @click="changeTwToken()"><ion-icon name="eye"></ion-icon></ion-chip>
             </ion-item>
+
+            <ion-item>
+                <ion-label>{{$t('backoffice.form.titles.sinchSMS')}}</ion-label> 
+            </ion-item>
+            <ion-item>
+                <ion-label >{{$t('backoffice.form.fields.acivateSinch')}}
+                    <ion-toggle name="activateSinch" style="top: 12px;"
+                    @ionChange="setActivate($event.target.checked, 'sinch')" 
+                    :checked ="activateSinch">
+                    </ion-toggle>
+                </ion-label>
+            </ion-item>
+            <ion-item>
+                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.sinchFromNumber')}}</ion-label>
+                <ion-input type="text" name="SinchFromNumber"
+                    @input="SinchFromNumber = $event.target.value" 
+                    v-bind:value="SinchFromNumber">
+                </ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.sinchAccountSID')}}</ion-label>
+                <ion-input :type="showSinchAccountSid" name="SinchAccountSid"
+                @input="SinchAccountSid = $event.target.value" 
+                v-bind:value="SinchAccountSid">
+                </ion-input>
+                <ion-chip slot="end" color="primary" outline="true" @click="changeSinchAccountSid()"><ion-icon name="eye"></ion-icon></ion-chip>
+            </ion-item>
+            <ion-item>
+                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.sinchToken')}}</ion-label>
+                <ion-input :type="showSinchToken" name="SinchToken"
+                @input="SinchToken = $event.target.value" 
+                v-bind:value="SinchToken">
+                </ion-input>
+                <ion-chip slot="end" color="primary" outline="true" @click="changeSinchToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+            </ion-item>
             <br/>
             <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="save()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
-        <!-- Authorize.net -->
-        <div v-if="auth">
-          <ion-item>
-              <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.endPointUrl')}}</ion-label>
-              <ion-input type="text" name="endPointUrl"
-              @input="endPointUrl = $event.target.value" 
-              v-bind:value="endPointUrl">
-              </ion-input>
-          </ion-item>
-          <ion-item>
-              <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.apiLoginId')}}</ion-label>
-              <ion-input :type="showApiLoginId" name="apiLoginId"
-              @input="apiLoginId = $event.target.value" 
-              v-bind:value="apiLoginId">
-              </ion-input>
-              <ion-chip slot="end" color="primary" outline="true" @click="changeApiLoginId()"><ion-icon name="eye"></ion-icon></ion-chip>
-          </ion-item>
-          <ion-item>
-              <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.transactionKey')}}</ion-label>
-              <ion-input :type="showTransactionKey" name="transactionKey"
-              @input="transactionKey = $event.target.value" 
-              v-bind:value="transactionKey">
-              </ion-input>
-              <ion-chip slot="end" color="primary" outline="true" @click="changeTransactionKey()"><ion-icon name="eye"></ion-icon></ion-chip>
-          </ion-item>
-
+        <!-- Capcha -->
+        <div v-if="capcha">
+            <ion-item>
+                <ion-label>{{$t('backoffice.form.titles.capcha')}}</ion-label> 
+            </ion-item>
+            <ion-item>
+                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.capchaKey')}}</ion-label>
+                <ion-input type="text" name="capchaKey"
+                @input="capchaKey = $event.target.value" 
+                v-bind:value="capchaKey">
+                </ion-input>
+            </ion-item>
         </div>
-        <!-- Shift4 -->
-        <div v-if="shift4">
-            <ion-item>
-                <ion-label>{{$t('backoffice.form.titles.shift4')}}</ion-label> 
-            </ion-item>
-            <ion-item>
-                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.endPointUrl')}}</ion-label>
-                <ion-input type="text" name="EndPointURLShift4"
-                @input="EndPointURLShift4 = $event.target.value" 
-                v-bind:value="EndPointURLShift4">
-                </ion-input>
-            </ion-item>
-            <ion-item>
-                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.clientGuid')}}</ion-label>
-                <ion-input type="text" name="ClientGUIDShift4"
-                @input="ClientGUIDShift4 = $event.target.value" 
-                v-bind:value="ClientGUIDShift4">
-                </ion-input>
-            </ion-item>
-            <ion-item>
-                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.interfazVersion')}}</ion-label>
-                <ion-input type="text" name="InterfaceVersionShift4"
-                @input="InterfaceVersionShift4 = $event.target.value" 
-                v-bind:value="InterfaceVersionShift4">
-                </ion-input>
-            </ion-item>
-            <ion-item>
-                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.interfazName')}}</ion-label>
-                <ion-input type="text" name="InterfaceNameShift4"
-                @input="InterfaceNameShift4 = $event.target.value" 
-                v-bind:value="InterfaceNameShift4">
-                </ion-input>
-            </ion-item>
-            <ion-item>
-                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.companyName')}}</ion-label>
-                <ion-input type="text" name="CompanyNameShift4"
-                @input="CompanyNameShift4 = $event.target.value" 
-                v-bind:value="CompanyNameShift4">
-                </ion-input>
-            </ion-item>
+        <!-- Payments -->
+        <div v-if="payments">
+            <ion-segment id="paymentsSegment" @ionChange="paySegmentChanged($event.target.value)" :value="paySegmentValue" @input="value=paySegmentValue">
+                <ion-segment-button value="shift4">
+                    <!-- <span class="iconify" data-icon="dashicons:businessman" data-inline="false"></span> -->
+                    <span>{{$t('backoffice.form.titles.shift4')}}</span>
+                </ion-segment-button>
+                <ion-segment-button value="auth">
+                    <!-- <span class="iconify" data-icon="dashicons:businessman" data-inline="false"></span> -->
+                    <span>{{$t('backoffice.form.titles.auth')}}</span>
+                </ion-segment-button>
+            </ion-segment>
+            <!-- Shift4 -->
+            <div v-if="shift4">
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.endPointUrl')}}</ion-label>
+                    <ion-input type="text" name="EndPointURLShift4"
+                    @input="EndPointURLShift4 = $event.target.value" 
+                    v-bind:value="EndPointURLShift4">
+                    </ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.clientGuid')}}</ion-label>
+                    <ion-input type="text" name="ClientGUIDShift4"
+                    @input="ClientGUIDShift4 = $event.target.value" 
+                    v-bind:value="ClientGUIDShift4">
+                    </ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.interfazVersion')}}</ion-label>
+                    <ion-input type="text" name="InterfaceVersionShift4"
+                    @input="InterfaceVersionShift4 = $event.target.value" 
+                    v-bind:value="InterfaceVersionShift4">
+                    </ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.interfazName')}}</ion-label>
+                    <ion-input type="text" name="InterfaceNameShift4"
+                    @input="InterfaceNameShift4 = $event.target.value" 
+                    v-bind:value="InterfaceNameShift4">
+                    </ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.companyName')}}</ion-label>
+                    <ion-input type="text" name="CompanyNameShift4"
+                    @input="CompanyNameShift4 = $event.target.value" 
+                    v-bind:value="CompanyNameShift4">
+                    </ion-input>
+                </ion-item>
+            </div>
+            <!-- Authorize.net -->
+            <div v-if="auth">
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.endPointUrl')}}</ion-label>
+                    <ion-input type="text" name="endPointUrl"
+                    @input="endPointUrl = $event.target.value" 
+                    v-bind:value="endPointUrl">
+                    </ion-input>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.apiLoginId')}}</ion-label>
+                    <ion-input :type="showApiLoginId" name="apiLoginId"
+                    @input="apiLoginId = $event.target.value" 
+                    v-bind:value="apiLoginId">
+                    </ion-input>
+                    <ion-chip slot="end" color="primary" outline="true" @click="changeApiLoginId()"><ion-icon name="eye"></ion-icon></ion-chip>
+                </ion-item>
+                <ion-item>
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.transactionKey')}}</ion-label>
+                    <ion-input :type="showTransactionKey" name="transactionKey"
+                    @input="transactionKey = $event.target.value" 
+                    v-bind:value="transactionKey">
+                    </ion-input>
+                    <ion-chip slot="end" color="primary" outline="true" @click="changeTransactionKey()"><ion-icon name="eye"></ion-icon></ion-chip>
+                </ion-item>
+            </div>
             <br/>
             <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="save()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
@@ -317,14 +382,23 @@ export default {
       Secure: false,
       Password: '',
 
-      //Twilio
+      //SMS
       TwFromNumber: '',
       TwAccountSid: '',
       TwToken: '',
       FreeTwilioMessage: 0,
+      activateTwilio: false,
 
       showTwAccountSid: "password",
       showTwToken: "password",
+
+      SinchFromNumber: '',
+      SinchAccountSid: '',
+      SinchToken: '',
+      activateSinch: false,
+
+      showSinchAccountSid: "password",
+      showSinchToken: "password",
 
       //Authorize.net
       endPointUrl : '',
@@ -341,17 +415,25 @@ export default {
       InterfaceNameShift4: '',
       CompanyNameShift4: '',
 
+      //Capcha
+      capchaKey: '',
+
       id: null,
       isBackdrop: false,
       spinner: false,
 
       //Segment
       segmentValue: 'email',
+      paySegmentValue: 'shift4',
       email: true,
-      twilio: false,
-      auth: false,
-      shift4: false,
+      sms: false,
+      payments: false,
+      capcha: false,
       user: false,
+
+      //Payments segments
+      shift4: true,
+      auth: false,
 
       //Users
       users: [],
@@ -390,44 +472,78 @@ export default {
         else
             this.showTwToken = "password"
     },
+    changeSinchAccountSid(){
+        if (this.showSinchAccountSid == "password")
+            this.showSinchAccountSid = "text"
+        else
+            this.showSinchAccountSid = "password"
+    },
+    changeSinchToken(){
+        if (this.showSinchToken == "password")
+            this.showSinchToken = "text"
+        else
+            this.showSinchToken = "password"
+    },
+    setActivate(val, system){
+        if (system === 'twilio'){
+            this.activateTwilio = val
+            if (val)
+                this.activateSinch = !val
+        }
+        if(system === 'sinch'){
+            if (val)
+                this.activateTwilio = !val
+            this.activateSinch = val
+        }
+    },
     segmentChanged(value){            
         console.log(value)
         if(value === 'email'){
             this.email = true
-            this.twilio = false
-            this.auth = false
-            this.shift4 = false
+            this.sms = false
+            this.payments = false
+            this.capcha = false
             this.user = false
         }
-        if(value === 'twilio'){
+        if(value === 'sms'){
             this.email = false
-            this.twilio = true
-            this.auth = false
-            this.shift4 = false
+            this.sms = true
+            this.payments = false
+            this.capcha = false
             this.user = false
         }
-        if(value === 'auth'){
+        if(value === 'payments'){
             this.email = false
-            this.twilio = false
-            this.auth = true
-            this.shift4 = false
+            this.sms = false
+            this.payments = true
+            this.capcha = false
             this.user = false          
         }
-        if(value === 'shift4'){
+        if(value === 'capcha'){
             this.email = false
-            this.twilio = false
-            this.auth = false
-            this.shift4 = true
+            this.sms = false
+            this.payments = false
+            this.capcha = true
             this.user = false          
         }
         if(value === 'user'){
             this.email = false
-            this.twilio = false
-            this.auth = false
-            this.shift4 = false
+            this.sms = false
+            this.payments = false
+            this.capcha = false
             this.user = true
         }
         this.segmentValue = value;
+    },
+    paySegmentChanged(value){
+        if(value === 'shift4'){
+            this.shift4 = true
+            this.auth = false
+        }
+        if(value === 'auth'){
+            this.shift4 = false
+            this.auth = true
+        }
     },
     handleInput(value){
       this.filterUsers = this.users
@@ -547,6 +663,8 @@ export default {
                   console.log(response)
                   if (response.data.length > 0)
                   {
+                      console.log("iMenuSupport")
+                      console.log(response.data[0])
                       this.id = response.data[0]._id
                       this.SmtpHost = response.data[0].SmtpHost
                       this.EmailHost = response.data[0].EmailHost
@@ -556,12 +674,23 @@ export default {
                       this.TwFromNumber = response.data[0].TwFromNumber
                       this.TwAccountSid = response.data[0].TwAccountSid
                       this.TwToken = response.data[0].TwToken
+
+                      if (response.data[0].smsSystem === 'twilio')
+                        this.activateTwilio = true
+                      if (response.data[0].smsSystem === 'sinch')
+                        this.activateSinch = true
+
+                      this.SinchFromNumber = response.data[0].SinchFromNumber
+                      this.SinchAccountSid = response.data[0].SinchAccountSid
+                      this.SinchToken = response.data[0].SinchToken
+
                       this.FreeTwilioMessage = response.data[0].FreeTwilioMessage
                       this.EndPointURLShift4 = response.data[0].EndPointURLShift4
                       this.ClientGUIDShift4 = response.data[0].ClientGUIDShift4
                       this.InterfaceVersionShift4 = response.data[0].InterfaceVersionShift4
                       this.InterfaceNameShift4 = response.data[0].InterfaceNameShift4
                       this.CompanyNameShift4 = response.data[0].CompanyNameShift4
+                      this.capchaKey = response.data[0].CaptchaKey
                   }
                   
                   loading.dismiss();
@@ -628,6 +757,13 @@ export default {
           this.isBackdrop = true;
 
             console.log(this.pickFrom);
+
+            let smsSystem = ''
+            if (this.activateTwilio)
+                smsSystem = 'twilio'
+            if (this.activateSinch)
+                smsSystem = 'sinch'
+            
             let item = {
                 "SmtpHost": this.SmtpHost,
                 "EmailHost": this.EmailHost,
@@ -637,12 +773,17 @@ export default {
                 "TwFromNumber": this.TwFromNumber,
                 "TwAccountSid": this.TwAccountSid,
                 "TwToken": this.TwToken,
+                "SinchFromNumber": this.SinchFromNumber,
+                "SinchAccountSid": this.SinchAccountSid,
+                "SinchToken": this.SinchToken,
+                "smsSystem": smsSystem,
                 "FreeTwilioMessage": this.FreeTwilioMessage,
                 "EndPointURLShift4": this.EndPointURLShift4,
                 "ClientGUIDShift4": this.ClientGUIDShift4,
                 "InterfaceVersionShift4": this.InterfaceVersionShift4,
                 "InterfaceNameShift4": this.InterfaceNameShift4,
                 "CompanyNameShift4": this.CompanyNameShift4,
+                "CaptchaKey": this.captchaKey,
             }
 
             //If I am editing

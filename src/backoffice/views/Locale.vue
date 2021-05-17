@@ -1,6 +1,4 @@
 <template>
-    <!-- <ion-content id="locale" class="locale"> -->
-
         <!-- <ion-list> -->
             <ion-item id="locale" class="locale">
                 <ion-label>{{$t('backoffice.form.titles.selectALanguage')}}</ion-label>
@@ -12,15 +10,6 @@
                 </ion-select>
             </ion-item>
         <!-- </ion-list> -->
-
-        <!-- <ion-segment color="tertiary" :value="currentLanguaje">
-            <ion-segment-button v-for="language in languages"
-                                :key="language.locale" 
-                                :value="language.locale"
-                                @click="changeLanguage(language.locale)">
-                <ion-label>{{language.title}}</ion-label>
-            </ion-segment-button>
-        </ion-segment> -->
 
     <!-- </ion-content> -->
 </template>

@@ -7,9 +7,8 @@
 
             <div style="padding: 20px 15px; text-align: center">
 
-                <ion-button :disabled="spinner1? true: false"  fill="outline" @click="cancel">{{Cancel}}</ion-button>
-                <ion-button :disabled="spinner1 || !canPay? true: false"
-                fill="outline" 
+                <ion-button   fill="outline" @click="cancel">{{Cancel}}</ion-button>
+                <ion-button fill="outline" 
                  @click="senPayment">{{Acept}}</ion-button>
 
                 <div v-if="spinner1" style="margin: 10px">
@@ -27,11 +26,11 @@
 </template>
 
 <script>
+
 export default {
     name: 'UsbCashDoor',
     created: async function(){        
-    
-        
+       
     },  
     data() {
         return {     
@@ -50,13 +49,7 @@ export default {
         parent: {type: Object, default: ()=> {}} ,
         Acept:  {type: String, default:"" } ,
         Cancel:  {type: String, default:"" } ,
-        ccode:  {type: String, default:"" } ,
-        postalCode:  {type: String, default:"" } ,
-        addressLine1:  {type: String, default:"" } ,
-        codeNotValid:  {type: String, default:"" } ,
-        cityText:  {type: String, default:"" } ,
-        stateText:  {type: String, default:"" } ,
-        dataRequired:  {type: String, default:"" } ,
+      
     },   
     
     methods:{

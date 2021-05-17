@@ -2,26 +2,26 @@
   <div>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Change Server Id</ion-title>
+        <ion-title>{{parent.$t('backoffice.form.fields.oldServerId')}}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">        
         <ion-item>
-            <ion-label position="floating"><span style="color: red">*</span>Old Server Id</ion-label>
+            <ion-label position="floating"><span style="color: red">*</span>{{parent.$t('backoffice.form.fields.oldServerId')}}</ion-label>
             <ion-input type="number" name="oldServerId"
             @input="oldServerId = $event.target.value" 
             v-bind:value="oldServerId">
             </ion-input>
         </ion-item>
         <ion-item>
-            <ion-label position="floating"><span style="color: red">*</span>New Server Id</ion-label>
+            <ion-label position="floating"><span style="color: red">*</span>{{parent.$t('backoffice.form.fields.newServerId')}}</ion-label>
             <ion-input type="number" name="newServerId"
             @input="newServerId = $event.target.value" 
             v-bind:value="newServerId">
             </ion-input>
         </ion-item>
         <!-- <ion-item></ion-item> -->
-        <ion-button expand="full" color="danger" :disabled="!isValidForm()" @click="changeServerId()">Change</ion-button>
+        <ion-button expand="full" color="danger" :disabled="!isValidForm()" @click="changeServerId()">{{parent.$t('backoffice.form.buttons.change')}}</ion-button>
         <ion-button expand="full" color="primary" @click="dismissModal()">X</ion-button>
     </ion-content>
   </div>
@@ -29,7 +29,7 @@
 
 <script>
 import { Api } from '../api/api.js';
-
+import { payAuthorizeNet } from '../api/payments.js';
 
 export default {
   name: 'ChangeModal',
@@ -95,6 +95,7 @@ export default {
         .then(response => {
             console.log(response.data)
             this.parent.$store.commit("setUser", user)
+            payAuthorizeNet.setClerkId(user.ServerId)
             this.showToastMessage("The Server Id was changed successfully", "success")
             this.dismissModal()
         })

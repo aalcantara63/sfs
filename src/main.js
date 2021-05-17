@@ -8,8 +8,7 @@ import { i18n } from '@/plugins/i18n'
 import App from './App.vue'
 import VuePaginate from 'vue-paginate'
 import VTooltip from 'v-tooltip'
-
-
+import Cors from 'cors'
 // import orouter from './frontend/router'
 import router from './backoffice/router/index.js'
 
@@ -116,12 +115,14 @@ addIcons({
 Vue.use(Ionic);
 Vue.use(Vuex);
 Vue.use(VModal);
+Vue.use(Cors);
 Vue.use(VTooltip);
 Vue.use(VuePaginate)
 Vue.use(VueGoogleMaps, {
   load: {
     // key: 'AIzaSyATqn9NEXjO84wIQKcw4i6_1fgb18Bz4TM'
-    key: 'AIzaSyDYCBGdIbp7XptHUOP2fDJogYvFTbmh5qw'
+    // key: 'AIzaSyDYCBGdIbp7XptHUOP2fDJogYvFTbmh5qw'
+    key: 'AIzaSyBawocz2WyVtKJaJx58SBKZewY1JRONmjk'
   }
 })
 
@@ -140,11 +141,8 @@ const store = new Vuex.Store({
     allOrders: [], 
     allTickets: [], 
     configuration: {}, 
-    hasRating: false, 
-
-
-    
-    
+    hasRating: false,  
+    device: {},    
   },
   mutations: {
     setAuthentication(state, status) {
@@ -187,11 +185,9 @@ const store = new Vuex.Store({
     setHasRating(state, hasRating){      
       state.hasRating = hasRating;
     },
-  
-
-
-  
-   
+    setDevice(state, device){
+      state.device = device
+    },
   
   }
 });

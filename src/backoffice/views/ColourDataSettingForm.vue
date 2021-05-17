@@ -1,7 +1,6 @@
 <template>
     <div class="screen" style="margin-bottom: 160px">
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link> -->
 
     <ion-header>
           <ion-toolbar>
@@ -20,22 +19,12 @@
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
     <div v-else>
-        
-        <!-- <div style="width: auto; height: auto; border: lightgray 1px solid;">
-            <ColorExample :secondaryStyles="getSecondaryStyles()"/>
-        </div> -->
 
         <div class="fixed-outside" :style="[previewBackground()]">
-            <div :style="[getToolbarStyles()]"><ion-icon name="menu" class="menu-col-2" style="float: left;font-size: 30px"></ion-icon><div style="margin-top: 5px; width: 66%; float:left">Restaurant Name</div><ion-icon name="settings" class="menu-col-2" style="float: right;font-size: 30px;"></ion-icon></div>
+            <div :style="[getToolbarStyles()]"><ion-icon name="menu" class="menu-col-2" style="float: left;font-size: 30px"></ion-icon><div style="margin-top: 5px; width: 66%; float:left">{{$t('backoffice.titles.restaurantName')}}</div><ion-icon name="settings" class="menu-col-2" style="float: right;font-size: 30px;"></ion-icon></div>
             <div :style="[getPrimaryStyles()]" >{{$t('frontend.app.deliver')}}</div>
             <div :style="[getSecondaryStyles()]" >{{$t('frontend.app.pickup')}}</div>
             <div :style="[getTertiaryStyles()]" >{{$t('frontend.app.table')}}</div>
-            <!-- <div>
-                <div :style="[getCartStyles()]"><ion-icon name="cart" size="large" style="margin-right:0"></ion-icon></div>
-                <div  style="float: left; margin: 15px;">
-                    <a >{{$t('frontend.home.checkout')}}</a>
-                </div>
-            </div> -->
         
             <div><ion-button color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
             <ion-button color="secondary" :disabled="id === null" @click="setDefault()">{{$t('backoffice.form.buttons.defaultColor')}}</ion-button>
@@ -43,7 +32,6 @@
         </div>
         <ion-item>
             <ion-label>{{$t('backoffice.form.colour.primaryColor')}}</ion-label>
-            <!-- <ion-label><div class="preView" :style="[getPrimaryStyles()]">{{$t('backoffice.form.colour.primary')}}</div></ion-label> -->
         </ion-item>
         <ion-item>
             <slider-picker style="width: 100%" 
@@ -63,7 +51,6 @@
 
         <ion-item>
             <ion-label>{{$t('backoffice.form.colour.secondaryColor')}}</ion-label>
-            <!-- <ion-label><div class="preView" :style="[getSecondaryStyles()]">{{$t('backoffice.form.colour.secondary')}}</div></ion-label> -->
         </ion-item>
         <ion-item>
             <slider-picker style="width: 100%" 
@@ -83,7 +70,6 @@
 
         <ion-item>
             <ion-label>{{$t('backoffice.form.colour.tertiaryColor')}}</ion-label>
-            <!-- <ion-label><div class="preView" :style="[getTertiaryStyles()]">{{$t('backoffice.form.colour.tertiary')}}</div></ion-label> -->
         </ion-item>
         <ion-item>
             <slider-picker style="width: 100%" 
@@ -101,49 +87,8 @@
         <ion-item>
         </ion-item>
 
-        <!-- <ion-item>
-            <ion-label>{{$t('backoffice.form.colour.successColor')}}</ion-label>
-            <ion-label><div class="preView" :style="[getSuccessStyles()]">{{$t('backoffice.form.colour.success')}}</div></ion-label>
-        </ion-item>
-        <ion-item>
-            <slider-picker
-            @input="successBackground = $event" 
-            v-bind:value="successBackground" />
-        </ion-item>
-        <ion-item>
-        </ion-item>
-        <ion-item><ion-label>{{$t('backoffice.form.colour.successText')}}</ion-label></ion-item>
-        <ion-item>
-            <slider-picker
-            @input="successContrast = $event" 
-            v-bind:value="successContrast" />
-        </ion-item>
-        <ion-item>
-        </ion-item>
-
-        <ion-item>
-            <ion-label>{{$t('backoffice.form.colour.dangerColor')}}</ion-label>
-            <ion-label><div class="preView" :style="[getDangerStyles()]">{{$t('backoffice.form.colour.danger')}}</div></ion-label>
-        </ion-item>
-        <ion-item>
-            <slider-picker
-            @input="dangerBackground = $event" 
-            v-bind:value="dangerBackground" />
-        </ion-item>
-        <ion-item>
-        </ion-item>
-        <ion-item><ion-label>{{$t('backoffice.form.colour.dangerText')}}</ion-label></ion-item>
-        <ion-item>
-            <slider-picker
-            @input="dangerContrast = $event" 
-            v-bind:value="dangerContrast" />
-        </ion-item>
-        <ion-item>
-        </ion-item> -->
-
         <ion-item>
             <ion-label>{{$t('backoffice.form.colour.backgroundColor')}}</ion-label>
-            <!-- <ion-label><div class="preView" :style="[getBackgroundStyles()]">{{$t('backoffice.form.colour.background')}}</div></ion-label> -->
         </ion-item>
         <ion-item>
             <slider-picker style="width: 100%" 

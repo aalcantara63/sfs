@@ -3,18 +3,24 @@ import qs from 'qs';
 // import md5 from 'http://www.myersdaily.org/joseph/javascript/md5.js';
 import MD5 from "crypto-js/md5";
 import SHA512 from "crypto-js/sha512";
-import { data } from 'currency-codes';
+// import { data } from 'currency-codes';
 // import Api from '../api/api.js';
 import { Api } from '../api/api.js';
-
+import { OlaPay } from '../api/olapay';
 
 export var payAuthorizeNet = {
+
+    clerkId: 1,
 
     // endPointURL: "https://apitest.authorize.net/xml/v1/request.api",
     // apiLoginId: "28gw3VWb",
     // transactionKey: "9d5Ubw5L6J7P7cGn",
     
     endPointURL: 'https://sls-eus-dev-serverless-succes-api.azurewebsites.net/api/',
+
+    setClerkId: function(clerkId){
+        this.clerkId = clerkId
+    },
 
     activatePaymentMethod: async function(datas){
 
@@ -54,7 +60,85 @@ export var payAuthorizeNet = {
                 
             } catch (error) {
                 console.log(error)
-                throw new Error("Problem contact with Shift4")  
+                throw new Error("Try another payment method")  
+            }
+        }
+        if (payMethod === 'TSYS')
+        {
+            try {
+                  const item = {
+                    "transactionID": invoice
+                    }
+
+                console.log('Capture in TSYS. con invoice : ' + invoice)
+
+                const res = await Api.captureTsys(item, restaurantId);
+                console.log('RESPONSE delCapture in TSYS.')
+                console.log(res);
+                if (res.status == 200 && res.statusText === "OK" && res.data.CaptureResponse.status ==='PASS'){ 
+                    const capRes = await Api.invoiceTsys(invoice, restaurantId);
+                    if (capRes.status == 200 && capRes.statusText === "OK" && capRes.data.GetReportDataResponse.status ==='PASS'){ 
+                        const response1 = {
+                            "total": capRes.data.GetReportDataResponse.reportData.ROW.amount,
+                            "transId":capRes.data.GetReportDataResponse.reportData.ROW.invoiceNumber,
+                            "accountNumber": capRes.data.GetReportDataResponse.reportData.ROW.cardNumber,
+                            "expirationCard": '',
+                            "accountType": capRes.data.GetReportDataResponse.reportData.ROW.cardType,
+                            "method": 'Authorization',
+                            "moto": moto,
+                        } 
+                        console.log(response1)
+                        return response1;
+                    }
+                  
+                }
+                
+            } catch (error) {
+                console.log(error)
+                throw new Error("Try another payment method")  
+            }
+        }
+        if (payMethod === 'OlaPay')
+        {
+            try {
+                console.log('Capture in OLAPAY. con invoice : ' + invoice)
+                const item = { 
+                    'Search': { "trans_id": invoice, }                       
+                }              
+                const resp = await OlaPay.search(this.ip, this.port, this.ssl, item);
+                if(resp){
+                    const item = { 
+                        'Capture':{
+                            "Amount": resp.total,     
+                            "TransactionID": invoice
+                        }                      
+                    }
+                    this.spinner = true;
+                    const respCapture = await OlaPay.capture(this.ip, this.port, this.ssl, item);
+                    if(respCapture){
+                        console.log('respCapture: '+ respCapture)
+                        const item1 = { 
+                            'Search': { "trans_id": respCapture, }                       
+                        } 
+                        const search = await OlaPay.search(this.ip, this.port, this.ssl, item1);
+                        if(search){
+                            const response1 = {
+                                "total": search.total,
+                                "transId":search.transId,
+                                "accountNumber": '',
+                                "expirationCard": '',
+                                "accountType": search.accountType,
+                                "method": 'Authorization',
+                                "moto": false,
+                            } 
+                            return response1;
+                        }                        
+                    }   
+                }
+                 
+            } catch (error) {
+                console.log(error)
+                throw new Error("Try another payment method")  
             }
         }
 
@@ -71,7 +155,7 @@ export var payAuthorizeNet = {
 
        if (payMethod === 'SHIFT4')
         {
-
+            
             let prodNames = []
             if (datas.products)  datas.products.forEach(p => { prodNames.push(p.Name)});
 
@@ -91,6 +175,8 @@ export var payAuthorizeNet = {
                     delete items.transaction.authSource;
                     delete items.transaction.responseCode;
                     delete items.transaction.saleFlag;
+                    delete items.card.entryMode;
+                    delete items.card.present;
                     console.log(items)
                     items.amount.tax = datas.tax;
                     items.amount.total =datas.total;
@@ -110,7 +196,8 @@ export var payAuthorizeNet = {
             else{
                 const invoiceSequence = await Api.getInvoiceSequence(restaurantId)
                 invoiceNumber = invoiceSequence.data;
-                const resObj = await Api.fetchById('Restaurant', restaurantId);                           
+                const resObj = await Api.fetchById('Restaurant', restaurantId);
+                console.log('CLERK ID: '+ this.clerkId)
 
                 items = {
                     "amount": {
@@ -119,8 +206,9 @@ export var payAuthorizeNet = {
                       "tip": datas.tip,
                     },
                     "clerk":{
-                        "numericId": 1
+                        "numericId": this.clerkId
                     },
+                    // "apiOptions": ["ALLOWPARTIALAUTH"],
                     "card": {
                       "entryMode": "M",
                       "present": "N",
@@ -150,9 +238,22 @@ export var payAuthorizeNet = {
                     items.googlePayToken = datas.googlePayToken;
                  if(datas.applePayToken)
                     items.applePayToken = datas.applePayToken;
-                if(datas.p2pe)  
-                    items.p2pe = { "data": datas.p2pe, "format": '01' }
+                if(datas.p2pe)  {
+                     items.p2pe = { "data": datas.p2pe, "format": '01' }
+                     items.card.entryMode="";
+                     items.card.present="";
+                     items.card.securityCode.indicator="";
+                     moto = 'moto';
+                }                   
+                if(datas.p2pe && !datas.zip && !datas.cardSecurityCode && !datas.address ){
+                    // items.card.entryMode="";
+                    // items.card.present="";
+                    moto = 'fb'  }
+
+                    console.log('iTEM TO PAY')
+                    console.log(JSON.parse(JSON.stringify(items)))
             }
+
 
             try {
                 const ipClient = await Api.getClientIp();                
@@ -161,8 +262,6 @@ export var payAuthorizeNet = {
                 console.log(JSON.stringify(items));
                 const res = await Api.authorizeShift4(items, moto, restaurantId, ipClient.data.ip); 
                 console.log(res);
-
-
         
                 if (res.status == 200 && res.statusText === "OK" && !res.data.msg){ 
                     console.log('response authorization')
@@ -193,16 +292,97 @@ export var payAuthorizeNet = {
             } catch (error) {
                 console.log(error)
                 return false;
-               // throw new Error("Problem contact with Shift4")  
+               // throw new Error("Try another payment method")  
             }
 
              
         }        
+        if (payMethod === 'TSYS')
+        {            
+            let items;
+
+            if(datas.trackData)
+            items = {
+                "Auth": {   
+                    "deviceID": "x",
+                    "transactionKey": "x",                
+                    "cardDataSource": "SWIPE",
+                    "transactionAmount":  datas.total,
+                    "track1Data": datas.trackData,
+                    "terminalCapability": "ICC_CHIP_READ_ONLY",
+                    "terminalOperatingEnvironment": "ON_MERCHANT_PREMISES_ATTENDED",
+                    "cardholderAuthenticationMethod": "NOT_AUTHENTICATED", 
+                    "developerID": "x",
+                }
+            }
+            else{
+                //Buscar el token de la card.
+                const token =  await Api.tokenCardTsys({"cardNumber": datas.cardNumber}, restaurantId) ;                
+                let cardToken = '';
+                if(token.status && token.data.GetOnusTokenResponse)
+                    cardToken = token.data.GetOnusTokenResponse.token;
+                
+                console.log('TOKEN') ;
+                console.log(cardToken);
+
+                items = {
+                    "Auth": {   
+                        "deviceID": "x",
+                        "transactionKey": "x",                
+                        "cardDataSource": "MANUAL",
+                        "transactionAmount":  datas.total,
+                        "cardNumber": cardToken, //datas.cardNumber,
+                        "expirationDate": datas.cardExpirationDateF1,
+                        "cvv2": datas.cardSecurityCode,
+                        "cardHolderName": datas.firstName + ' '+  datas.lastName,
+                        "addressLine1": datas.address,
+                        "zip": datas.zip,
+                        "terminalCapability": "ICC_CHIP_READ_ONLY",
+                        "terminalOperatingEnvironment": "ON_MERCHANT_PREMISES_ATTENDED",
+                        "cardholderAuthenticationMethod": "NOT_AUTHENTICATED", 
+                        "developerID": "x",
+                    }
+                } 
+            }
+           
+            try {               
+                const res = await Api.authorizeTsys(items, restaurantId); 
+                console.log(res);
         
+                if (res.status == 200 && res.statusText === "OK" && res.data.AuthResponse.status ==='PASS'){ 
+                    console.log('response authorization')
+                    console.log();
+                    const response1 = {
+                        "total": res.data.AuthResponse.transactionAmount,
+                        "transId": res.data.AuthResponse.transactionID,
+                        "accountNumber": res.data.AuthResponse.maskedCardNumber,
+                        "expirationCard": '',
+                        "accountType": res.data.AuthResponse.cardType,
+                        "method": 'Card',
+                        "moto": moto,
+                    }   
+                    console.log(response1)
+                    return response1;
+                }
+                else
+                { console.log('FALSE')
+                    console.log(res)
+                   
+                    return false;
+                }
+                
+            } catch (error) {
+                console.log(error)
+                return false;
+               // throw new Error("Try another payment method")  
+            }
+
+             
+        }   
         return true;
     },
 
-     payOrder: async function(datas)
+    payOrder: async function(datas)
     {
         const restaurantId = datas.restaurantId
         const payMethod = datas.payMethod
@@ -212,8 +392,9 @@ export var payAuthorizeNet = {
        if (payMethod === 'SHIFT4')
         {
             const invoiceSequence = await Api.getInvoiceSequence(restaurantId)
-            const resObj = await Api.fetchById('Restaurant', restaurantId)
-            
+            const resObj = await Api.fetchById('Restaurant', restaurantId)                               
+            console.log('CLERK ID: '+ this.clerkId)
+
             let prodNames = []
             if (datas.products)
             {
@@ -229,8 +410,9 @@ export var payAuthorizeNet = {
                   "tip": datas.tip,
                 },
                 "clerk":{
-                    "numericId": 1
+                    "numericId": this.clerkId
                 },
+                // "apiOptions": ["ALLOWPARTIALAUTH"],
                 "card": {
                   "entryMode": "M",
                   "present": "N",
@@ -260,8 +442,19 @@ export var payAuthorizeNet = {
                 items.googlePayToken = datas.googlePayToken;
               if(datas.applePayToken)
                 items.applePayToken = datas.applePayToken;
-              if(datas.p2pe)  
-                items.p2pe = { "data": datas.p2pe, "format": '01' }
+              if(datas.p2pe)  {
+                   items.p2pe = { "data": datas.p2pe, "format": '01' }
+                   items.card.entryMode="";
+                   items.card.present=""; 
+                   items.card.securityCode.indicator="";
+              }
+
+              console.log('iTEM TO PAY')
+              console.log(JSON.parse(JSON.stringify(items)))
+               
+            //   if(datas.p2pe && !datas.zip && !datas.cardSecurityCode && !datas.address ){
+            //       items.card.entryMode="";
+            //       items.card.present="";  }
 
             try {
                 const ipClient = await Api.getClientIp();
@@ -270,31 +463,38 @@ export var payAuthorizeNet = {
                 console.log(JSON.stringify(items));
 
                 const res = await Api.payShift4(items, restaurantId, ipClient.data.ip); 
-
              
                 console.log(res);
 
-
+                console.log('RESPONSE CODE : '+ res.data[0].transaction.responseCode)
         
-                if (res.status == 200 && res.statusText === "OK"){ 
-                    const response1 = {
-                        "total": res.data[0].amount.total,
-                        "transId": res.data[0].transaction.invoice,
-                        "accountNumber": res.data[0].card.number,
-                        "expirationCard": datas.cardExpirationDateF1,
-                        "accountType": res.data[0].card.type,
-                        "method": 'Card',
-                        "moto": false,
-                    }
-                    if(datas.googlePayToken)
-                        response1.method = 'Google Pay'
-                    if(datas.applePayToken)
-                        response1.method = 'Apple Pay'
-                    if(datas.p2pe && datas.zip && datas.cardSecurityCode && datas.address )
-                        response1.moto = true;
-
-                    console.log(response1)
-                    return response1;
+                if (res.status == 200 && res.statusText === "OK" && res.data[0].transaction.responseCode !== 'D'){ 
+                    if(res.data[0].transaction.responseCode === 'P')
+                     return new Error("Partial authorization. Enter a second form of payment.");
+                     else{
+                        const response1 = {
+                            "total": res.data[0].amount.total,
+                            "transId": res.data[0].transaction.invoice,
+                            "accountNumber": res.data[0].card.number,
+                            "expirationCard": datas.cardExpirationDateF1,
+                            "accountType": res.data[0].card.type,
+                            "method": 'Card',
+                            "moto": false,
+                        }
+                        if(datas.googlePayToken)
+                            response1.method = 'Google Pay'
+                        if(datas.applePayToken)
+                            response1.method = 'Apple Pay'
+                        if(datas.p2pe && datas.zip && datas.cardSecurityCode && datas.address )
+                            response1.moto = 'moto';
+                        if(datas.p2pe && !datas.zip && !datas.cardSecurityCode && !datas.address )
+                            response1.moto = 'fb';
+    
+                        console.log(response1)
+                        return response1;
+                         
+                     }
+                   
                 }
                 else
                 {
@@ -304,12 +504,12 @@ export var payAuthorizeNet = {
                 
             } catch (error) {
                 console.log(error)
-                throw new Error("Problem contact with Shift4")  
+                throw new Error("Try another payment method")  
             }
 
              
         }
-        if (payMethod === 'AUTH')
+        else if (payMethod === 'AUTH')
         {
             items = {
                 "transactionType":"authCaptureTransaction",
@@ -359,6 +559,81 @@ export var payAuthorizeNet = {
             } catch (error) {
                 console.log(error)
                 throw new Error("Problem contact with Authorize.net")
+            }
+        } 
+        else if (payMethod === 'TSYS')
+        {
+            if(datas.trackData)
+                items = {
+                    "Sale": {   
+                        "deviceID": "x",
+                        "transactionKey": "x",                
+                        "cardDataSource": "SWIPE",
+                        "transactionAmount":  datas.total,
+                        "track1Data": datas.trackData,
+                        "terminalCapability": "ICC_CHIP_READ_ONLY",
+                        "terminalOperatingEnvironment": "ON_MERCHANT_PREMISES_ATTENDED",
+                        "cardholderAuthenticationMethod": "NOT_AUTHENTICATED", 
+                        "developerID": "x",
+                    }
+                }
+            else{
+                //Buscar el token de la card.
+                const token =  await Api.tokenCardTsys({"cardNumber": datas.cardNumber}, restaurantId) ;                
+                let cardToken = '';
+                if(token.status && token.data.GetOnusTokenResponse)
+                    cardToken = token.data.GetOnusTokenResponse.token;
+                
+                console.log('TOKEN') ;
+                console.log(cardToken);
+
+                items = {
+                    "Sale": {   
+                        "deviceID": "x",
+                        "transactionKey": "x",                
+                        "cardDataSource": "MANUAL",
+                        "transactionAmount":  datas.total,
+                        "cardNumber": cardToken, //datas.cardNumber,
+                        "expirationDate": datas.cardExpirationDateF1,
+                        "cvv2": datas.cardSecurityCode,
+                        "cardHolderName": datas.firstName + ' '+  datas.lastName,
+                        "addressLine1": datas.address,
+                        "zip": datas.zip,
+                        "terminalCapability": "ICC_CHIP_READ_ONLY",
+                        "terminalOperatingEnvironment": "ON_MERCHANT_PREMISES_ATTENDED",
+                        "cardholderAuthenticationMethod": "NOT_AUTHENTICATED", 
+                        "developerID": "x",
+                    }
+                } 
+            }
+               
+            
+            try {
+             const res =  await Api.payTsys(items, restaurantId)            
+                if (res.status == 200 && res.statusText === "OK" && res.data.SaleResponse.status ==='PASS')
+                {
+                    console.log('response Tsys');
+                    console.log(res)
+                   
+                    return {
+                        "total": res.data.SaleResponse.transactionAmount,
+                        "transId": res.data.SaleResponse.transactionID,
+                        "accountNumber": res.data.SaleResponse.maskedCardNumber,
+                        "expirationCard": '',
+                        "accountType": '',
+                        "method": 'Card',
+                        "moto": false,
+                    }
+                }
+                else
+                {
+                    console.log(res)
+                    throw new Error("Error, Try another payment method")
+                }           
+                
+            } catch (error) {
+                console.log(error)
+                throw new Error("Try another payment method");
             }
         } 
         
@@ -437,6 +712,7 @@ export var payAuthorizeNet = {
 
             try {
                 const res = await Api.validateStatusQrShift4(items, restaurantId);   
+                console.log(res)             
                 console.log(res.status)             
                 console.log(res.data.result[0])             
                 if (res.status == 200 && res.data.result[0].transaction){    
@@ -529,12 +805,15 @@ export var payAuthorizeNet = {
 
         if (payMethod === 'SHIFT4')
         {
+                            
+            console.log('CLERK ID: '+ this.clerkId)
+           
             items = {
                 "amount": {
                   "total": datas.total
                 },
                 "clerk":{
-                    "numericId": 1
+                    "numericId": this.clerkId
                 },
                 "card": {
                     "entryMode": "M",
@@ -549,8 +828,8 @@ export var payAuthorizeNet = {
                   "invoice": invoiceSequence.data
                 }
             }
-            console.log("Object Shift Para refound")
-            console.log(items)
+            console.log('iTEM TO REFUND')
+            console.log(JSON.parse(JSON.stringify(items)))
             // return;
             return Api.refoundShift4(items, moto, restaurantId)
         }
@@ -566,10 +845,31 @@ export var payAuthorizeNet = {
                         "expirationDate": datas.cardExpirationDateF2 //2021-12
                     }
                 },
-               "refTransId": data.invoiceNumber
+               "refTransId": datas.invoiceNumber
             }
 
             return Api.refoundAutorizeNet(items, restaurantId)
+        }
+
+        if (payMethod === 'OlaPay')
+        {
+            try {
+                console.log('refund in OLAPAY. con invoice : ' + datas.invoiceNumber)
+                const item = { 
+                    'Return':{
+                        "Amount": datas.total,     
+                        "TransactionID": datas.invoiceNumber
+                    }
+                }              
+                const resp = await OlaPay.goReturn(this.ip, this.port, this.ssl, item);
+                console.log('RESPONSE RETURN OLAPAY')
+                console.log(resp);
+                return resp;
+              
+            }
+            catch(error){
+                console.log(error)
+            }
         }
 
         throw new Error("Debe especificar en metodo de pago")
@@ -585,7 +885,7 @@ export var payAuthorizeNet = {
                 
             } catch (error) {
                 console.log(error)
-                throw new Error("Problem contact with Shift4")  
+                throw new Error("Try another payment method")  
             }
         }
 
@@ -602,7 +902,35 @@ export var payAuthorizeNet = {
                 
             } catch (error) {
                 console.log(error)
-                throw new Error("Problem contact with Shift4")  
+                throw new Error("Try another payment method")  
+            }
+        }
+        //if (payMethod === 'TSYS')
+        if (payMethod === 'OlaPay')
+        {
+            try {
+                console.log('Void in OLAPAY. con invoice : ' + invoice)
+                const item = { 
+                    'Search': { "trans_id": invoice, }                       
+                }              
+                const resp = await OlaPay.search(this.ip, this.port, this.ssl, item);
+                if(resp){
+                    const item = { 
+                        'Void':{
+                            "Amount": resp.total,     
+                            "TransactionID": invoice
+                        }                      
+                    }
+                    const respVoid = await OlaPay.goVoid(this.ip, this.port, this.ssl, item);
+                    if(respVoid){
+                        console.log('Response VOID OLAPAY');
+                        console.log(respVoid)
+                        return respVoid;
+                    }
+                }
+            }
+            catch(error){
+                console.log(error)
             }
         }
 

@@ -1,8 +1,6 @@
 <template>
     <div class="screen">
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link to="/aboutDataSettings"><ion-button expand="full" color="tertiary"><ion-icon name="arrow-round-back"></ion-icon>{{$t('backoffice.form.buttons.backToAboutList')}}</ion-button></router-link> -->
 
     <ion-header>
           <ion-toolbar>
@@ -16,7 +14,7 @@
     </ion-header>
     <br/>
 
-      <!-- <ion-card> -->
+    <!-- <ion-card> -->
     <div v-if="spinner">
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
@@ -46,10 +44,6 @@
           <ion-card v-if="checkImage()" >
               <ion-img :src="file"></ion-img>
           </ion-card>
-          <!-- <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.image')}}</ion-label>
-          <ion-input type="file" accept=".jpg,.png,.gif" name="file"
-          @change="handleImage">
-          </ion-input> -->
         </ion-item>
         <ion-item>
             <div>

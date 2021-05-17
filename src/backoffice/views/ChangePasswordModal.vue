@@ -2,7 +2,7 @@
   <div>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Change Password</ion-title>
+        <ion-title>{{parent.$t('backoffice.titles.changePassword')}}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -21,8 +21,8 @@
               </ion-input>
         </ion-item>
         <br/>
-        <ion-button expand="full" color="primary" @click="save()">Save</ion-button>
-        <ion-button expand="full" color="danger" @click="dismissModal()">Close</ion-button>
+        <ion-button expand="full" color="primary" @click="save()">{{parent.$t('backoffice.form.buttons.save')}}</ion-button>
+        <ion-button expand="full" color="danger" @click="dismissModal()">{{parent.$t('backoffice.list.messages.buttons.close')}} </ion-button>
     </ion-content>
   </div>
 </template>

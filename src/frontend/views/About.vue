@@ -132,14 +132,13 @@
 
          </v-breakpoint>
 
-         <div>
+            <!-- <div>
                 <ion-label >
                     <ion-card-title style="margin: 12px 0 0;">Constact US</ion-card-title>                   
                 </ion-label>
 
-                <div 
-               
-                style="max-width: 600px; margin: 0 auto; border: 1px solid #ececec;">
+                <div                
+                    style="max-width: 600px; margin: 0 auto; border: 1px solid #ececec;">
                     <ion-item >
                         <ion-label position="floating">{{$t('frontend.orderType.email')}} <strong style="color: red">*</strong> </ion-label> 
                         <ion-input  
@@ -155,37 +154,16 @@
                        <vue-recaptcha 
                         :loadRecaptchaScript="true"
                             @verify="onVerify"
-                            sitekey="6LfkGYIaAAAAAAvMzqmKGhCCX6hN0vyd1K8bQV2s">
+                            :sitekey="captchaKey">
                         </vue-recaptcha>
-                        <!-- <ion-icon 
-                            name="refresh" 
-                            color="primary"
-                            size="large" 
-                            style="margin-top: 0px;width: 24px;"
-                            @click="resetRecaptcha" 
-                            v-tooltip="$t('frontend.tooltips.refreshCaptcha')">
-                        </ion-icon>                         -->
                     </div>
-     
-   
-
-
-                    <!-- <vue-recaptcha                       
-                        @verify="onVerify"
-                        @expired="onExpired"
-                        sitekey="6LdVK4IaAAAAAChLN7ncZNIOhPlCfUW905sYYxMf">
-                         <button>Click me</button>
-                    </vue-recaptcha>
-                       -->
-
                     <ion-button expand="full" color="primary" @click="sendContactMsg()">                        
                         Send Message
                         <ion-spinner v-if="spinnerEmail" name="crescent" style="margin: 0 20px;"></ion-spinner>
                     </ion-button>
                 </div>
-
                
-            </div>
+            </div> -->
 
 
          
@@ -243,16 +221,21 @@ import { EventBus } from '../event-bus';
 import Moment from 'moment'
 import { Plugins } from '@capacitor/core';
 const { Share } = Plugins;
-import VueRecaptcha from 'vue-recaptcha';
+// import VueRecaptcha from 'vue-recaptcha';
 
 export default {
     name: 'About',
-    created: function(){
+    created: async function(){
+
+
         this.allRestaurant = this.$store.state.allRestaurant;
         this.configuration = this.$store.state.configuration;
         this.restaurantActive = this.$store.state.restaurantActive       
         this.allRestaurants= this.allRestaurant.filter(p => p._id != this.restaurantSelectedId);        
         this.sliderstData();
+
+       const res = await Api.getCaptchaKey(this.restaurantSelectedId)
+        this.captchaKey = res.data
 
         EventBus.$on('updateCustomer', (value) => {if(value) 
             this.clientId= this.$store.state.customer._id; });
@@ -285,11 +268,12 @@ export default {
             clientId:'',
             hasRating: false,
             key: 0,
-            embebedMap: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyDYCBGdIbp7XptHUOP2fDJogYvFTbmh5qw&q=',
+            embebedMap: 'https://www.google.com/maps/embed/v1/place?key=AIzaSyBawocz2WyVtKJaJx58SBKZewY1JRONmjk&q=',
             emailContact: '',
             msgContact: '',
             spinnerEmail: false,
             sitekey: "6LdVK4IaAAAAAECLMi3WkdELlSJ6bCpFOZAMcsAO",
+            captchaKey: '',
         }
     },
     props: {     
@@ -300,7 +284,7 @@ export default {
   components:{
    StarRating,
    VBreakpoint,
-   VueRecaptcha ,
+//    VueRecaptcha ,
   },
     methods:{
         sliderstData: function(){
@@ -314,7 +298,6 @@ export default {
             })
             .catch(e => {
                 this.spinner = false
-                console.log(e)   
                  return  this.$ionic.alertController
                 .create({
                     cssClass: 'my-custom-class',
@@ -351,9 +334,6 @@ export default {
 
         totalAllRating: function(){
             let totalRating = 0;
-
-            console.log('this.rating')
-            console.log(this.rating)
             
             if(this.rating.length > 0)
             {
@@ -371,9 +351,7 @@ export default {
                     response.data.rating = this.rating;    
                     Api.putIn("Restaurant",  response.data).then(response1 => {                        
                         if(response1.status === 200){ 
-                            console.log('update Raiting in Restaurant');
                             this.hasRating = true;
-                            console.log('hasRating ' + this.hasRating)
                             this.key ++;
                             this.$store.commit('setHasRating',true) ;
 
@@ -386,7 +364,6 @@ export default {
                     })
                     .catch(e => {
                         this.spinner = false
-                        console.log(e)  
                          return  this.$ionic.alertController
                             .create({
                                 cssClass: 'my-custom-class',
@@ -407,7 +384,6 @@ export default {
             })
             .catch(e => {
                 this.spinner = false
-                console.log(e)   
                  return  this.$ionic.alertController
                     .create({
                         cssClass: 'my-custom-class',
@@ -521,7 +497,6 @@ export default {
           });
 
       } catch (error) {        
-         console.log(error)
          this.getError(error);
         
       }
@@ -602,7 +577,6 @@ export default {
             this.emailSended();
             
         } catch (error) {
-            console.log(error);
             this.spinnerEmail = false;
         }
        

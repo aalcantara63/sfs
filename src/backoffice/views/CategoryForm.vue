@@ -1,8 +1,6 @@
 <template>
     <div class="screen">
 
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link to="/category"><ion-button expand="full" color="tertiary"><ion-icon name="arrow-round-back"></ion-icon>{{$t('backoffice.form.buttons.backToCategoriesList')}}</ion-button></router-link> -->
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
     <ion-header>
           <ion-toolbar>
@@ -49,10 +47,6 @@
           <ion-card v-else>
               {{ $t('backoffice.form.titles.imageText')}}
           </ion-card>
-          <!-- <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.image')}}</ion-label>
-          <ion-input type="file" accept=".jpg,.png,.gif" name="file"
-          @change="handleImage">
-          </ion-input> -->
         </ion-item>
         <ion-item>
             <div>
@@ -60,21 +54,6 @@
             </div>
            <input type="file" accept="image/png, image/jpeg" @change="handleImage" />
         </ion-item>
-
-<!-- 
-        <div>
-          <ion-label>File chooser for android</ion-label>
-          <ion-button @click="handleImage3">Load image...</ion-button>
-        </div> -->
-
-        <!-- <div>
-          <ion-label>Image picker</ion-label>
-          <ion-button @click="handleImage4">Image picker</ion-button>
-        </div> -->
-
-        <!-- <div>
-            {{temp}}
-        </div> -->
 
         <ion-list>
             <ion-list-header>

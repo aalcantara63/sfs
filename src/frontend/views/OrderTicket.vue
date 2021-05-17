@@ -730,13 +730,9 @@ export default {
             if(this.order.AuthorizationPayment[0].paymentInfo.accountNumber)
               data.cardNumber = this.order.AuthorizationPayment[0].paymentInfo.accountNumber;
 
-            console.log('data');
-            console.log(data);
             const response = await payAuthorizeNet.firstAuthorizeOrder(data, moto);
             if(response){
-              console.log('response');
-              console.log(response);
-              this.order.AuthorizationPayment = [{
+               this.order.AuthorizationPayment = [{
                 state: 1,
                 total: response.total,
                 paymentInfo: response, 
@@ -758,7 +754,6 @@ export default {
 
         }
         else{
-          console.log('no tiene transId');
           return false;
         }
       }
@@ -838,8 +833,7 @@ export default {
         this.$store.commit('setCart', [] );
         this.$store.commit('setOrder', {}); 
         this.$store.commit('setAllTickets',[]) ;
-        console.log('order luego de terminar el flujo')
-        console.log(this.order);
+        
 
         this.spinner = false;
                                              
@@ -1023,8 +1017,6 @@ export default {
 
     updateAuthorization: async function(){
      const autho =  await this.generalAuthorization();
-     console.log('response autho')
-     console.log(autho)
      if(autho)
         this.addProductsToCart();
       else
@@ -1034,11 +1026,12 @@ export default {
     closeTicket: async function(){ 
       try {
         this.spinner = true;
-        const autho =  await this.generalAuthorization();
+        let autho = true;
+        if(this.restaurantActive.payMethod !== 'TSYS')
+          autho =  await this.generalAuthorization();
         if(autho){
           const invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
           const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
-          console.log('Capture del Authorization'  + invoiceNumber);
 
           const response = await payAuthorizeNet.captureOrder(invoiceNumber, moto, this.restaurantSelectedId, this.restaurantActive.payMethod,);      
           delete this.order.AuthorizationPayment;
@@ -1478,12 +1471,8 @@ ValidateHour(value){
       this.spinner = true
 
       Api.fetchById("Table", tableId).then(response => {        
-      this.spinner = false  
-      console.log('fuera de table home');
-      console.log(response);
+      this.spinner = false 
         if(response.status === 200 && response.data.Available){
-
-          console.log('dentro de table home');
 
           const seat = response.data.Seats.findIndex(t => t.name === value)
           if(seat !== -1){
@@ -1577,7 +1566,6 @@ ValidateHour(value){
     
       let min1 = this.configuration.minHour;
       let response = this.checkPickTime();
-      console.log(response)
       if(!this.timeToPick )return this.alertNoTimeToPick(min1);
       if(response)  min1 = response;   
      
@@ -1922,22 +1910,17 @@ sinPickAction() {
     },
 
     async refreshTicket(){
-      console.log('ORDER ID: ' + this.order._id)
       this.spinnerTicket = true;
       try {
         const response = await Api.fetchById("Order", this.order._id)  
         if(response.status === 200){
            if(response.data.State === 5 ) return this.finishPayment(response.data)
-          console.log('actualizado el ticket');
-          console.log(JSON.parse(JSON.stringify(this.cart)));
           this.$store.commit('setOrder', response.data);
           const cartTicket = this.cart;
           const cartOrder = response.data.Products
           for (const cart1 of cartTicket) {
             for (const order1 of cartOrder) {
-              console.log('cart ids: ' , cart1._id)
               if(cart1.ProductId === order1.ProductId ){
-                console.log('same id', cart1.State, order1.State)
                  cart1.State = order1.State;  
               }
                              

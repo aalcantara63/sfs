@@ -1,11 +1,23 @@
 <template>
-  <div class="examples" >
+  <div class="examples"  v-if="isReadyToPay">
+      <!-- <ion-button >
+        <span class="iconify" data-icon="cib:apple-pay" data-inline="false"></span>
+      </ion-button>    -->
 
+      <ion-button 
+         
+          @click="onClick()"          
+          style="float: left;"          
+          class="button-menu button button-solid ion-activatable ion-focusable hydrated">
+          <span class="iconify"  data-icon="cib:apple-pay" data-inline="false" style="width: 40px;height: 40px;"></span>
+      </ion-button>
 
-      <ion-button v-if="isReadyToPay" @click="onClick()">Apple pay</ion-button>
-  
-  
+      <div>CONSOLE:
+        <div >{{consoleMsj}}</div>    
+      </div>
   </div>
+
+  
 
 </template>
 
@@ -43,13 +55,12 @@ export default {
     },
     data() {
         return {   
-        isReadyToPay: false,  
-        currencyCode: '',
-        countryCode: '', 
-        supportedNetworks: [],
-        merchantCapabilities:  [ 'capability3DS', 'capabilityCredit', 'capabilityDebit', 'capabilityEMV' ],
-               
-       
+          consoleMsj: '',
+          isReadyToPay: false,  
+          currencyCode: '',
+          countryCode: '', 
+          supportedNetworks: [],
+          merchantCapabilities:  [ 'capability3DS', 'capabilityCredit', 'capabilityDebit', 'capabilityEMV' ],                      
         }
     },   
   
@@ -59,36 +70,24 @@ export default {
         const  newT =  parseInt( this.Total.toString().replace('.', ''));
         const basket = {"invoice": 666, "total": newT };    
         try {
-            const ipClient = await Api.getClientIp();
-
-        console.log('ip client: ');
-        console.log(ipClient.data.ip);
-        const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
-        if(res.status === 200 && res.statusText === "OK"){
-          console.log('response in getWalletInformation');
-          console.log(res.data);    
-          this.paymentRequest.merchantInfo.merchantId = res.data.walletConfig.merchantID.toString();  
-          this.paymentRequest.allowedPaymentMethods[0].tokenizationSpecification.parameters.gateway = res.data.walletConfig.googlePay.gateway;           
-          this.paymentRequest.allowedPaymentMethods[0].parameters.allowedAuthMethods = res.data.walletConfig.googlePay.allowedAuthMethods;  
-         
-         this.paymentRequest.allowedPaymentMethods[0].parameters.allowedCardNetworks =res.data.walletConfig.googlePay.allowedCardNetworks;  
-         this.currencyCode =res.data.walletConfig.currencyCode;  
-         this.countryCode =res.data.walletConfig.countryCode;  
-     
-
-          console.log('.currencyCode ' + this.currencyCode )
-          console.log('.countryCode ' + this.countryCode )
-          console.log('.merchantId ' + this.paymentRequest.merchantInfo.merchantId )
-          console.log('.gateway ' + this.paymentRequest.allowedPaymentMethods[0].tokenizationSpecification.parameters.gateway )
-          console.log('allowedAuthMethods ' + this.paymentRequest.allowedPaymentMethods[0].parameters.allowedAuthMethods )
-          console.log('allowedCardNetworks' + this.paymentRequest.allowedPaymentMethods[0].parameters.allowedCardNetworks )
-          return true;
+          const ipClient = await Api.getClientIp();
+          const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
+          if(res.status === 200 && res.statusText === "OK"){       
+            this.paymentRequest.merchantInfo.merchantId = res.data.walletConfig.merchantID.toString();  
+            this.paymentRequest.allowedPaymentMethods[0].tokenizationSpecification.parameters.gateway = res.data.walletConfig.googlePay.gateway;           
+            this.paymentRequest.allowedPaymentMethods[0].parameters.allowedAuthMethods = res.data.walletConfig.googlePay.allowedAuthMethods;  
+            
+            this.paymentRequest.allowedPaymentMethods[0].parameters.allowedCardNetworks =res.data.walletConfig.googlePay.allowedCardNetworks;  
+            this.currencyCode =res.data.walletConfig.currencyCode;  
+            this.countryCode =res.data.walletConfig.countryCode; 
+            return true;
         }
+
         return false;
           
         } catch (error) {
           console.log(error);
-          
+          return false;
         }
       
         },
@@ -97,8 +96,7 @@ export default {
       let merchantIdentifier = "merchant.com.i4go.i4m"
       window.ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier)
         .then(canMakePayments => {
-          if (canMakePayments) {
-            console.log('ApplePayButton canMakePayments')
+          if (canMakePayments) {         
             this.isReadyToPay = true
           } else {
             // Check for the existence of the openPaymentSetup method.
@@ -109,22 +107,26 @@ export default {
                   if (success) {
                     // Open payment setup successful
                     console.log('Open payment setup successful')
+                    this.consoleMsj += ' '+ 'Open payment setup successful' + ' ';
                   } else {
                     // Open payment setup failed
                     console.error('Open payment setup failed')
+                    this.consoleMsj += ' '+ 'Open payment setup failed' + ' ';
                   }
                 })
                 .catch(error => {
                   // Open payment setup error handling
                   console.error(error)
+                   this.consoleMsj += ' '+ 'Error' + error+ ' ';
                 })
             }
           }
         })
     },
     onClick () {
-      console.log('ApplePayButton.onClick')     
-        if (this.Total > 0) {
+      console.log('ApplePayButton.onClick')   
+      this.consoleMsj += ' '+ 'ApplePayButton.onClick' + ' ';  
+        if (parseFloat(this.Total) > 0) {
           let request = {
             countryCode: this.countryCode,
             currencyCode: this.currencyCode,
@@ -137,6 +139,7 @@ export default {
             // lineItems: this.getLineItems(),
             // shippingMethods: this.getShippingMethods()
           }
+          this.consoleMsj += ' '+ 'Aqui debe abrir el session de apple Pay' + ' ';  
           this.session = new window.ApplePaySession(3, request)
           this.session.onvalidatemerchant = this.onValidateMerchant
           this.session.onpaymentauthorized = this.onPaymentAuthorized
@@ -151,6 +154,7 @@ export default {
     },
     onValidateMerchant (event) {
       console.log('ApplePayButton.onValidateMerchant', event)
+      this.consoleMsj += ' '+ ' function onValidateMerchant ' + event+ ' '; 
       // 1. You call your server, passing it the URL from the event’s validationURL property.
       // 2. Your server uses the validation URL to request a session from the Apple Pay server,
       //    as described in Requesting an Apple Pay Payment Session.
@@ -162,13 +166,15 @@ export default {
     },
     onPaymentAuthorized (event) {
         console.log('ApplePayButton.onPaymentAuthorized', event)
+        this.consoleMsj += ' '+ ' function onPaymentAuthorized ' + event+ ' '; 
         // The onpaymentauthorized function must complete the payment
         // and respond by calling completePayment before the 30 second timeout,
         // after which a message appears stating that the payment could not be completed.
         const paymentData = event.payment
         const paymentToken = paymentData.token
-        console.log(' event.payment', paymentData)
+     
         console.log(' paymentData.token', paymentToken)    
+         this.consoleMsj += ' '+ ' paymentData.token ' + paymentToken+ ' '; 
 
         const response = JSON.parse(JSON.stringify(paymentToken))  
         if(response)   
@@ -176,77 +182,67 @@ export default {
     },
     onCancel (event) {
       console.log('ApplePayButton.onCancel', event)
-      console.error('onCancel')
+      this.consoleMsj += ' '+ ' onCancel ' + ' '; 
       this.session.abort()
     },
 
-    getRequestApplePay: async function(){
+    // getRequestApplePay: async function(){
     
-//    const paymentRequest = {
-//     // Requiered
-//     merchantIdentifier: "merchant.com.i4go.i4m",
-//     paymentSummaryItems: [
-//     {
-//         label: 'order #1001',
-//         amount: this.Total,
-//         // type: 'pending' // or default: final
-//     },
-//     // ...
-//     ],
-//     // Outher
-//     countryCode: 'US',
-//     currencyCode: 'USD',
+    // const paymentRequest = {
+    //   // Requiered
+    //   merchantIdentifier: "merchant.com.i4go.i4m",
+    //   paymentSummaryItems: [
+    //   {
+    //       label: 'order #1001',
+    //       amount: this.Total,
+    //       // type: 'pending' // or default: final
+    //   },
+    //   // ...
+    //   ],
+    //   // Outher
+    //   countryCode: 'US',
+    //   currencyCode: 'USD',
 
-//     supportedNetworks: [
-//             "amex",
-//             "discover",
-//             "jcb",
-//             "masterCard",
-//             "visa"
-//     ],
+    //   supportedNetworks: [
+    //           "amex",
+    //           "discover",
+    //           "jcb",
+    //           "masterCard",
+    //           "visa"
+    //   ],
+    //   merchantCapabilities: [
+    //   'capability3DS', 'capabilityCredit',
+    //   'capabilityDebit', 'capabilityEMV'
+    //   ],
+    // };
 
-//     merchantCapabilities: [
-//     'capability3DS', 'capabilityCredit',
-//     'capabilityDebit', 'capabilityEMV'
-//     ],
+    //   try {
+    //   // See: https://developer.apple.com/documentation/passkit/pkpaymenttoken
+    //   // const { token } = await ApplePay.makePaymentRequest(paymentRequest);    
+        
+    //   // console.log('token de APPLE PAY')
+    //    console.log('paymentRequest');
+    //    console.log(paymentRequest);
+      
 
-    
-
-
-//     };
-
-//     try {
-//     // See: https://developer.apple.com/documentation/passkit/pkpaymenttoken
-//     const { token } = await ApplePay.makePaymentRequest(paymentRequest);    
-    
-//     console.log('token de APPLE PAY')
-//     console.log(token);
-//     this.parent.mssApplePay = 'token '+ token + ' ';
-    
-
-//     } catch (e) {
-//         console.log(e)
-//         this.parent.mssApplePay = 'Error Apple Payment '+ e + ' ';
-//     if (e.message === 'canceled') {
-//         console.log('Payment widget was closed by user');
-//     }
-//     }
-    },
+    //   } catch (e) {
+    //       console.log(e)
+    //     //  this.parent.mssApplePay = 'Error Apple Payment '+ e + ' ';
+    //   if (e.message === 'canceled') {
+    //       console.log('Payment widget was closed by user');
+    //   }
+    //   }
+    // },
 
      async getWalletConfig(){
         const  newT =  parseInt( this.Total.toString().replace('.', ''));
         const basket = {"invoice": 666, "total": newT };    
         try {
-            const ipClient = await Api.getClientIp();
-
-        console.log('ip client: ');
-        console.log(ipClient.data.ip);
-        const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
-        if(res.status === 200 && res.statusText === "OK"){
-          console.log('response in getWalletInformation');
-          console.log(res.data);    
-          return res.data;
-        }
+          const ipClient = await Api.getClientIp();
+          const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
+          if(res.status === 200 && res.statusText === "OK"){          
+            return res.data;
+          }
         return false;
           
         } catch (error) {

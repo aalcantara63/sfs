@@ -1,7 +1,6 @@
 <template>
     <div class="screen">
     <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link> -->
 
     <ion-header>
           <ion-toolbar>
@@ -14,28 +13,21 @@
 
             <ion-segment scrollable id="productSegment" @ionChange="segmentChanged($event.target.value)" :value="segmentValue" @input="value=segmentValue">
                 <ion-segment-button value="general">
-                    <!-- <span class="iconify" data-icon="dashicons:businessman" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.titles.genaral')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="catering">
-                    <!-- <span class="iconify" data-icon="mdi:sitemap" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.fields.catering')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="reservation">
-                    <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.fields.reservation')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="tip">
-                    <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.titles.tip')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="zipCodes">
-                    <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.titles.zipCodes')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="backup">
-                    <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
-                    <!-- <span>{{$t('backoffice.form.titles.zipCodes')}}</span> -->
                     <span>Backup</span>
                 </ion-segment-button>
             </ion-segment>
@@ -85,6 +77,13 @@
                     @ionChange="showCooker=$event.target.checked" 
                     :checked="showCooker">
               </ion-checkbox>
+            </ion-item>
+            <ion-item>
+                <ion-label >{{$t('backoffice.form.fields.showOtherRestaurant')}}
+                <ion-toggle name="showOthersRestaurant" style="top: 12px;"
+                @ionChange="showOthersRestaurant=$event.target.checked" 
+                :checked ="showOthersRestaurant">
+                </ion-toggle></ion-label>
             </ion-item>
             <ion-item>
               <ion-label>{{$t('backoffice.form.fields.canViewGeoposition')}}</ion-label>
@@ -479,20 +478,6 @@
                     <ion-input type="number" @input="newCode = $event.target.value"></ion-input>
                     <ion-button expand="full" color="primary" v-bind:value="newCode" @click="addCode(newCode, IsCatering, cateringPrice)"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
                   </ion-item>
-                  <!-- <ion-item>
-                      <ion-label>Is catering</ion-label>
-                      <ion-checkbox slot="end" name="IsCatering" 
-                            @ionChange="IsCatering=$event.target.checked" 
-                            :checked="IsCatering">
-                      </ion-checkbox>
-                  </ion-item>
-                  <ion-item v-if="IsCatering">
-                      <ion-label><span style="color: red">*</span>Catering price</ion-label>
-                      <ion-input type="number" name="cateringPrice"
-                          @input="cateringPrice = $event.target.value" 
-                          v-bind:value="cateringPrice">
-                      </ion-input>
-                  </ion-item> -->
                   <ion-item style="margin-left: 30px" v-for="zipCode in zipCodes" v-bind:key="zipCode._id">
                     <ion-label>{{zipCode.ZipCode}} - {{getCityAndState(zipCode.ZipCode)}}</ion-label>
                     <ion-button expand="full" color="danger" @click="delCode(zipCode)"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
@@ -513,8 +498,7 @@
             <div style="margin-left: 30px">
                 <ion-list>
                     <ion-item>
-                      <!-- <h1>{{$t('backoffice.form.fields.zipCodes')}}</h1> -->
-                      <h1>Backups</h1>
+                      <h1>{{$t('backoffice.form.titles.backups')}} Backups</h1>
                     </ion-item>
                     <ion-item>
                         <ion-label>Make backup and download</ion-label>
@@ -571,7 +555,7 @@ export default {
       showCooker: false,
       canViewGeoposition: false,
       canViewRating: false,
-
+      showOthersRestaurant: false,
       viewDelivery: false,
       viewOnTable: false,
       viewCurbside: false,
@@ -737,6 +721,7 @@ export default {
                     this.pickFrom = response.data.PickFrom;
                     this.pickTo = response.data.PickTo;
                     this.showCooker = response.data.ShowCooker;
+                    this.showOthersRestaurant = response.data.ShowOtherRestaurant;
                     this.canViewGeoposition = response.data.CanViewGeolocation;
                     this.canViewRating = response.data.ViewRating;
                     this.viewDelivery = response.data.ViewDelivery;
@@ -1138,6 +1123,7 @@ export default {
               "ZipCodes": this.zipCodes,
               "DeliveryZone": this.deliveryZone,
               "CanViewGeolocation": this.canViewGeoposition,
+              "ShowOtherRestaurant": this.showOthersRestaurant,
               "ViewRating": this.canViewRating,
               "ViewDelivery": this.viewDelivery,
               "ViewOnTable": this.viewOnTable,

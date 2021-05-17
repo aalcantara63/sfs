@@ -1,9 +1,5 @@
 <template>
   <div id="customer" class="screen">
-
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link to="/customer-form"><ion-button v-if="hasPermission('canCreateCustomer')" expand="full" color="primary"><ion-icon name="add"></ion-icon>{{$t('backoffice.list.actions.addANew')}} {{$t('backoffice.list.entitiesName.customer')}}</ion-button></router-link> -->
-
     <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
@@ -48,14 +44,6 @@
                     <h3>{{ customer.EmailAddress }}</h3>
                 </ion-label>
               </ion-item>
-              <!-- <ion-item-options side="end">
-                <ion-item-option v-if="hasPermission('canEditCustomer')" color="primary" @click="editCustomer(customer._id)">
-                  <ion-icon slot="icon-only" name="create"></ion-icon>
-                </ion-item-option>
-                <ion-item-option v-if="hasPermission('canDeleteCustomer')" color="danger" @click="deleteCustomer(customer._id)">
-                  <ion-icon slot="icon-only" name="trash"></ion-icon>
-                </ion-item-option>
-              </ion-item-options> -->
             </ion-item-sliding>
         </ion-list>
 

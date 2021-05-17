@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Api } from '../api/api.js';
+import moment from 'moment-timezone';
 
 function StrToHex(response){
     var responseHex = "";
@@ -46,7 +47,7 @@ export var Devices = {
     
     a930: {
 
-        endPointURL: 'https://192.168.4.53:10009?',
+        // endPointURL: 'https://192.168.4.53:10009?',
         // endPointURL: '192.168.100.166:10009?'
 
         mStx : {
@@ -268,7 +269,48 @@ export var Devices = {
             xhr.send(null);
         },
 
-        DoCredit: async function(ip, port, data, callback){
+        Printer: async function(ip, port, ssl, callback, PrintCopy = 1){
+            const command = 'A60'
+            const version = '1.28'
+            const PrintData = "Example"
+
+            let params = [this.mStx.hex, command, this.mFS.hex, version,
+                this.mFS.hex, PrintCopy, this.mFS.hex, PrintData, this.mEtx.hex]
+            let lrc = this.getLRC(params)
+            console.log(params)
+            
+            var command_hex = this.base64ToHex(window.btoa(command));
+            var version_hex = this.base64ToHex(window.btoa(version));
+            var PrintCopy_hex = this.base64ToHex(window.btoa(PrintCopy));
+            var PrintData_hex = this.base64ToHex(window.btoa(PrintData));
+            
+            var elements = [this.mStx.code, command_hex, this.mFS.code, version_hex,
+                this.mFS.code, PrintCopy_hex, this.mFS.code, PrintData_hex, this.mEtx.code,
+                this.base64ToHex(btoa(lrc))
+            ];
+
+            console.log("elements");
+            console.log(elements);
+
+            var final_string = elements.join(" ");
+            var final_b64 = this.hexToBase64(final_string);
+            console.log("LRC: " + lrc);
+            console.log("Base64: " + final_b64);
+
+            //Communication
+            let endPointURL = 'http://'+ip+':'+port+'?'+final_b64
+            if (ssl)
+                endPointURL = 'https://'+ip+':'+port+'?'+final_b64
+
+            console.log(endPointURL)
+
+            // return await axios.get(endPointURL, {headers: {'accessControlAllowed': 'Y'}})
+            this.HttpCommunication('Printer',endPointURL,function(response){
+                callback(response);
+            });
+        },
+
+        DoCredit: async function(ip, port, ssl, data, callback){
 
             console.log(data)
             const invoiceSequence = await Api.getInvoiceSequence(null)
@@ -276,12 +318,13 @@ export var Devices = {
                 const command = 'T00'
                 const version = '1.28'
                 const transactionType = data.transactionType
+
                 const amountInformation = {
                     'TransactionAmount': data.amountInformation.TransactionAmount,
-                    'TipAmount': data.amountInformation.TipAmount,
+                    'TipAmount': data.amountInformation.TipAmount || '',
                     'CashBackAmount': '',
                     'MerchantFee': '',
-                    'TaxAmount': data.amountInformation.TaxAmount,
+                    'TaxAmount': data.amountInformation.TaxAmount || '',
                     'FuelAmount': ''
                     
                 }
@@ -292,18 +335,18 @@ export var Devices = {
                     'EBTtype': '',
                     'VoucherNumber': '',
                     'Force': '',
-                    'FirstName': data.accountInformation.FirstName,
-                    'LastName': '',
+                    'FirstName': data.accountInformation.FirstName || '',
+                    'LastName': data.accountInformation.LastName || '',
                     'CountryCode': 'US',
                     'State_ProvinceCode': '',
                     'CityName': '',
                     'EmailAddress': '',
                 }
                 const traceInformation = {
-                    'ReferenceNumber': invoiceSequence.data,
-                    'InvoiceNumber':  invoiceSequence.data,
+                    'ReferenceNumber': data.traceInformation.ReferenceNumber || invoiceSequence.data,
+                    'InvoiceNumber':  data.traceInformation.InvoiceNumber || invoiceSequence.data,
                     'AuthCode': '',
-                    'TransactionNumber': data.traceInformation.TransactionNumber,
+                    'TransactionNumber': data.traceInformation.TransactionNumber || '',
                     'TimeStamp': '',
                     'ECRTransID': '',
                 }
@@ -336,7 +379,8 @@ export var Devices = {
                     'Installments': '',
                     'CurrentInstallment': ''
                 }
-
+                const transDatetime = moment()
+                console.log('TRANS DATETIME: ' + transDatetime.toISOString())
                 const additionalInformation = {
                     'TABLE': '',
                     'GUEST': '',
@@ -352,10 +396,10 @@ export var Devices = {
                     'CARDTYPEBITMAP': '',
                     'PASSTHRUDATA': '',
                     'RETURNREASON': '',
-                    'ORIGTRANSDATE': '',
+                    'ORIGTRANSDATE': transDatetime.format('YYYYMMDD'),
                     'ORIGPAN': '',
                     'ORIGEXPIRYDATE': '',
-                    'ORIGTRANSTIME': '',
+                    'ORIGTRANSTIME': transDatetime.format('HHmmss'),
                     'DISPROGPROMPTS': '',
                     'GATEWAYID': '',
                     'GETSIGN': '',
@@ -454,7 +498,10 @@ export var Devices = {
                 console.log("Base64: " + final_b64);
 
                 //Communication
-                const endPointURL = 'https://'+ip+':'+port+'?'+final_b64
+                let endPointURL = 'http://'+ip+':'+port+'?'+final_b64
+                if (ssl)
+                    endPointURL = 'https://'+ip+':'+port+'?'+final_b64
+
                 console.log(endPointURL)
 
                 // return await axios.get(endPointURL, {headers: {'accessControlAllowed': 'Y'}})
@@ -465,7 +512,7 @@ export var Devices = {
             
         },
 
-        Initialize: async function(ip, port, callback){
+        Initialize: async function(ip, port, ssl, callback){
 
             const command = 'A00'
             const version = '1.28'
@@ -487,8 +534,11 @@ export var Devices = {
 			console.log("Base64: " + final_b64);
             console.log("COMMAND_HEX: " + command_hex + " VERSION_HEX: " + version_hex);
 			
-             //Communication
-            const endPointURL = 'https://'+ip+':'+port+'?'+final_b64
+            //Communication
+            let endPointURL = 'http://'+ip+':'+port+'?'+final_b64
+            if (ssl)
+                endPointURL = 'https://'+ip+':'+port+'?'+final_b64
+
             console.log(endPointURL)
             // return await axios.get(endPointURL, {headers: {'accessControlAllowed': 'Y'}})
             this.HttpCommunication('Initialize',endPointURL,function(response){

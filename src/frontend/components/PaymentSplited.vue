@@ -270,9 +270,7 @@ import { Plugins } from '@capacitor/core';
 export default {
    name: 'PaymentSplitedModal',
    created: function(){
-     console.log('Device data in Split');
-     console.log(this.deviceData)
-     console.log('this.Total '+ this.Total)
+    
    },
    props: {  
     googleData: {type: Object, default: ()=> {}} ,
@@ -578,8 +576,6 @@ export default {
     }, 
 
     responseIDTEch(response){
-      console.log('response de responseGooglePay in split')
-      console.log(response);
       if(response){
           const partOfTotal = this.order.Total / this.Total
           const taxGeneral = (parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100;
@@ -606,8 +602,6 @@ export default {
     },
     
     responseGooglePay(response){
-      console.log('response de responseGooglePay in split')
-      console.log(response);
       if(response){
           const partOfTotal = this.order.Total / this.Total
           const taxGeneral = (parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100;

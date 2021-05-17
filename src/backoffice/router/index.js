@@ -468,7 +468,7 @@ Vue.use(VueRouter)
     }
   },
   {
-    path: '/controlPanel',
+    path: '/controlPanel/:firstLogin?',
     name: 'ControlPanel',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -718,6 +718,12 @@ Vue.use(VueRouter)
     path: '/:url',   
      name: 'AboutFront',
      component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/About.vue')
+   },
+   {
+    // path: '/home', 
+    path: '/:url',   
+     name: 'Ads',
+     component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/Ads.vue')
    },
   {
   //  path: '/products',  

@@ -36,7 +36,7 @@
           <v-breakpoint>
             <div slot-scope="scope">
               <span  > 
-                  <div  v-for="pr in filterProduct" :key="pr._id" :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' :  scope.isMedium ? 'menu-col-6 card-category': 'menu-col-4 card-category' ">
+                  <div  v-for="pr in filterProduct" :key="pr._id" :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' :  scope.isMedium ? 'menu-col-6 card-category': 'menu-col-3 card-category' ">
                     <ion-card style="padding:12px " >
                       <div >
 

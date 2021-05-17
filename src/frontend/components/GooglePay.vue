@@ -53,7 +53,6 @@ export default {
         keyGoogle:  {type: Number, default: 0 } ,
     },   
     created: async function() {   
-      console.log('paymentRequest IN CREATED')        
     },
     data() {
         return {           
@@ -102,8 +101,6 @@ export default {
   },
   methods:{
     onLoadPaymentData: function (event)  {
-      console.log('event');
-      console.log(event);
       
       const response = JSON.parse(JSON.stringify(event.detail))  
       if(response)   
@@ -114,8 +111,7 @@ export default {
       console.error('error', event.error);
     },
 
-    onReadyToPayChange: async function (event) {
-      console.log('in onReadyToPayChange');     
+    onReadyToPayChange: async function (event) {  
       
       if(event.detail.isButtonVisible && event.detail.isReadyToPay  && event.detail.paymentMethodPresent && this.googleData.merchantId){
           this.isReadyToPay = event.detail.isReadyToPay;
@@ -135,9 +131,6 @@ export default {
             countryCode: this.googleData.countryCode,
             }
           }
-          console.log('ready to pay change',  this.isReadyToPay); 
-          console.log('total a pagar en GOOGLE '+ this.amount)
-          console.log('key GOOGLE '+ this.keyGoogle)
       }
       
     },
@@ -155,12 +148,9 @@ export default {
       
      
       const ipClient = await Api.getClientIp();
-
-      console.log('ip client: ');
-      console.log(ipClient.data.ip);      
+      
       const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
       if(res.status === 200 && res.statusText === "OK"){
-        console.log('response in getWalletInformation');
         
         this.googleData.merchantId = res.data.walletConfig.merchantID.toString();  
         this.googleData.gateway = res.data.walletConfig.googlePay.gateway;           

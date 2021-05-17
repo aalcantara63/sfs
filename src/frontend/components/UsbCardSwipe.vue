@@ -32,7 +32,7 @@ import LibCodes from 'zipcodes'
 export default {
     name: 'UsbCardReader',
     created: async function(){ 
-        this.callFunction()
+       
         
     },  
     data() {
@@ -52,7 +52,6 @@ export default {
         parent: {type: Object, default: ()=> {}} ,
         Acept:  {type: String, default:"" } ,
         Cancel:  {type: String, default:"" } ,       
-        dataRequired:  {type: String, default:"" } ,
     },   
     
     methods:{
@@ -64,7 +63,6 @@ export default {
                  try {                     
                     let device = await navigator.usb.requestDevice({ filters: [{ vendorId: 0xACD }]});
                     if(device){
-                        //console.log(device);
                         document.getElementById('target').focus();
                     }
                     else
@@ -97,7 +95,6 @@ export default {
             const val = document.getElementById('target').value;
 
             if(val){
-                console.log('send payment');
                 var hex = val.toString('hex'); 
                 const data = {
                     hex : hex                    
@@ -178,24 +175,7 @@ export default {
       .then(a => a.present())
     },
    
-      alertRequiredDatas(){
-      return  this.$ionic.alertController
-      .create({
-          cssClass: 'my-custom-class',
-          header: 'Error',
-          message: this.dataRequired,
-          buttons: [                   
-          {
-              text: this.Acept,
-              handler: () => {                                 
-                            
-              },
-          },
-          ],
-      })
-      .then(a => a.present())
-                  
-    },
+     
 
   
       

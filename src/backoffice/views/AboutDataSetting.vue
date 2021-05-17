@@ -1,9 +1,6 @@
 <template>
   <div id="category" class="screen">
 
-    <!-- <router-link to="/controlPanel"><ion-button expand="full" color="tertiary"><ion-icon name="hammer"></ion-icon>{{$t('backoffice.list.buttons.goToControlPanel')}}</ion-button></router-link>
-    <router-link v-if="abouts.length < 3" to="/aboutDataSettingsForm"><ion-button v-if="hasPermission('canChangeSetting')" expand="full" color="primary"><ion-icon name="add"></ion-icon>{{$t('backoffice.list.actions.addANew')}} {{$t('backoffice.list.entitiesName.about')}}</ion-button></router-link> -->
-
     <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
@@ -56,7 +53,6 @@
               <ion-label>
                   <h2>{{ about.Title }}</h2>
                   <h3>{{ about.Subtitle }}</h3>
-                  <!-- <h3><div style="word-wrap: break-word">{{ about.Description }}</div></h3> -->
               </ion-label>
               <ion-item-group side="end">
                 <ion-button v-if="hasPermission('canChangeSetting')" color="primary" @click="editAbout(about._id)">

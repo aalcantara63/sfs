@@ -304,6 +304,12 @@ export var Api = {
         return await axios.get(this.endPointURL + 'imenusupport?invoicenumber=1', {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
+    getCaptchaKey: async function(restaurantId){
+        if (restaurantId == null)
+            restaurantId = this.restaurantId
+        return await axios.get(this.endPointURL + 'imenusupport?captchakey=1', {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
     payAutorizeNet: async function(item, restaurantId){
         return await axios.post(this.endPointURL + 'payment?payAutorizeNet=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
@@ -326,6 +332,53 @@ export var Api = {
 
     cancelQrShift4: async function(item, restaurantId){
         return await axios.post(this.endPointURL + 'payment?cancelqrshift4=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    generateKeyTsys: async function(item, restaurantId){
+            //item = {
+            //  "mid": "",
+            //  "userID": "",
+            //  "password": ""
+            // }
+        return await axios.post(this.endPointURL + 'payment?generateKeyTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    tokenCardTsys: async function(item, restaurantId){
+        return await axios.post(this.endPointURL + 'payment?generateTokenTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    payTsys: async function(item, restaurantId){
+        return await axios.post(this.endPointURL + 'payment?payTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    authorizeTsys: async function(item, restaurantId){
+        return await axios.post(this.endPointURL + 'payment?authorizeTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    captureTsys: async function(item, restaurantId){
+        //item = {
+        //  "transactionID": ""
+        // }
+    return await axios.post(this.endPointURL + 'payment?captureTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+
+    invoiceTsys: async function(invoice, restaurantId){
+        return await axios.get(this.endPointURL + 'payment?invoiceTsys=' + invoice, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    returnWithReferenceTsys: async function(item, restaurantId){
+        //item = {
+        //  "transactionID": ""
+        // }
+    return await axios.post(this.endPointURL + 'payment?returnWithReferenceTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    },
+
+    voidTsys: async function(item, restaurantId){
+        //item = {
+        //  "transactionID": "",        
+        // }
+    return await axios.post(this.endPointURL + 'payment?voidTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
     restoreBackUpFromPortal: async function(){

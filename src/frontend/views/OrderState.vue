@@ -1254,7 +1254,6 @@ export default {
                 await Api.putIn('Order', this.order);
                 await this.getOrders();
                 this.spinnerUpdateCurbside = false;
-                 console.log('UPDATE CURBSIDE ORDER');
                 
                 return this.openToastProd(); 
                 
@@ -1273,7 +1272,6 @@ export default {
                 await Api.putIn('Order', this.order);
                 await this.getOrders();
                 this.spinnerCarArrived = false;
-                console.log('CAR ARRIVED')
                 return this.openToastProd(); 
                 
             } catch (error) {
