@@ -378,6 +378,7 @@ const messages = {
                     capcha: 'Capcha',
                     zipCodes: 'Zip codes',
                     backups: 'Backups',
+                    devices: 'Devices',
                 },
                 fields:{
                     name: 'Name',
@@ -1368,6 +1369,7 @@ const messages = {
                     capcha: 'Capcha',
                     zipCodes: 'Códigos postales',
                     backups: 'Backups',
+                    devices: 'Dispositivos',
                 },
                 fields:{
                     name: 'Nombre',

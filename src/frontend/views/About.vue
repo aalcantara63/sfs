@@ -234,8 +234,8 @@ export default {
         this.allRestaurants= this.allRestaurant.filter(p => p._id != this.restaurantSelectedId);        
         this.sliderstData();
 
-       const res = await Api.getCaptchaKey(this.restaurantSelectedId)
-        this.captchaKey = res.data
+    //    const res = await Api.getCaptchaKey(this.restaurantSelectedId)
+    //     this.captchaKey = res.data
 
         EventBus.$on('updateCustomer', (value) => {if(value) 
             this.clientId= this.$store.state.customer._id; });

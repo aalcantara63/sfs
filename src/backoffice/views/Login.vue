@@ -58,6 +58,10 @@ export default {
 
   name: 'userForm',
    
+  // props: {
+  //     RestaurantList: { type: Object, default: null },
+  // },
+
   data () {
     return {
       email: '',
@@ -72,6 +76,7 @@ export default {
       forgotEmail: '',
       // basicSettings: null,
       spinner: false,
+
     }
   },
   created: function(){
@@ -79,6 +84,28 @@ export default {
     //  this.fetchUsers();
   },
   methods: {
+      getAllRestaurant(){
+          Api.fetchAll('Restaurant').then(response => {
+              if(response.status === 200){
+
+                  let restaurants = response.data
+                  let myRestaurants = this.$store.state.user.AllRestaurant
+
+                  let userRestaurant = []
+                  restaurants.forEach(restaurant => {
+                      if (myRestaurants.indexOf(restaurant._id) != -1)
+                          userRestaurant.push(restaurant)
+                  });
+
+                  console.log("Todos Restaurantes")
+                  console.log(userRestaurant)
+                  EventBus.$emit('userRestaurant', userRestaurant)
+              }
+          })
+          .catch(e => {
+              console.log(e)
+          });
+      },
       forgotPassword(){
           this.forgotP = true;
       },
@@ -176,6 +203,11 @@ export default {
               document.querySelector('ion-menu-controller').close('end')
               EventBus.$emit('blockScreen', 'true')
               EventBus.$emit('staffName', this.userLogin.FirstName + ' ' + this.userLogin.LastName)
+
+              this.getAllRestaurant()
+              console.log("EL STORAGE")
+              console.log(this.$store.state.user.RestaurantId)
+
               this.spinner = false
               if (this.userLogin.IsSupport){
                   this.$router.push({

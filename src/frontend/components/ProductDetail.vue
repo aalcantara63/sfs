@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-row>
           <ion-col size="10" style="border: 0px !important;">
-            <!-- <ion-title>{{ title }}</ion-title> -->
+            <ion-title>{{ i18n.t('frontend.product.productDetail') }}</ion-title>
           </ion-col>
           <ion-col size="2" style="border: 0px !important;">
             <ion-button @click="dismissQr" >
@@ -41,7 +41,7 @@
                     <ion-list>
                       <ion-item>
                           <ion-label class="menu-col-12"   color="danger" style="font-size: 14pt;font-weight: bold;text-align: center;">{{ getFormatPrice(thisPrice) }}
-                          <span style="color: #f82525;" v-if="isService">( {{estimatedMessage}} )</span>
+                          <span style="color: #f82525;" v-if="isService">( {{i18n.t('frontend.home.priceEstimated')}} )</span>
  
                             </ion-label>                   
                       </ion-item>                    
@@ -54,7 +54,7 @@
 
                     <div  v-if="productVariant.length > 0">
                       <ion-list  v-for="vari in productVariant" :key="vari._id"  style="padding: 0;border: 1px solid;"  >
-                          <ion-title style="background: #d6cbcb;padding: 5px;">{{ variantsText }}</ion-title>
+                          <ion-title style="background: #d6cbcb;padding: 5px;">{{ i18n.t('frontend.home.variants') }}</ion-title>
                           <ion-radio-group :value="productVariant[0].Variants[0]._id" @ionChange="changeVariant(vari._id, $event.target.value)">
                             <ion-item v-for="variant in vari.Variants" :key="variant._id"> 
                               <ion-avatar>
@@ -71,7 +71,7 @@
 
                     <div  v-if="Aggregates.length > 0">
                       <ion-list style="padding: 0;border: 1px solid;"  >
-                          <p style="background: #d6cbcb;padding: 5px;">{{sides}} ( {{aggregateCant}} {{aggregateFree}} ) </p>
+                          <p style="background: #d6cbcb;padding: 5px;">{{i18n.t('frontend.home.sides')}} ( {{aggregateCant}} {{i18n.t('frontend.home.aggregateFree')}} ) </p>
                           
                           <ion-item v-for="(aggre,index) in Aggregates" :key="index" >
                             <ion-avatar><img :src="getSide(aggre).ImageUrl"></ion-avatar>
@@ -84,7 +84,7 @@
 
                      <div  v-if="Ingredients.length > 0">
                       <ion-list style="padding: 0;border: 1px solid;"  >
-                          <ion-title style="background: #d6cbcb;padding: 5px;">{{ingredientText}}</ion-title>
+                          <ion-title style="background: #d6cbcb;padding: 5px;">{{i18n.t('frontend.home.choises')}}</ion-title>
                           <ion-item v-for="(ing,index) in Ingredients" :key="index" >                           
                             <p>{{ing}}</p>
                             <ion-toggle checked slot="end"  
@@ -97,7 +97,7 @@
                     </div>
 
                     <ion-list  style="padding: 0;border: 1px solid;" >
-                        <ion-title style="background: #d6cbcb;padding: 5px;">{{noteMss}}</ion-title>
+                        <ion-title style="background: #d6cbcb;padding: 5px;">{{i18n.t('frontend.order.notes')}}</ion-title>
                         <ion-textarea  :value="thisNote" @input="thisNote = $event.target.value"
                       ></ion-textarea>   
                     </ion-list>
@@ -105,7 +105,7 @@
                       <ion-list style="padding: 0;border-bottom: 1px solid;border-left: 1px solid;border-right: 1px solid;">
                         <ion-title style="background: #d6cbcb;padding: 5px;"> {{ getFormatPrice(getTotal) }}</ion-title>
                         <ion-input  type="number" min=1 :value="thisCant" @input="thisCant = $event.target.value" style="text-align: center;max-width: 50%; float:left" ></ion-input>              
-                        <ion-button  color="primary" size="normal" style="float:right" @click="linkToCart()"> {{addMss}} </ion-button>
+                        <ion-button  color="primary" size="normal" style="float:right" @click="linkToCart()"> {{i18n.t('frontend.order.add')}} </ion-button>
                       </ion-list>
                                                     
                     </div>
@@ -135,49 +135,34 @@
 
 import { EventBus } from '../event-bus';
 import { VBreakpoint } from 'vue-breakpoint-component'
+import {i18n} from '@/plugins/i18n'
+import store from '../../main'
 
 export default {
   name: 'ProductDetail',
   props: {
-    parent:  {type: Object, default:() => {}}, 
-    title: { type: String, default: '' },
     productId: { type: String, default: '' },
     ImageUrl: { type: String, default: '' },
     Name: { type: String, default: '' },
     Description: { type: String, default: '' },
     ProductCant: { type: Number, default: 1 },
-    Note: { type: String, default: '' },
-    CantNoValid: { type: String, default: '' },   
-    Acept: { type: String, default: '' },        
-    Cancel: { type: String, default: '' }, 
-    mssOrderType: { type: String, default: '' },  
-    aggregateFree: { type: String, default: '' },
-    sides: { type: String, default: '' },
-    ingredientText:  { type: String, default: '' },
-    variantsText:  { type: String, default: '' },
-    withoutIng: { type: String, default: '' },
-    message: { type: String, default: '' },      
-    noteMss: { type: String, default: '' },
-    addMss: { type: String, default: '' },
+    Note: { type: String, default: '' },   
     SalePrice: { type: Number, default: 0 },
     productVariant:  {type: Array, default:() => []},
     products:  {type: Array, default:() => []},    
     aggregateCant: { type: Number, default: 0 },
     Aggregates:  {type: Array, default:() => []},
-    Ingredients:  {type: Array, default:() => []},    
-    Delivery: { type: String, default: '' },
-    PickUp: { type: String, default: '' },
-    Table: { type: String, default: '' },
+    Ingredients:  {type: Array, default:() => []},
     orderFromCatering: { type: Boolean, default: false },
-    isService:{ type: Boolean, default: false },
-    estimatedMessage: { type: String, default: '' },
-    mssgToOrder:  { type: String, default: '' },
-    mssgToCatering:  { type: String, default: '' },
+    isService:{ type: Boolean, default: false },   
     currency:  { type: String, default: '' },
+    forEdit: { type: Boolean, default: false },
   },
   created: function(){
 
-  this.cart = this.parent.$store.state.cart;
+    this.i18n = i18n; 
+
+    this.cart = store.state.cart;
 
    if(this.productVariant.length > 0){
      this.thisPrice = this.productVariant[0].Variants[0].SalePrice;
@@ -202,6 +187,7 @@ export default {
       thisAggregates: [],
       thisIngredients:[],
       cart: [],
+      i18n: {},
       
     }
   },
@@ -251,9 +237,9 @@ methods: {
     alertMissingProduct(){
       let mssg = ''
       if(this.orderFromCatering)
-        mssg = this.mssgToOrder;
+        mssg = this.i18n.t('frontend.order.warningProductsTheCateringToOrder');
       else
-        mssg = this.mssgToCatering;
+        mssg = this.i18n.t('frontend.order.warningProductsTheOrderToCatering');
 
         
       return  this.$ionic.alertController
@@ -263,16 +249,16 @@ methods: {
           message: mssg,
           buttons: [                   
           {
-            text: this.Cancel,
+            text: this.i18n.t('frontend.home.cancel'),
             handler: () => {   
               this.dismissQr(); 
             },
           },
             {
-            text: this.Acept,
+            text: this.i18n.t('frontend.home.acept'),
             handler: () => {      
               this.cart = [];
-               this.parent.$store.commit('setCart', this.cart); 
+               store.commit('setCart', this.cart); 
                EventBus.$emit('updateCart', true); 
               this.addProduct();
             }
@@ -294,7 +280,41 @@ methods: {
        return this.addProduct();
     },
 
+    editProduct: function(){
+
+       if(this.thisCant <1)
+          return this.cantNoValida();
+
+         let p = {
+           "ImageUrl": this.ImageUrl,
+            "ProductId": this.productId,
+            "Name": this.Name + this.thisName,
+            "Price": this.thisPrice,
+            "Cant": parseInt(this.thisCant),
+            "Note": this.thisNote,
+            "AggregatesCant": this.aggregateCant || 0,
+            "Aggregates": this.thisAggregates,
+            "isService": this.isService,
+            "fromCatering": this.orderFromCatering,
+            "State": 0,
+         }
+     
+        const index = this.cart.findIndex(pr => pr.ProductId === this.productId );
+      
+        if (index !== -1) {
+          this.cart[index] = p;                  
+          this.thisAggregates.forEach(a => this.cart[index].Aggregates.push(a) )
+        }                 
+        store.commit('setCart', this.cart); 
+        EventBus.$emit('updateCart', true); 
+        this.openToast();
+        this.dismissQr();
+    },
+
     addProduct: function(){
+      
+      if(this.forEdit)
+        return this.editProduct();
           
        if(this.thisCant <1)
           return this.cantNoValida();
@@ -323,7 +343,7 @@ methods: {
         else{
           this.cart.push(p);
         }            
-          this.parent.$store.commit('setCart', this.cart); 
+          store.commit('setCart', this.cart); 
           EventBus.$emit('updateCart', true); 
           this.openToast();
           this.dismissQr();
@@ -345,10 +365,10 @@ methods: {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.CantNoValid,
+          message: this.i18n.t('frontend.home.cantNotValid'),
           buttons: [                   
           {
-              text: this.Acept,
+              text: this.i18n.t('frontend.home.acept'),
               handler: () => {                                 
                             
               },
@@ -394,7 +414,7 @@ methods: {
       else
          this.thisIngredients.push(value)
 
-      let str =this.withoutIng + ': '
+      let str =this.i18n.t('frontend.home.withoutIngredients') + ': '
 
       this.thisIngredients.forEach( e => str += e + '. ')
       if(this.thisIngredients.length >0)
@@ -408,20 +428,20 @@ methods: {
       .create({
           cssClass: 'my-custom-class',
           header: '',
-          message: this.mssOrderType,
+          message: this.i18n.t('frontend.home.selectOrderType'),
           inputs:[
             {type: 'radio', label: 'Catering', value: 'delivery', },
-            {type: 'radio', label: this.PickUp, value: 'pick', },           
+            {type: 'radio', label: this.i18n.t('frontend.app.pickup'), value: 'pick', },           
           ],
           buttons: [                   
           {
-            text: this.Cancel,
+            text: this.i18n.t('frontend.home.cancel'),
             handler: () => {   
               this.dismissQr(); 
             },
           },
             {
-            text: this.Acept,
+            text: this.i18n.t('frontend.home.acept'),
             handler: (value) => {      
               this.chooseOrderType(value)   
             }
@@ -436,21 +456,21 @@ methods: {
       .create({
           cssClass: 'my-custom-class',
           header: '',
-          message: this.mssOrderType,
+          message: this.i18n.t('frontend.home.selectOrderType'),
           inputs:[
-            {type: 'radio', label: this.Delivery, value: 'delivery', },
-            {type: 'radio', label: this.PickUp, value: 'pick', },
-            {type: 'radio', label: this.Table, value: 'table', },        
+            {type: 'radio', label: this.i18n.t('frontend.app.deliver'), value: 'delivery', },
+            {type: 'radio', label: this.i18n.t('frontend.app.pickup'), value: 'pick', },
+            {type: 'radio', label: this.i18n.t('frontend.app.table'), value: 'table', },        
           ],
           buttons: [                   
           {
-            text: this.Cancel,
+            text: this.i18n.t('frontend.home.cancel'),
             handler: () => {   
               this.dismissQr(); 
             },
           },
             {
-            text: this.Acept,
+            text: this.i18n.t('frontend.home.acept'),
             handler: (value) => {      
               this.chooseOrderType(value)   
             }
@@ -463,7 +483,7 @@ methods: {
     async openToast() {
       return this.$ionic.toastController      
         .create({
-          message: this.message,
+          message: this.i18n.t('frontend.product.massageToast'),
           duration: 2000,
           position: 'top',
           color:'success'

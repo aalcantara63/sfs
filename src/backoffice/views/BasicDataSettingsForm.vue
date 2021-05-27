@@ -388,6 +388,8 @@ export default {
                   
                   Api.fetchById(this.modelName, this.id)
                   .then(response => {
+                    console.log("The Zip Code");
+                    console.log(response.data.ZipCode);
                     this.name = response.data.Name;
                     this.address = response.data.Address;
                     this.online = response.data.Online;

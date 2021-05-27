@@ -61,6 +61,7 @@
               </ion-item>     
            
               <ion-item v-if="restaurantSelected"  @click="goAbout">  {{$t('frontend.menu.about')}}</ion-item> 
+              <ion-item v-if="restaurantSelected" >  {{$t('frontend.menu.log')}}</ion-item> 
               <ion-item v-if="restaurantSelected && hasOptionToShowMenu()"  @click="goHome"> {{$t('frontend.menu.menu')}}</ion-item>   
               <ion-item v-if="configuration.viewCatering && hasCardPayCat()" @click="goCatering">  {{$t('frontend.menu.menuCatering')}}</ion-item>           
               <ion-item v-if="restaurantSelected && $store.state.allTickets.length > 0"  @click="showTickets()"> {{$t('frontend.menu.ticketMenu')}} <ion-badge v-if="$store.state.allTickets.length > 0" slot="end" color="secondary">{{$store.state.allTickets.length}}</ion-badge></ion-item>  
@@ -103,12 +104,24 @@
           <ion-content v-if="!getAuthenticated">
               <Login />
           </ion-content>
+
+          
+          <ion-list>
+              <ion-item>
+                  <ion-label>{{$t('frontend.menu.restaurant')}}</ion-label>
+                  <ion-select interface="popover" :ok-text="$t('backoffice.form.messages.buttons.ok')" :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
+                  @ionChange="changeUserLoginRestaurant($event.target.value)" v-bind:value="userLoginRestaurantId">
+                      <ion-select-option v-for="restaurant in userLoginRestaurant" v-bind:key="restaurant._id" v-bind:value="restaurant._id" >{{restaurant.Name}}</ion-select-option>
+                  </ion-select>
+              </ion-item>
+          </ion-list>
+          
            
           <!-- <ion-item v-if="!getAuthenticated" @click="closeEnd"><router-link to="/login" >{{ $t('backoffice.options.login') }}</router-link></ion-item> -->
 
 
-          <ion-item color='light' @click="session = !session" style="cursor: pointer">Session</ion-item>
-            <router-link to="/login" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="getAuthenticated && session" @click="logOut"><span class="iconify" data-icon="mdi:logout-variant" data-inline="false"></span>{{ $t('backoffice.options.logout') }}</ion-item></router-link>
+            <ion-item color='light' @click="session = !session" style="cursor: pointer">Session</ion-item>
+            <ion-item v-if="getAuthenticated && session" @click="logOut" style="cursor: pointer"><span class="iconify" data-icon="mdi:logout-variant" data-inline="false"></span>{{ $t('backoffice.options.logout') }}</ion-item>
             <a style="cursor: pointer; text-decoration: none; color: black;" @click="changeServerId()"><ion-item v-if="getAuthenticated && session"><span class="iconify" data-icon="ri:exchange-box-line" data-inline="false"></span>{{ $t('backoffice.options.changeServerId') }}</ion-item></a>
             <router-link to="/controlPanel" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="accessToControlPanel() && session" @click="closeEnd()"><span class="iconify" data-icon="mdi:tools" data-inline="false"></span>{{ $t('backoffice.options.controlPanel') }}</ion-item></router-link>
             <a @click="showDeviceSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="getAuthenticated && session" @click="closeEnd()"><span class="iconify" data-icon="uil:mobile-android-alt" data-inline="false"></span>Set device</ion-item></a>
@@ -159,10 +172,22 @@
         <ion-header>
           <ion-toolbar color="primary">             
             <ion-icon @click="openStart" name="menu" class="menu-col-2" style="float: left;font-size: 30px;"></ion-icon> 
-            <ion-title class="menu-col-8" style="float: left">{{restaurantActive.restaurantName}}</ion-title>          
-            <ion-icon @click="openEnd" name="settings" class="menu-col-2" style="float: right;font-size: 30px;"></ion-icon>
+            <ion-title class="menu-col-6" style="float: left">{{restaurantActive.restaurantName}}</ion-title>          
+           
+            <ion-icon @click="openEnd" name="settings" class="menu-col-1" style="float: right;font-size: 30px;margin: 0px 25px 0 15px;"></ion-icon>
+             <div style="float: right;" v-if="!CustomerName && !getAuthenticated" @click="logIng('','')"><span class="iconify" data-icon="ph:user-circle" data-inline="false"></span></div>
+             <div style="float: right;" v-if="CustomerName" @click="showEditUser=!showEditUser"><span class="iconify" data-icon="ph:user-circle-fill" data-inline="false"></span></div>
+             
           </ion-toolbar>
         </ion-header>
+          <ion-card v-if="showEditUser" style="position: absolute; right: 35px;margin:0 ">
+               <ion-chip  @click="restaurantSelected? goMyAccount() : logIng(email, '') , showEditUser=false" style="padding: 0;" v-tooltip="$t('frontend.menu.edit')">                  
+                 <span class="iconify" data-icon="fa-solid:user-edit" data-inline="false"></span>
+                </ion-chip>
+                <ion-chip @click="cerrarSesion(), showEditUser=false" style="padding: 0;" v-tooltip="$t('frontend.menu.logout')">                  
+                 <span class="iconify" data-icon="eva:close-circle-fill" data-inline="false" ></span>
+                </ion-chip>
+            </ion-card>
         <ion-content></ion-content>
       </div>
 
@@ -175,32 +200,8 @@
 
     <ion-content :readonly="!spinner? true: false" id="app-ionic-vue">
       
-      
-        <div id="front-login">
-            <div style="text-align: right;padding: 12px 10px;" v-if="CustomerName"  color="secondary">  
-              <a outline @click="goMyAccount" style="margin-right: 20px;" v-if="restaurantSelected">
-                <span class="iconify" data-icon="icomoon-free:profile" data-inline="false" style="width: 20px; height: 20px;margin: -15px 3px 0 0;"></span>
-                <ion-label>{{$t('frontend.menu.profil')}}</ion-label>
-              </a>    
-              <a outline @click="logIng(email, '')" style="margin-right: 20px;" v-if="!restaurantSelected">
-                <span class="iconify" data-icon="icomoon-free:profile" data-inline="false" style="width: 20px; height: 20px;margin: -15px 3px 0 0;"></span>
-                <ion-label>{{$t('frontend.menu.edit')}}</ion-label>
-              </a>    
-              <a outline @click="cerrarSesion">          
-                  <span class="iconify" data-icon="mi:close" data-inline="false"  style="width: 20px; height: 20px;margin: -15px 3px 0 0;"></span>
-                  <ion-label>{{$t('frontend.menu.logout')}}</ion-label>
-              </a>
-            </div>
-          <div style="text-align: right; padding: 12px 10px;" v-if="!CustomerName && !getAuthenticated" >
-            <a outline @click="logIng('','')">
-              <ion-label>{{$t('frontend.menu.log')}}</ion-label>
-            </a>
-          </div>
-        </div>
-        
+              
         <div v-if="!restaurantSelected && !getAuthenticated">
-          <!-- <div v-if="!restaurantSelected" && !getAuthenticated> -->
-
           <ion-toolbar>
              <h1 >{{$t('frontend.menu.restaurant')}}</h1>
             <ion-searchbar  
@@ -274,7 +275,9 @@
         :restaurantSelected="this.restaurantSelected"
         :restaurantSelectedId="this.restaurantSelectedId"
         :menuListSinCatering="this.menuListSinCatering"
+        :categoryMenuListSinCatering="this.categoryMenuListSinCatering"
         :menuListConCatering="this.menuListConCatering"
+        :categoryMenuConCatering="this.categoryMenuConCatering"
         :prod="this.prod" 
         :staffName="this.staffName"
         :staffId="this.staffId"
@@ -310,9 +313,10 @@
 
 <script>
 
+// import RestaurantList from './backoffice/components/RestaurantList.vue'
 import Language from './backoffice/views/Locale.vue'
 import Login from './backoffice/views/Login.vue'
-import { logOut, settings } from "ionicons/icons";
+import { logOut, logIn, settings } from "ionicons/icons";
 import { menu } from "ionicons/icons";
 import { add } from "ionicons/icons";
 import { logoFacebook } from "ionicons/icons";
@@ -328,6 +332,8 @@ addIcons({
   "md-menu": menu.md,
   "ios-settings": settings.ios,
   "md-settings": settings.md,
+  "ios-logIn": logIn.ios,
+  "md-logIn": logIn.md,
 });
 
 import { Api } from './backoffice/api/api.js';
@@ -474,7 +480,13 @@ export default {
        if(value && this.email !='')   
         this.logIng(this.email, '');
       EventBus.$off('editInfoClient');
-    });            
+    });
+    
+    EventBus.$on('userRestaurant', (value) => {    
+      this.userLoginRestaurant = value;
+      this.userLoginRestaurantId = this.$store.state.user.RestaurantId;
+      // EventBus.$off('staffId');   
+    });
   
   },
 
@@ -533,7 +545,9 @@ export default {
       rating: [],
 
       menuListSinCatering: [],
+      categoryMenuListSinCatering: [],
       menuListConCatering: [],
+      categoryMenuConCatering: [],
       viewCatering: false,
 
       viewRating: false,    
@@ -564,10 +578,16 @@ export default {
             }
       ),
       isBackLocked: false,
+
+      //Backoffice
+      userLoginRestaurant: [],
+      userLoginRestaurantId: -1,
+      showEditUser: false,
            
     }
   }, 
   components:{
+    // RestaurantList: RestaurantList,
     Language,
     Login,
     VBreakpoint: VBreakpoint,
@@ -586,9 +606,60 @@ export default {
       return this.allOrders.length;
     }
   },
-  methods: { 
+  methods: {
 
-    
+    changeUserLoginRestaurant(value){
+        this.userLoginRestaurantId = value
+        this.relogin()
+    },
+
+    relogin(){
+            this.spinner = true
+            let userLogin = this.$store.state.user
+            userLogin.RestaurantId = this.userLoginRestaurantId
+
+            Api.setRestaurantId(this.userLoginRestaurantId);
+            this.getBackofficeConfig();
+
+            Api.fetchById("staff", userLogin._id)
+            .then(response => {
+                    let roles = []
+                    let staffMember = response.data
+                    staffMember.Roles.forEach(rol_id => {
+                        Api.fetchById("rol", rol_id).then(response => {
+                            roles.push(response.data);
+                        })
+                    });
+                    this.$store.commit("setRoles", roles);
+                    // this.$router.push({
+                    //     path: "/controlPanel/true"
+                    // })
+                    // this.init();
+                  this.spinner = false
+            })
+            .catch(e => {
+                console.log(e)
+                this.spinner = false
+            });
+      },
+      getBackofficeConfig: function(){
+            Api.fetchAll("Setting").then(response=> {
+                let settings = [];
+                settings = response.data;
+                if (settings.length > 0)
+                {
+                    var allStyles = settings[settings.length -1].AllStyles;
+                    document.querySelector('style').innerHTML += allStyles;
+
+                }
+            })
+            .catch(e => {
+            console.log(e)
+            });
+      },
+
+        /*Backoffice change Restaurant */
+
     async doRefresh(event) {
     
       await this.getAllRestaurant();      
@@ -1126,20 +1197,32 @@ export default {
       });
     },
 
+    async getCategoryMenu(menulist){
+      if(menulist.length > 0){        
+        const id = menulist[0]._id;                 
+        const response = await Api.categoryByMenuId(id);        
+        if(response.status === 200){ 
+          return response.data;
+        }  
+      }
+    },
+
     async fetchMenus(){   
      
-      Api.menuSinCaterin().then(response => {
+      await Api.menuSinCaterin().then(async response => {
          if(response.status === 200){
-          this.menuListSinCatering = response.data;           
+          this.menuListSinCatering = response.data; 
+          this.categoryMenuListSinCatering = await this.getCategoryMenu(response.data)          
          }
       })
       .catch(e => {
         console.log(e)
       })
 
-      Api.menuConCaterin().then(response => {
+      await Api.menuConCaterin().then(async response => {
          if(response.status === 200){
            this.menuListConCatering = response.data;
+           this.categoryMenuConCatering = await this.getCategoryMenu(response.data) 
          }
       })
       .catch(e => 
@@ -1313,7 +1396,7 @@ export default {
     goHome: function(){
       this.closeStart();
       console.log('GOIN HOME');
-      return this.$router.push({ name: 'Home', params: {cart:this.cart, order: this.order, clientId: this.clientId } })
+      return this.$router.push({ name: 'HomeGrid', params: {cart:this.cart, order: this.order, clientId: this.clientId } })
     },
 
     goCatering: function(){
@@ -1497,9 +1580,7 @@ export default {
               data: {
                 content: 'New Content',
               },
-              propsData: {
-                title: this.$t('frontend.product.productDetail'),
-                cart: this.cart,
+              propsData: {               
                 productId: pr._id,
                 Name: pr.Name,
                 SalePrice: parseFloat(pr.SalePrice),
@@ -1509,16 +1590,8 @@ export default {
                 productVariant: productVariant,
                 aggregateCant: pr.AggregateCant || 0,
                 Aggregates: pr.Aggregates || [],
-                products: this.products,
-                CantNoValid: this.$t('frontend.home.cantNotValid'),
-                Acept: this.$t('frontend.home.acept'),
-                orderType: this.orderType,
-                mssOrderType: this.$t('frontend.home.selectOrderType'),
-                message: this.$t('frontend.product.massageToast'),
-                aggregateFree: this.$t('frontend.home.aggregateFree'),
-                noteMss: this.$t('frontend.order.notes'),
-                addMss: this.$t('frontend.order.add'),
-                withoutIng: this.$t('frontend.home.withoutIngredients'),
+                products: this.products,              
+                orderType: this.orderType,               
                 Ingredients: pr.Ingredients || [],
                 currency: this.restaurantActive.currency,
               },
@@ -1547,6 +1620,7 @@ export default {
 
           const dataRestaurant = {
             restaurantName: response.data.Name,
+            restaurantZipCode: response.data.ZipCode,
             restaurantUrl: response.data.Url,
             restaurantPhone: response.data.Phone,
             restaurantLogo: response.data.ImageUrl,

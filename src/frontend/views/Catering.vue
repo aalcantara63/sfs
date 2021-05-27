@@ -221,10 +221,14 @@ export default {
   props: {
     msg: String,
     menuListConCatering: {type: Array, default:() => [] },
+    categoryMenuConCatering: {type: Array, default:() => [] },
     restaurantSelected: {type: Boolean, default:false } ,
     restaurantSelectedId:  {type: String, default: "" },       
     products: {type: Array, default:() => [] }, 
     variants: {type: Array, default: () => [] },
+    taxes: {type: Number, default:0 } ,
+    shipping: {type: Number, default:0 } ,
+
   },
   created: async function(){ 
 
@@ -243,21 +247,9 @@ export default {
     
     this.dateToDay = moment(this.dateToDay, "MM-DD-YYYY").add('days', this.configuration.cateringMarginDays);
 
-   try {
-      if(this.menuListConCatering.length > 0){ 
-        this.dots= true; 
-        const id = this.menuListConCatering[0]._id;               
-        const response = await Api.categoryByMenuId(id);       
-        if(response.status === 200){ 
-          this.categories = response.data;          
-          this.filterCategories = response.data;
-          this.dots= false;
-          }  
-        }
-      } catch (error) {
-        console.log(error)
-         this.dots= false;
-    }
+
+    this.categories = this.categoryMenuConCatering;          
+    this.filterCategories = this.categoryMenuConCatering;
     
         
     
@@ -430,17 +422,12 @@ export default {
             data: {
               content: 'New Content',
             },
-            propsData: { 
-              parent: this,
-              key:0,
-              title: this.$t('frontend.home.cardTitle'),            
-              cart: this.cart,
-              message:  this.$t('frontend.product.massageToast'),
-              buttonAcept:this.$t('frontend.home.checkout'),
-              buttonCancel:this.$t('frontend.home.cancel'),
-              aggregateFree: this.$t('frontend.home.aggregateFree'),
-              refresh: this.$t('frontend.menu.refresh'),
-              currency: this.restaurantActive.currency
+            propsData: {
+              currency: this.restaurantActive.currency,
+              products: this.products,
+              variants: this.variants,
+              taxes: this.taxes,
+              shipping: this.shipping,              
             },
           },
         })

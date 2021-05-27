@@ -27,6 +27,9 @@
                 <ion-segment-button value="zipCodes">
                     <span>{{$t('backoffice.form.titles.zipCodes')}}</span>
                 </ion-segment-button>
+                <ion-segment-button value="devices">
+                    <span>{{$t('backoffice.form.titles.devices')}}</span>
+                </ion-segment-button>
                 <ion-segment-button value="backup">
                     <span>Backup</span>
                 </ion-segment-button>
@@ -482,18 +485,56 @@
                     <ion-label>{{zipCode.ZipCode}} - {{getCityAndState(zipCode.ZipCode)}}</ion-label>
                     <ion-button expand="full" color="danger" @click="delCode(zipCode)"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
                   </ion-item>
+                  <ion-item>
+                        <ion-label position="floating">{{$t('backoffice.form.fields.deliveryZone')}}</ion-label>
+                        <ion-textarea name="deliveryZone" 
+                        @input="deliveryZone = $event.target.value" 
+                        v-bind:value="deliveryZone">
+                        </ion-textarea>
+                    </ion-item>
               </ion-list>
+              
           </div>
-
-          <ion-item>
-            <ion-label position="floating">{{$t('backoffice.form.fields.deliveryZone')}}</ion-label>
-            <ion-textarea name="deliveryZone" 
-            @input="deliveryZone = $event.target.value" 
-            v-bind:value="deliveryZone">
-            </ion-textarea>
-          </ion-item>
         </div>
+        <!-- Devices -->
+        <div v-if="devices">
 
+            <div style="margin-left: 30px">
+                <ion-list>
+                    <!-- <ion-item>
+                        <h1>{{$t('backoffice.form.fields.zipCodes')}}</h1>
+                    </ion-item> -->
+                    <ion-item>
+                        <!-- <ion-label>Device Name</ion-label> -->
+                        <ion-input style="border: 1px solid darkred; margin-left:5px; border-radius: 3px" placeholder="Device name" type="text" @input="newDevName = $event.target.value" :value="newDevName"></ion-input>
+
+                        <!-- <ion-label>Device Company</ion-label> -->
+                        <ion-select style="border: 1px solid darkred; margin-left:5px; border-radius: 3px" interface="popover" icon="add"
+                            :ok-text="$t('backoffice.form.messages.buttons.ok')"
+                            :cancel-text="$t('backoffice.form.messages.buttons.dismiss')" 
+                            :value="newDevCompany"
+                            placeholder="Seleccione una compañía"
+                            @ionChange="newDevCompany = $event.target.value">
+                                <ion-select-option key="pax" value="pax">PAX</ion-select-option>
+                                <ion-select-option key="teamsable" value="teamsable">Teamable</ion-select-option>
+                        </ion-select>
+
+                        <!-- <ion-label>IP Address</ion-label> -->
+                        <ion-input style="border: 1px solid darkred; margin-left:5px; border-radius: 3px" placeholder="Ip Address" type="text" @input="newDevIpAddress = $event.target.value" :value="newDevIpAddress"></ion-input>
+
+                        <!-- <ion-label>Port</ion-label> -->
+                        <ion-input style="border: 1px solid darkred; margin-left:5px; border-radius: 3px" placeholder="Port" type="number" @input="newDevPort = $event.target.value" :value="newDevPort"></ion-input>
+
+                        <ion-button expand="full" color="primary" :disabled="newDevName === '' || newDevCompany === '' || newDevIpAddress === '' || newDevPort === ''" @click="addDevice()"><ion-icon slot="icon-only" name="add"></ion-icon></ion-button>
+                    </ion-item>
+                    <ion-item style="margin-left: 30px" v-for="device in DeviceList" v-bind:key="DeviceList.indexOf(device)">
+                        <ion-label>{{device.Name}} - {{device.Company}} | {{device.Ip}}:{{device.Port}}</ion-label>
+                        <ion-button expand="full" color="danger" @click="delDevice(device)"><ion-icon slot="icon-only" name="trash"></ion-icon></ion-button>
+                    </ion-item>
+                </ion-list>
+            </div>
+        </div>
+        <!-- Backups -->
         <div v-if="backup">
             <div style="margin-left: 30px">
                 <ion-list>
@@ -635,10 +676,18 @@ export default {
       reservation: false,
       tip: false,
       zipCode: false,
+      devices: false,
       backup: false,
 
       //Backup file
       backupFile: null,
+
+      //Devices
+      newDevName: '',
+      newDevCompany: 'shift4',
+      newDevIpAddress: '127.0.0.1',
+      newDevPort: '90001', 
+      DeviceList: [],
     }
   },
   created: function(){
@@ -658,6 +707,7 @@ export default {
             this.reservation = false
             this.tip = false
             this.zipCode = false
+            this.devices = false
             this.backup = false
         }
         if(value === 'catering'){
@@ -666,6 +716,7 @@ export default {
             this.reservation = false
             this.tip = false
             this.zipCode = false
+            this.devices = false
             this.backup = false
         }  
         if(value === 'reservation'){
@@ -674,6 +725,7 @@ export default {
             this.reservation = true
             this.tip = false
             this.zipCode = false
+            this.devices = false
             this.backup = false            
         }
         if(value === 'tip'){
@@ -682,6 +734,7 @@ export default {
             this.reservation = false
             this.tip = true
             this.zipCode = false
+            this.devices = false
             this.backup = false               
         }
         if(value === 'zipCodes'){
@@ -690,6 +743,7 @@ export default {
             this.reservation = false
             this.tip = false
             this.zipCode = true
+            this.devices = false
             this.backup = false               
         }
         if(value === 'backup'){
@@ -698,6 +752,25 @@ export default {
             this.reservation = false
             this.tip = false
             this.zipCode = false
+            this.devices = false
+            this.backup = true               
+        }
+        if(value === 'devices'){
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = true
+            this.backup = false               
+        }
+        if(value === 'backup'){
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
             this.backup = true               
         }
         this.segmentValue = value;
@@ -733,6 +806,7 @@ export default {
                     this.zipCodes = response.data.ZipCodes;
                     this.deliveryZone = response.data.DeliveryZone;
                     this.tipRequire = response.data.TipRequire;
+                    this.DeviceList = response.data.Devices || [];
                     this.tips = response.data.Tips;
                     this.tips.sort();
 
@@ -1132,6 +1206,7 @@ export default {
               "BarPrefix": this.barPrefix,
               "RoomPrefix": this.roomPrefix,
               "TipRequire": this.tipRequire,
+              "Devices": this.DeviceList,
               "Tips": this.tips,
             }
 
@@ -1240,6 +1315,33 @@ export default {
     })
     .then(a => a.present());
 
+    },
+
+    addDevice()
+    {
+        if (!this.DeviceList.find(dev => dev.Name == this.newDevName))
+        {
+            const dev = {
+            "Name": this.newDevName,
+            "Company": this.newDevCompany,
+            "Ip": this.newDevIpAddress,
+            "Port": this.newDevPort 
+            }
+            this.DeviceList.push(dev)
+
+            this.newDevName = ''
+            this.newDevCompany = 'shift4',
+            this.newDevIpAddress = '127.0.0.1',
+            this.newDevPort = '90001'
+        }
+        else{
+            this.showToastMessage('The device name already exist.', 'danger')
+        }
+        
+    },
+
+    delDevice(device){
+        this.DeviceList.splice(this.DeviceList.indexOf(device), 1);
     },
 
     handleFile: function(event)
@@ -1367,11 +1469,11 @@ export default {
         ]
     })
     .then(a => a.present());
-
-
     }
+
   },
 
+    
 
 }
     

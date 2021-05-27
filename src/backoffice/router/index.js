@@ -700,6 +700,13 @@ Vue.use(VueRouter)
     
   },
   {
+    // path: '/menus',    
+    path: '/:url/home',    
+    name: 'HomeGrid',
+    component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/HomeGrid.vue')
+    
+  },
+  {
     // path: '//catering',
     path: '/:url', 
     name: 'Catering',

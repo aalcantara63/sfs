@@ -116,6 +116,7 @@ Vue.use(Ionic);
 Vue.use(Vuex);
 Vue.use(VModal);
 Vue.use(Cors);
+// Vue.use(Cors({ maxAge: 604800000, origin: true }));  
 Vue.use(VTooltip);
 Vue.use(VuePaginate)
 Vue.use(VueGoogleMaps, {

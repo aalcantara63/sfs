@@ -528,7 +528,6 @@ export default {
                 return true;
 
           }
-
            else if (restaurant.data.PayMethod == 'SHIFT4')
             {
 
@@ -599,6 +598,53 @@ export default {
 
                 }
                 
+            }
+            else if (restaurant.data.PayMethod == 'TSYS'){
+                try{
+                    const datas = {
+                                    "restaurantId": restaurantID,
+                                    "payMethod": 'TSYS',
+                                    "total": parseFloat(count).toFixed(2),
+                                    // "cardExpirationDateF1": this.order.expirationCard,
+                                    // "cardNumber": this.order.accountNumber,
+                                    // "token": invoiceInformation.data[0].card.token.value,
+                                    "invoiceNumber": pay.paymentInfo.transId
+                                }
+    
+                    console.log(datas)
+                    const resRefund = await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto)
+                    
+                    const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                    if(paymeD){
+                        console.log('paymenD')
+                        console.log(paymeD.data[0])
+                        const payUpd = paymeD.data[0];
+                        payUpd.Refund = parseFloat(count).toFixed(2);
+                        await Api.putIn('Allpayments', payUpd);
+                    }
+                    console.log(resRefund)
+
+                    this.order.Payment[key]["state"] = 2;
+                    this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
+                    let item = {
+                        "_id": this.order._id,
+                        "Payment": this.order.Payment,
+                    };
+                    Api.putIn('order', item)
+                    .then(response => {
+                        console.log(response)
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+
+                    this.spinner = false
+                }
+                catch(e){
+                    console.log(e)
+                    this.showToastMessage(e, 'danger')
+                    this.spinner = false
+                }
             }
             
       },
@@ -778,9 +824,47 @@ export default {
 
                 }
             }
-        // else if (restaurant.data.PayMethod == 'TSYS')
-            
-            
+            else if (restaurant.data.PayMethod == 'TSYS'){
+
+                try
+                {
+                    const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'TSYS')
+                    console.log("Response Void")
+                    console.log(resVoid)
+                    const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                    if(paymeD){
+                        console.log('paymenD')
+                        console.log(paymeD.data[0])
+                        const payUpd = paymeD.data[0];
+                        payUpd.Void = pay.paymentInfo.total;
+                        await Api.putIn('Allpayments', payUpd);
+                    }
+
+                    this.order.Payment[key]["state"] = 3
+                    this.order.Payment[key]["voidValue"] = pay.paymentInfo.total;
+                    let item = {
+                        "_id": this.order._id,
+                        "Payment": this.order.Payment,
+                    };
+                    Api.putIn('order', item)
+                    .then(response => {
+                        console.log(response)
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+
+                    this.spinner = false
+                }
+                catch(e)
+                {
+                    console.log(e)
+                    this.showToastMessage(e, 'danger')
+                    this.spinner = false
+
+                }
+
+            }
       },
       callbackVoid(res){
             console.log("SUCCESSFULLY---RESPONSE:")

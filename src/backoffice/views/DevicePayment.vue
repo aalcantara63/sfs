@@ -89,6 +89,7 @@
             ssl: false,
             spinner: false,
             deviceType: 'shift4',
+            taxesName: '',
         }
         
     },
@@ -97,6 +98,8 @@
         this.serverId = this.grandfather.$store.state.user.ServerId.toString()
         this.datas.ClerkID = this.serverId
         this.datas.transactionType = this.transactionType
+        this.datas.destinationZipCode = this.grandfather.$store.state.restaurantActive.restaurantZipCode
+        // this.getTax()
 
         //loading device
         const device = this.grandfather.$store.state.device
@@ -112,6 +115,14 @@
         deviceTransactionType: { type: String, default: '01' },
     },
     methods: {
+        // getTax: function(){
+        //     Api.getAvailbleTax().then(response => {
+        //         this.taxesName = response.data.Name
+        //     })
+        //     .catch(e => {
+        //         console.log(e)
+        //     });   
+        // },
         changeModeId(val){
             console.log(val)
             this.modeId = val

@@ -155,7 +155,7 @@
                     
                   </ion-item>
 
-                     <ion-item-options side="end">
+                  <ion-item-options side="end">
 
                      <ion-item-option color="primary"  @click.stop="reOrder(order)" v-tooltip="$t('frontend.tooltips.reOrder')">                        
                         <span class="iconify" data-icon="mi:shopping-cart-add" data-inline="false"></span>   

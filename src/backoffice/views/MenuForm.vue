@@ -440,7 +440,9 @@ export default{
         // this.$refs.active.checked = this.active;
         let categoriesIds = data.Categories;
 
+        console.log("Init selected categories")
         this.selectedCategories = this.mapCategory(categoriesIds);
+        console.log("End selected categories")
 
         this.initAvailableCategories();
       },
@@ -455,13 +457,17 @@ export default{
                     selCategory = category;
             });
 
-            selCategories.push(selCategory);
+            if (selCategory != null)
+                selCategories.push(selCategory);
 
          });
 
         // console.log("SelectedCateg");
         // console.log(selCategories);
-
+          console.log("TODAS LAS CATEGORIAS")
+          console.log(this.categories)
+          console.log("LAS CATEGORIAS SELECCIONADAS")
+          console.log(selCategories)
          return selCategories;
          
       },
@@ -475,8 +481,12 @@ export default{
                   this.selectedCategories.forEach(selectCateg => {
                     //  console.log(category);
                     //  console.log(selectCateg);
-                     if (selectCateg._id == category._id)
-                        found = true;
+                     console.log("Selected category: "); console.log(selectCateg)
+                     console.log("Category: "); console.log(category)
+                     if (selectCateg != null && category != null){
+                        if (selectCateg._id == category._id)
+                            found = true;
+                     }
                   });
                   if (!found)
                     availableCateg.push(category);
@@ -550,7 +560,8 @@ export default{
         let sCategories = [];
         // let productItem = null;
         this.selectedCategories.forEach(categorySelected => {
-            sCategories.push(categorySelected._id);
+            if (categorySelected != null)
+                sCategories.push(categorySelected._id);
         });
          return sCategories;
       },

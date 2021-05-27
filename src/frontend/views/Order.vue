@@ -132,17 +132,15 @@
 
                 <span > 
                     <ion-toolbar>
-
-                            <ion-buttons slot="start" @click="backToCall()">
-                                <ion-back-button default-href="home"></ion-back-button>
-                            </ion-buttons>    
-                                                
-                            <ion-card-title                          
-                                style="padding: 10px;text-align: center;text-transform: uppercase;font-weight: bolder;">
-                                {{$t('frontend.order.orderDetail')}} 
-                            </ion-card-title>
-
-                        </ion-toolbar>                  
+                        <ion-buttons slot="start" @click="backToCall()">
+                            <ion-back-button default-href="home"></ion-back-button>
+                        </ion-buttons>    
+                                            
+                        <ion-card-title                          
+                            style="padding: 10px;text-align: center;text-transform: uppercase;font-weight: bolder;">
+                            {{$t('frontend.order.orderDetail')}} 
+                        </ion-card-title>
+                    </ion-toolbar>                  
 
                     <div :style="scope.isSmall || scope.isMedium || scope.noMatch? '': 'width: 80%; margin: 0 auto;'">
                         
@@ -535,7 +533,7 @@
                                         <h2 class="titles-order"> {{$t('frontend.order.notes')}}</h2> 
                                     </ion-label>
                             
-                                    <ion-textarea class="menu-textarea" @input="note = $event.target.value"></ion-textarea>
+                                    <ion-textarea class="menu-textarea" @input="note = $event.target.value">{{note}}</ion-textarea>
                             
                                 </ion-item>  
                             </ion-item-slidin>
@@ -550,10 +548,11 @@
                             </ion-label>                            
 
                             <!-- hasta saber si hay autho incremental in tsys (restaurantActive.payMethod==='SHIFT4' || restaurantActive.payMethod==='TSYS') -->
-                            <ion-item v-if="(restaurantActive.payMethod==='SHIFT4' && order.OrderType === 'On Table' ) && (clientId !='' || staffName != '')">
+                            <ion-item v-if="( restaurantActive.payMethod==='SHIFT4' && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
+                              (restaurantActive.payMethod==='TSYS' && order.OrderType === 'On Table'  && staffName != '')">
                                 <p style=" float: left;text-align: left;padding: 0" class="subtitles-order menu-col-4">{{$t('frontend.order.isTicket')}} </p>                               
                                 <ion-toggle color="primary" :value="isTicket" @ionChange="isTicket = !isTicket"></ion-toggle>
-                            </ion-item>
+                            </ion-item> 
 
                             <div style="padding: 20px 0; text-align: center">
                               <ion-button  fill="outline" @click="goHome">{{$t('frontend.home.cancel')}}</ion-button>    
@@ -639,9 +638,14 @@ export default {
        if(this.$route.params.backButton === true)
         this.buttonBack = this.$route.params.backButton; 
        else
-        this.buttonBack = false; 
+        this.buttonBack = false;
+        
+        if(this.order.Note)
+          this.note = this.order.Note
 
         this.spinner = true;
+
+
                 
         this.getOrderInfo();
         this.getOtherCharges();        

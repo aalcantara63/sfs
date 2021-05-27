@@ -104,7 +104,7 @@
                v-tooltip="parent.$t('frontend.payment.devicePayment')"
                v-if="(payMethod==='SHIFT4' || payMethod==='TSYS' ) && staffName !==''"
               :class="devicePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+1">
-             <span class="iconify" data-icon="emojione-monotone:mobile-phone" data-inline="false"></span>            
+              <span class="iconify" data-icon="emojione-monotone:mobile-phone" data-inline="false"></span>            
             </ion-button> 
 
               <!-- -->
@@ -113,40 +113,35 @@
                v-tooltip="parent.$t('frontend.payment.idtechPayment')"
                v-if="payMethod==='SHIFT4' && staffName !==''"
               :class="idtechPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
-            <span class="iconify" data-icon="gg:usb" data-inline="false"></span>        
+              <span class="iconify" data-icon="gg:usb" data-inline="false"></span>        
             </ion-button> 
 
-            
-         
-
-             <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
-              :disabled="spinner"
-               v-tooltip="parent.$t('frontend.payment.cashPayment')"
-               v-if="staffName !==''"
-              :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
-            <span class="iconify" data-icon="ic:baseline-attach-money" data-inline="false"></span>          
+            <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
+                :disabled="spinner"
+                v-tooltip="parent.$t('frontend.payment.cashPayment')"
+                v-if="staffName !==''"
+                :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+                <span class="iconify" data-icon="ic:baseline-attach-money" data-inline="false"></span>          
             </ion-button> 
 
-             <ion-button @click="changePayment(), swipePay = true" :style="cashPay? 'float: left;border: solid' : 'float: left'"
+            <ion-button @click="changePayment(), swipePay = true" :style="cashPay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
                v-tooltip="parent.$t('frontend.payment.swipePayment')"
                v-if="payMethod==='TSYS' && staffName !==''"
               :class="swipePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
               <span class="iconify" data-icon="wpf:bank-cards" data-inline="false"></span>
             </ion-button> 
-
             
-              <ion-button  @click="changePayment(), qrPay = true"  
+            <ion-button  @click="changePayment(), qrPay = true"  
               :disabled="spinner"
                v-if="payMethod==='SHIFT4' && staffName!== ''"
                v-tooltip="parent.$t('frontend.payment.qrPayment')"
               :style="qrPay? 'float: left;border: solid' : 'float: left'"
               :class="qrPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
                 <span class="iconify" data-icon="ion:qr-code-sharp" data-inline="false"></span>              
-              </ion-button>
-
+            </ion-button>
             
-              <ion-button  @click="shareQrPayment()"  
+            <ion-button  @click="shareQrPayment()"  
                 v-if="payMethod==='SHIFT4' && staffName==='' && !isCatering"
                 :key="keyShare+4"
                 :disabled="spinner"
@@ -155,10 +150,9 @@
                 :class="sharePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
                 <ion-spinner v-if="spinnerShare" name="lines"></ion-spinner>
                 <span v-if="!spinnerShare" class="iconify" data-icon="fe:share" data-inline="false" ></span> 
-              </ion-button>
-
+            </ion-button>
             
-              <ion-button   @click="changePayment(), checkPay = true" 
+            <ion-button   @click="changePayment(), checkPay = true" 
                 v-if="isCatering"
                 :disabled="spinner"
                 v-tooltip="parent.$t('frontend.payment.checkPayment')"
@@ -166,20 +160,20 @@
                 :style="checkPay? 'float: left;border: solid' : 'float: left'"
                 :class="checkPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+5">
                 <span class="iconify" data-icon="la:money-check-alt" data-inline="false" style="width: 40px;height: 40px;"></span>
-              </ion-button>
+            </ion-button>
           
           
              <google-pay   v-if="payMethod==='SHIFT4' && staffName==='' && googleData.merchantId"
-             @click="changePayment()"
-             :keyGoogle="this.keyGoogle"
-              v-tooltip="'Google Pay'"
-             :disabled="spinner"   
-              style="float: left; margin: 2px" 
-              :Total="this.Total"
-              :parent="this"
-              :googleData="this.googleData"
-              :restaurantId="this.restaurantId"
-            ></google-pay>
+              @click="changePayment()"
+              :keyGoogle="this.keyGoogle"
+                v-tooltip="'Google Pay'"
+              :disabled="spinner"   
+                style="float: left; margin: 2px" 
+                :Total="this.Total"
+                :parent="this"
+                :googleData="this.googleData"
+                :restaurantId="this.restaurantId"
+              ></google-pay>
        
 
              <apple-pay   
@@ -199,7 +193,7 @@
 
          <div v-if="spinner" style="margin: 10px; padding: 30px 0;">
             <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
-          </div>
+         </div>
         
         
           <ion-card  v-if="cardPay && !spinner" class="scroll" style="height: auto" >  
@@ -281,11 +275,24 @@
                   
                 <olapay-device
                  v-if="payMethod==='TSYS'"
-                  :datas="this.olapayData"
-                  :grandfather="this.parent"
+                  :datas="this.olapayData"                 
                   :parent="this"
                   :Acept="this.Acept"
-                  :Cancel="this.Cancel"                   
+                  :Cancel="this.Cancel"
+                  :isTicket="isTicket"
+                  :codeNotValid="this.codeNotValid"
+                  :notValidCC="this.notValidCC"
+                  :dataRequired="this.dataRequired"
+                  :ccard="this.ccard"
+                  :expcard="this.expcard" 
+                  :ccode="this.ccode"  
+                  :cityText="this.cityText"  
+                  :stateText="this.stateText"
+                  :firstNameText="this.firstNameText"
+                  :lastNameText="this.lastNameText"
+                  :postalCode="this.postalCode"
+                  :addressLine1="this.addressLine1"
+                  :verifyText="this.verifyText"
                 >
                 </olapay-device>  
                 
@@ -473,7 +480,7 @@ import {Utils} from '../../backoffice/utils/utils'
 import { Plugins } from '@capacitor/core';
  const { Share } = Plugins;
 //  const { Network } = Plugins;
- import  RoutingValidator from 'bank-routing-number-validator';
+import  RoutingValidator from 'bank-routing-number-validator';
  
 export default {
    name: 'PaymentModal',  
@@ -612,6 +619,8 @@ export default {
         bankName: '',
         readyButton: false,
         googleData: {},
+
+        
         
         deviceData: {
              'amountInformation': {
@@ -624,13 +633,17 @@ export default {
                 },
                 'traceInformation':{
                     'TransactionNumber': ''
-                }
+                },
+                'commercialInformation': this.commercialInformation(),
+                'destinationZipCode': this.ccode
+                
         },
           olapayData: {
             'tip': this.order.Tip,
             'total': this.order.Total,
             'subtotal': this.order.SubTotal,
-            'tax': this.order.Taxe.toFixed(2),   
+            'tax': this.order.Taxe.toFixed(2),  
+            'device': this.parent.$store.state.device 
         },
         deviceTransactionType: '01',
         shareText1: ' ',
@@ -638,8 +651,25 @@ export default {
         allTypeOrder:{'Delivery':this.parent.$t('frontend.app.deliver'), 'PickUp':this.parent.$t('frontend.app.pickup'), 'On Table':this.parent.$t('frontend.app.table'), 'Curbside':this.parent.$t('frontend.app.curbside'), },
     }
   }, 
-  
+
    methods: {
+    commercialInformation(){
+          let commercialInfo = []
+          console.log("Esta es la orden")
+          console.log(this.order)
+          this.order.Products.forEach(p => {
+              let obj = {
+                  'description': p.Name,
+                  'qty': p.Cant,
+                  'price': p.Price,
+                  'total': parseFloat(p.Price * p.Cant).toFixed(2)
+              }
+              commercialInfo.push(obj)
+          });
+          console.log("Commercial PLAIN:")
+          console.log(commercialInfo)
+          return commercialInfo
+    },
 
     alertRequiredDatas(){
       return  this.$ionic.alertController

@@ -211,6 +211,7 @@ import { VBreakpoint } from 'vue-breakpoint-component'
 import Modal from './SetDeviceDataModal.vue';
 import Moment from 'moment'
 import 'echarts';
+// import SHA256 from "crypto-js/sha256";
 
 export default {
     data(){
@@ -336,6 +337,19 @@ export default {
         },
         init(){
             this.spinner = true 
+
+            //Esto es NAB
+            // var endpoint = '/sale/';
+            // var epiKey="8EEDC66DF02D7803E05321281FAC8C31";
+            // var epiId='9001-900614-1-14';
+            // var payload = {
+                // "accountNumber": "4111111111111111",
+                // "amount": "127.99",
+                // "TransactionId": 123
+            // }
+            // var hash = SHA256(endpoint+payload, epiKey)
+            // console.log("SIGNATURE")
+            // console.log(hash.toString())
 
             this.initData()
             this.fetchAllRestaurant()
@@ -489,7 +503,6 @@ export default {
         },
         changeRestaurant(value){
             this.restaurantId = value
-
             this.relogin()
         },
         relogin(){

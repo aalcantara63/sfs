@@ -70,6 +70,16 @@ export var Devices = {
 			code : "1F"
 		},
 
+        mRS : {
+            hex : 0x1E,
+            code : "1E"
+        },
+
+        mGS : {
+            hex : 0x1D,
+            code : "1D"
+        },
+
         getDeviceInfoBySN: async function(number){
             return await axios.get('https://poslink.com/poslink/ws/process2.asmx/GetDeviceLocalIP?TerminalId=&Token=&SerialNo=' + number)
         },
@@ -310,6 +320,44 @@ export var Devices = {
             });
         },
 
+        setProductDescription: function(productInformation){
+            let ProductDescription = ''
+            productInformation.forEach(pi => {
+                ProductDescription += pi.description.toString() + ". "
+            })
+            return ProductDescription
+        },
+
+        setProductInformation: function(productInformation) //productInformation = [{}]
+        {
+            let res = []
+            let count = 1
+
+            // arr.push(this.base64ToHex(window.btoa(objectInfo[name].toString())));
+            console.log(productInformation)
+            productInformation.forEach(pi => {
+                res.push(this.base64ToHex(window.btoa(count.toString())))
+                res.push(this.mRS.code)
+                res.push(this.mRS.code)
+                res.push(this.mRS.code)
+                res.push(this.base64ToHex(window.btoa(pi.description.toString())))
+                res.push(this.mRS.code)
+                res.push(this.base64ToHex(window.btoa(pi.qty.toString())))
+                res.push(this.mRS.code)
+                res.push(this.mRS.code)
+                res.push(this.base64ToHex(window.btoa(pi.price.toString())))
+                res.push(this.mRS.code)
+                res.push(this.mRS.code)
+                res.push(this.mRS.code)
+                res.push(this.mRS.code)
+                res.push(this.base64ToHex(window.btoa(pi.total.toString())))
+                res.push(this.mGS.code)
+                count++
+            });
+
+            return res
+        },
+
         DoCredit: async function(ip, port, ssl, data, callback){
 
             console.log(data)
@@ -328,6 +376,12 @@ export var Devices = {
                     'FuelAmount': ''
                     
                 }
+
+                let voucherNumber = ''
+                if (data.transactionType === '01'){
+                    voucherNumber = invoiceSequence.data
+                }
+
                 const accountInformation = {
                     'Account': '',
                     'EXPD': '',
@@ -361,26 +415,60 @@ export var Devices = {
                     'ShiftID': ''
                 }
 
+                //Process commercialInformation
+                const transDatetime = moment()
+                transDatetime.format('YYMMDD').toString()
+                console.log('TRANS DATETIME: ' + transDatetime.toISOString())
+                let productInformation = ''
+                let PONumber = ''
+                let orderDate = '' 
+                let destinationZipCode = ''
+                let productDescription = ''
+            
+                if (data.transactionType === '01'){
+                    PONumber = data.traceInformation.InvoiceNumber || invoiceSequence.data
+                    if (data.commercialInformation)
+                    {
+                        productInformation = this.setProductInformation(data.commercialInformation)
+                        productDescription = this.setProductDescription(data.commercialInformation)
+                    }
+                        
+                    orderDate = transDatetime.format('YYMMDD').toString()
+                    destinationZipCode = data.destinationZipCode
+                    
+                }
+                
                 const commercialInformation = {
-                    'PONumber': '',
-                    'CustomerCode': '',
+                    'PONumber': PONumber.toString(),
+                    'CustomerCode': PONumber.toString(),
                     'TaxExempt': '',
                     'TaxExemptID': '',
                     'MerchantTaxID': '',
-                    'DestinationZipCode': '',
-                    'ProductDescription': '',
+                    'DestinationZipCode': destinationZipCode,
+                    'ProductDescription': data.productDescription || productDescription,
+                    'ShipFromZipCode': '',
+                    'DestinationCountryCode': 'USA',
+                    'TaxDetail': '',
+                    'SummaryCommodityCode': '',
+                    'DiscountAmount': '',
+                    'FleightAmount': '',
+                    'DutyAmount': '',
+                    'OrderDate': orderDate,
+                    'ProductInformation':  productInformation,
                 }
+
+                console.log('COMMERCIAL INFORMATION:')
+                console.log(commercialInformation)
 
                 const motoEcommerce = {
                     'MOTO_E_CommerceMode': '',
                     'TransactionType': '',
                     'SecureType': '',
-                    'OrderNumber': '',
+                    'OrderNumber': voucherNumber,
                     'Installments': '',
                     'CurrentInstallment': ''
                 }
-                const transDatetime = moment()
-                console.log('TRANS DATETIME: ' + transDatetime.toISOString())
+ 
                 const additionalInformation = {
                     'TABLE': '',
                     'GUEST': '',

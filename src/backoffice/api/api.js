@@ -356,10 +356,7 @@ export var Api = {
     },
 
     captureTsys: async function(item, restaurantId){
-        //item = {
-        //  "transactionID": ""
-        // }
-    return await axios.post(this.endPointURL + 'payment?captureTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+        return await axios.post(this.endPointURL + 'payment?captureTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
 
@@ -375,10 +372,7 @@ export var Api = {
     },
 
     voidTsys: async function(item, restaurantId){
-        //item = {
-        //  "transactionID": "",        
-        // }
-    return await axios.post(this.endPointURL + 'payment?voidTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+        return await axios.post(this.endPointURL + 'payment?voidTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
     restoreBackUpFromPortal: async function(){

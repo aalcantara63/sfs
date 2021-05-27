@@ -5,31 +5,7 @@
         <ion-spinner  name="lines" class="spinner"></ion-spinner>
       </div>
 
-      <div v-if="!spinner && restaurantSelected"> 
-        <!-- <ion-label>{{$t('frontend.home.selectOrderType')}}</ion-label>   <br>     -->
-          <ion-button v-if="configuration.viewDelivery && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" style="width: 23%;" color="primary" @click="showDeliver" :class="isDelivery? 'ion-color ion-color-primary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-primary md button button-solid ion-activatable ion-focusable hydrated disable-hover'" >{{$t('frontend.app.deliver')}}</ion-button>
-          <ion-button style="width: 23%;" color="secondary" v-if="configuration.selectPickHour && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" @click="showPickUp " :class="isPick? 'ion-color ion-color-secondary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-secondary md button button-solid ion-activatable ion-focusable hydrated'" >{{$t('frontend.app.pickup')}}</ion-button>
-          <ion-button style="width: 23%;" color="secondary" v-if="!configuration.selectPickHour && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" @click="sinPickAction" :class="isPick? 'ion-color ion-color-secondary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-secondary md button button-solid ion-activatable ion-focusable hydrated'">{{$t('frontend.app.pickup')}}</ion-button>
-          <ion-button  v-if="configuration.viewOnTable" style="width: 23%;" color="tertiary" @click="show"  :class="isTable? 'ion-color ion-color-tertiary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-tertiary md button button-solid ion-activatable ion-focusable hydrated'" >{{$t('frontend.app.table')}}</ion-button> 
-          <ion-button v-if="configuration.viewCurbside && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" style="width: 23%;" color="secondary" @click="showCurbside" :class="isCurbside? 'ion-color ion-color-primary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-primary md button button-solid ion-activatable ion-focusable hydrated disable-hover'" >{{$t('frontend.app.curbside')}}</ion-button>
-
-        <br>
-          <div style="display: inline-block;">
-            <ion-chip outline  @click="productDetails()"
-              style="margin: 7px 0 0 5px;padding: 0 10px; float: left;">            
-              <ion-icon name="cart" v-if="!spinnerTicket" size="large" style="margin-right:0"></ion-icon>
-              <ion-spinner style="padding-top:10px" v-if="spinnerTicket" name="crescent"  color="primary"></ion-spinner>
-              <ion-badge>{{cart.length}}</ion-badge>
-            </ion-chip>
-            <div v-if="cart.length > 0" style="float: left;margin: 15px;">
-              <a @click="showOrder()">{{$t('frontend.home.checkout')}}</a>
-            </div> 
-          </div>
-
-        
-           
-      </div>
-     
+      
 
       <modal name="my-first-modal" width="80%" height="80%">
         <ion-header>
@@ -152,92 +128,324 @@
         </ion-card>          
       </modal>
        
-      <div  v-if="!showProduct && !spinner && restaurantSelected">
-       
-          <ion-toolbar>
-            <!-- <h1 >{{$t('frontend.menu.menu')}}</h1> -->
-            <br>
-             <div v-if="menuListSinCatering.length > 0">
-                <ion-select interface="popover" icon="add"
-                style="padding: 10px 50px;"
-                 :ok-text="$t('backoffice.form.messages.buttons.ok')"
-                 :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
-                 :value="menuListSinCatering[0]._id"
-                 :placeholder="$t('frontend.menu.menu')"
-                  @ionChange="changeMenu($event.target.value)" >
-                    <ion-select-option v-for="res in menuListSinCatering"                    
-                      :key="res._id" 
-                      :value="res._id" > {{res.Name}}
-                    </ion-select-option>
-                   
-                </ion-select>
-            </div>
+      <div  v-if="!spinner && restaurantSelected">
 
+        <v-breakpoint>
+          <div slot-scope="scope">
+            <div >
 
-            <ion-searchbar  
-              style="padding: 3px 1px;"
-              @ionClear="handleInput('')"
-              @input="$event.target.value?handleInput($event.target.value):handleInput('')"
-              :placeholder="$t('frontend.home.search')"> 
-              
-            </ion-searchbar>
-        </ion-toolbar>
-
-      <v-breakpoint>
-         <div slot-scope="scope">
-
-           <div v-if="dots" style="margin: 10px">              
-               <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
-            </div>
-
-            <div v-if="!dots"> 
-              <div  v-for="category in filterCategories"
-               :key="category.Id" v-show="!category.ParentId"
+              <ion-toolbar style="text-align: center;">
+                <ion-button  @click="menuactive='grid';productKey++" :style="menuactive==='grid'? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;' ">
+                  <span class="iconify" data-icon="clarity:grid-chart-solid" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+                </ion-button>
+                 <ion-button @click="menuactive='gridPicture';productKey++" :style="menuactive==='gridPicture'? 'opacity: 1;;border: outset;' : 'opacity: 0.65;border: none;' ">
+                  <span class="iconify" data-icon="clarity:grid-chart-solid-badged" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+                </ion-button>
+                 <ion-button @click="menuactive='list';productKey++" :style="menuactive==='list'? 'opacity: 1;;border: outset;' : 'opacity: 0.65;border: none;' ">
+                  <span class="iconify" data-icon="foundation:list-bullet" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+                </ion-button>
+                
+              </ion-toolbar>
                
-               :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-3 card-categories'">
-                <ion-card  >
-
-                  <ion-item @click="productsByCategory(category._id, category.Name, category.Description)">
-                      
-                    <div class="menu-col-6" style="height: 120px; width: 140px;background: #80808021;" >
-                        <img v-if="category.ImageUrl" :src="category.ImageUrl" style="height: auto;width: 100%;">
-                    </div>
-                    <ion-label class="ion-text-wrap menu-col-6" >
-                        <h1 style="text-overflow: ellipsis; overflow: hidden;display: -webkit-box; -webkit-line-clamp: 2;-webkit-box-orient: vertical;">{{category.Name}}</h1>
-                        <!-- <p style=" white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"> {{category.Description}}</p> -->
-                    </ion-label>  
-                  </ion-item>
-              
-                  
-                                  
-                </ion-card>
+              <div v-if="scope.isSmall || scope.noMatch">
+                MOSTRAT VISTA MOVIL
               </div>
             
+
+              <div v-else >
+                <ion-card  class="menu-col-8 card-categories" >
+
+                    <ion-toolbar>  
+                      <div v-if="menuListSinCatering.length > 0">
+                        <ion-select interface="popover" icon="add"
+                        style="padding: 10px 50px;"
+                        :ok-text="$t('backoffice.form.messages.buttons.ok')"
+                        :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
+                        :value="menuListSinCatering[0]._id"
+                        :placeholder="$t('frontend.menu.menu')"
+                          @ionChange="changeMenu($event.target.value)" >
+                            <ion-select-option v-for="res in menuListSinCatering"                    
+                              :key="res._id" 
+                              :value="res._id" > {{res.Name}}
+                            </ion-select-option>
+                          
+                        </ion-select>
+                      </div>
+
+                      <div v-if="dots" style="margin: 10px">              
+                        <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
+                      </div>
+
+                      <ion-searchbar  
+                        style="padding: 3px 1px;"
+                        @ionClear="handleInput('')"
+                        @input="$event.target.value?handleInput($event.target.value):handleInput('')"
+                        :placeholder="$t('frontend.home.search')"> 
+                        
+                      </ion-searchbar>
+                    </ion-toolbar>
+                    
+                    <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+                      <div  v-for="category in filterCategories" :key="category.Id" v-show="!category.ParentId"               
+                        :class="scope.isMedium? 'menu-col-6 card-categories': 'menu-col-3 card-categories'">                  
+                        <ion-card color="primary" 
+                        :key="productKey+1" 
+                        :style="categorySelected===category._id? 'opacity: 1': 'opacity: 0.75'"
+                        @click="productsByCategory(category._id, category.Name, category.Description)"> 
+                          <ion-avatar style="margin-inline: auto; margin-top: 25px;" v-if="menuactive==='gridPicture'">
+                            <img :src="category.ImageUrl">
+                          </ion-avatar>
+                           <h1 v-if="menuactive==='gridPicture'" class="elipsy-center" v-tooltip="category.Name" style="margin: 5px;">{{category.Name}}</h1>
+                          <ion-label v-else class="ion-text-wrap menu-col-6" >
+                            <h1 class="elipsy-center" v-tooltip="category.Name">{{category.Name}}</h1>
+                          </ion-label>
+                          
+                                                                                      
+                        </ion-card>
+                      </div> 
+                    </div>
+
+                    <div >
+                      <vue-product  v-if="showProduct && !spinner"  :key="productKey"    
+                      :restaurantSelectedId="restaurantSelectedId"
+                      :restaurantName="restaurantActive.restaurantName"
+                      :currency="restaurantActive.currency"
+                      :cart="cart" 
+                      :prod="prod"
+                      :products="products" 
+                      :categories="categories"
+                      :variants="variants"
+                      :category="categoryName" 
+                      :categoryDescription="categoryDescription"
+                      :menuactive="menuactive"
+                      :orderType="orderType">
+                    </vue-product>
+                      
+                    </div> 
+
+                  
+                </ion-card>
+
+
+                <ion-card  class="menu-col-4 card-categories" color="light">
+
+                    <ion-segment id="reservationSegment" :value="segmentValue" style="margin: 0px 0 25px;">
+                      <ion-segment-button value="table"  @click="segmentValue='table'">
+                        <span class="iconify" data-icon="grommet-icons:location-pin" data-inline="false" data-width="15" data-height="15"></span>
+                        Table
+                      </ion-segment-button>
+                      <ion-segment-button value="customer"  @click="segmentValue='customer'">
+                      <span class="iconify" data-icon="raphael:customer" data-inline="false" data-width="15" data-height="15"></span>
+                        Customer
+                      </ion-segment-button>
+                      <ion-segment-button value="order"  @click="segmentValue='order'">
+                        <span class="iconify" data-icon="clarity:shopping-cart-solid" data-inline="false" data-width="15" data-height="15">0</span>
+                        Order  
+                      </ion-segment-button>
+                    </ion-segment>
+                  
+                    <div style="height: 55vh; overflow: auto;"> 
+                      <div v-if="segmentValue==='order'">                       
+                        <cart                                                  
+                          :currency="restaurantActive.currency"
+                          :showButtons ="false"
+                          :products="products"
+                          :variants="variants"
+                          :taxes="taxes"
+                          :shipping="shipping"
+                        ></cart>
+                      </div>
+
+                      <div v-if="segmentValue==='customer'">
+                        CUSTOMER
+                      </div>
+
+                      <div v-if="segmentValue==='table'" style="    text-align: center;">
+                      
+                          <ion-button 
+                            v-if="configuration.viewDelivery && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
+                            :style="isDelivery? 'opacity: 1;border: outset;width: 23%;' : 'opacity: 0.65;border: none;width: 23%;'" 
+                            color="secondary" 
+                            @click="showDeliver" 
+                            v-tooltip="$t('frontend.app.deliver')">
+                            <span class="iconify" data-icon="emojione-monotone:delivery-truck" data-inline="false" style="margin: 0;"></span>
+                            </ion-button>
+                          
+                          <ion-button 
+                            :style="isPick? 'opacity: 1;border: outset;width: 23%;' : 'opacity: 0.65;border: none;width: 23%;'"  
+                            color="secondary" 
+                            v-if="configuration.selectPickHour && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
+                            @click="showPickUp " 
+                            v-tooltip="$t('frontend.app.pickup')" >                   
+                            <span class="iconify" data-icon="bx:bx-walk" data-inline="false" style="margin: 0;"></span>
+                          </ion-button>
+
+                          <ion-button 
+                            :style="isPick? 'opacity: 1;border: outset;width: 23%;' : 'opacity: 0.65;border: none;width: 23%;'" 
+                            color="secondary" 
+                            v-if="!configuration.selectPickHour && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
+                            @click="sinPickAction" 
+                            v-tooltip="$t('frontend.app.pickup')">
+                            <span class="iconify" data-icon="bx:bx-walk" data-inline="false" style="margin: 0;"></span>
+                          </ion-button>
+                        
+                          <ion-button  
+                            v-if="configuration.viewOnTable" 
+                            :style="isTable? 'opacity: 1;border: outset;width: 23%;' : 'opacity: 0.65;border: none;width: 23%;'" 
+                            color="secondary" 
+                            @click="show"  
+                            v-tooltip="$t('frontend.app.table')" >
+                            <span class="iconify" data-icon="vs:table-o" data-inline="false" style="margin: 0;"></span>
+                          </ion-button> 
+                          
+                          <ion-button
+                            v-if="configuration.viewCurbside && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
+                            :style="isCurbside? 'opacity: 1;border: outset;width: 23%;' : 'opacity: 0.65;border: none;width: 23%;'" 
+                            color="secondary" 
+                            @click="showCurbside" 
+                            v-tooltip="$t('frontend.app.curbside')">
+                            <span class="iconify" data-icon="raphael:car" data-inline="false" style="margin: 0;"></span>
+                          </ion-button>
+
+                          <div >
+                                  
+                            <div v-if="order.OrderType==='PickUp' || isPick" @click="showPickUp()">
+                              <ion-item>
+                                <h2>{{allTypeOrder['PickUp']}} </h2>
+                              </ion-item>
+                              <ion-item   >
+                                <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-datetime :key="key1" style="text-align: left;" :min="minDay"
+                                  :value="dateToDay" @ionChange="dateToDay=$event.target.value" ></ion-datetime>                                
+                              </ion-item>
+                              <ion-item  >
+                                <ion-label position="floating">{{$t('frontend.orderType.pickOut') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-datetime display-format="h:mm A" picker-format="h:mm A" :key="key1" style="text-align: left;"
+                                  :value="thisMinHour" @ionChange="thisMinHour=ValidateHour($event.target.value), thisMinHour !==''? savePickUp() : ''" ></ion-datetime>                                
+                              </ion-item>
+                            </div>
+                                    
+
+                            <div v-if="order.OrderType ==='Delivery' || isDelivery" @click="showDeliver()">
+                                <ion-item>
+                                  <h2>{{allTypeOrder['Delivery']}} </h2>
+                                </ion-item>
+                                <ion-item >
+                                  <ion-label position="floating">{{$t('frontend.home.address')}} <strong style="color: red">*</strong></ion-label>
+                                  <ion-input :value="addres1" readonly></ion-input>
+                                </ion-item> 
+                                <ion-item v-if="addres2">                                     
+                                  <ion-label position="floating">{{$t('frontend.home.address')}} 2</ion-label>
+                                  <ion-input :value="addres2" readonly></ion-input>                     
+                                </ion-item> 
+                                <ion-item >
+                                  <ion-label position="floating">{{$t('frontend.orderType.code')}} <strong style="color: red">*</strong></ion-label>
+                                  <ion-input :value="zipCodeFlag" readonly></ion-input>
+                                </ion-item>
+                            </div>
+
+                            <ion-item  v-if="order.OrderType=='On Table' || isTable" @click="show()">
+                              <ion-item>
+                                  <h2>{{allTypeOrder['On Table']}} </h2>
+                                </ion-item>
+                                <ion-label position="floating">{{$t('frontend.order.location')}} <strong style="color: red">*</strong></ion-label>
+                                <ion-input :value="order.tableService" readonly></ion-input>
+                            </ion-item> 
+
+                            <div v-if="order.OrderType==='Curbside' || isCurbside" @click="showCurbside()">
+                              <ion-item>
+                                  <h2>{{allTypeOrder['Curbside']}} </h2>
+                                </ion-item>
+                              <ion-item   >
+                                <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-datetime style="text-align: left;" 
+                                  :value="dateToDay" ></ion-datetime>                                
+                              </ion-item>
+
+                              <ion-item   >
+                                <ion-label position="floating">{{$t('frontend.orderType.pickOut') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-datetime display-format="h:mm A" picker-format="h:mm A" style="text-align: left;"
+                                  :value="thisMinHour" ></ion-datetime>                                
+                              </ion-item>
+
+                              <ion-item   >
+                                <ion-label position="floating">{{$t('frontend.orderType.licencePlate') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-input :value="order.LicencePlate" ></ion-input>                                
+                              </ion-item>
+
+                              <ion-item   >
+                                <ion-label position="floating">{{$t('frontend.orderType.vehicleModel') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-input :value="order.VehicleModel" ></ion-input>                                
+                              </ion-item>
+
+                                <ion-item   >
+                                <ion-label position="floating">{{$t('frontend.orderType.vehicleColor') }}<strong style="color: red">*</strong> </ion-label> 
+                                <ion-input :value="order.VehicleColor" ></ion-input>                                
+                              </ion-item>
+                            </div>
+                          </div>
+
+                      </div>
+                    </div>
+
+                  <ion-footer class="ion-no-border">
+                    
+                    <ion-toolbar >
+                      <ion-item v-if="( restaurantActive.payMethod==='SHIFT4' && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
+                          (restaurantActive.payMethod==='TSYS' && order.OrderType === 'On Table'  && staffName != '')">
+                            <p style=" float: left;text-align: left;padding: 0" class="subtitles-order menu-col-4">{{$t('frontend.order.isTicket')}} </p>                               
+                            <ion-toggle color="primary" :value="isTicket" @ionChange="isTicket = !isTicket"></ion-toggle>
+                        </ion-item> 
+
+                      <div style="padding: 20px 0; text-align: center">
+                        <ion-button  
+                          fill="outline" 
+                          @click="goHome">{{$t('frontend.home.cancel')}}
+                        </ion-button>  
+
+                        <ion-button 
+                          v-if="!isTicket" 
+                          fill="outline"  
+                          @click="openCardPayment()">{{$t('frontend.order.pay')}}
+                        </ion-button>
+
+                        <ion-button  
+                          v-if="isTicket" 
+                          fill="outline"  
+                          @click="openCardPayment()">{{$t('frontend.order.payAsTicket')}}
+                        </ion-button>  
+
+                        <ion-button
+                          v-if="isTicket && staffName != ''" 
+                          fill="outline"  
+                          @click="saveAsTicket()">{{$t('frontend.order.saveAsTicket')}}
+                        </ion-button>  
+
+                        <ion-button   v-if="cart.length > 0"                    
+                          fill="outline"  
+                          @click="showOrder()">{{$t('frontend.home.checkout')}}
+                        </ion-button>   
+
+                      </div>
+                    </ion-toolbar>
+                  </ion-footer>
+
+                  
+                </ion-card>
+
+                
+                
+              </div>
+
             </div>
-         
-        </div>
-      </v-breakpoint>
 
-        
-        
+
+              
+          
+          </div>
+        </v-breakpoint>
+
       </div>
-
-
-      <vue-product  v-if="showProduct && !spinner"      
-        :restaurantSelectedId="this.restaurantSelectedId"
-        :restaurantName="this.restaurantActive.restaurantName"
-        :currency="this.restaurantActive.currency"
-        :cart="this.cart" 
-        :prod="this.prod"
-        :products="this.products" 
-        :categories="this.categories"
-        :variants="this.variants"
-        :category="this.categoryName" 
-        :categoryDescription="this.categoryDescription"
-        :orderType="this.orderType">
-       </vue-product>
-
-    
 
     </div>
 </template>
@@ -257,16 +465,20 @@ addIcons({
  import Cart from '../components/Cart'
 import { Api } from '../../backoffice/api/api.js';
 import { EventBus } from '../event-bus';
- import Products from './Products'
+ import Products from './ProductsGrid'
  import { QrcodeStream } from 'vue-qrcode-reader'
  import { VBreakpoint } from 'vue-breakpoint-component'
  import Moment from 'moment'
  import moment from 'moment-timezone';
  import LibCodes from 'zipcodes'
+ import OrderVue from '../views/Order';
+ import PaymentModal from '../components/PaymentModal'
+
+
 
 
 export default {
-  name: "Home",
+  name: "HomeGrid",
   props: {
     msg: String,
     menuListSinCatering: {type: Array, default:() => [] },
@@ -275,10 +487,17 @@ export default {
     restaurantSelectedId:  {type: String, default: "" }, 
     products: {type: Array, default:() => [] }, 
     variants: {type: Array, default: () => [] },  
+
+    staffName: {type: String, default: "" } , 
+    staffId: {type: String, default: "" } , 
+    taxesName: {type: String, default:"" } ,
     taxes: {type: Number, default:0 } ,
-    shipping: {type: Number, default:0 } ,
+    shippingName: {type: String, default:"" } ,
+    shipping: {type: Number, default:0 } ,    
   }, 
   created: async function(){ 
+
+    console.log(this);
 
     if(this.$store.state.customer._id){
       this.clientId= this.$store.state.customer._id;            
@@ -323,8 +542,7 @@ export default {
     EventBus.$on('showProduct', (value) => {
       if(!value)
         this.filterCategories = JSON.parse(JSON.stringify(this.categories))
-      this.showProduct = value;  
-      EventBus.$off('showProduct');          
+      this.showProduct = value;              
     });
     
     EventBus.$on('showOrder', (value) => {
@@ -389,6 +607,14 @@ export default {
       configuration: {},
       restaurantActive: {},
       spinnerTicket: false,
+
+      segmentValue: 'table',
+      minDay: moment.tz(moment.tz.guess()).format('YYYY-MM-DD'),
+      key1: 1,
+      isTicket: false,
+      productKey: 2,
+      categorySelected: '',
+      menuactive: 'grid',
       
       
 
@@ -400,7 +626,8 @@ export default {
   components:{
     vueProduct: Products,
     VBreakpoint: VBreakpoint,
-    QrcodeStream: QrcodeStream
+    QrcodeStream: QrcodeStream,
+    Cart: Cart,
   },  
   methods: {
 
@@ -489,6 +716,7 @@ export default {
     productsByCategory(categoryId, categoryName, categoryDescription){ 
       this.categoryDescription = categoryDescription;
       this.categoryName = categoryName;
+      this.categorySelected=categoryId
       this.prod = this.products.filter(p => p.CategoryId === categoryId && p.Available === true);
 
       let c1 = this.categories.filter(c => c.ParentId === categoryId);
@@ -499,7 +727,8 @@ export default {
       }
 
       this.showProduct = true;
-          },
+      this.productKey ++;
+    },
  
     productDetails: async function(){
 
@@ -533,13 +762,12 @@ export default {
             data: {
               content: 'New Content',
             },
-            propsData: {                           
+            propsData: { 
+             products: this.products,
               currency: this.restaurantActive.currency,
-              products: this.products,
               variants: this.variants,
               taxes: this.taxes,
               shipping: this.shipping,
-              
             },
           },
         })
@@ -1102,7 +1330,151 @@ export default {
       return this.$router.push({ name: 'OrderTicket' }) 
     else
       this.$router.push({ name: 'OrderFront' }) 
-  }
+  },
+
+
+    goHome: function(){ 
+      this.order = {}      ;
+      this.cart = [];
+      this.$store.commit('setCart', []);
+      this.$store.commit('setOrder', {});      
+        // return this.$router.push({ name: 'Home', params: {cart:this.cart, order:this.order } })
+    },   
+
+    validateBeforePay(){
+
+          if(this.order.OrderType === 'On Table'){            
+            if(this.CustomerName ==='') return false;                   
+            }   
+          
+          else if(this.CustomerName ==='' || this.email === '' || this.phone === ''){
+                  return false;
+            }
+        
+        if(!this.order.OrderType){
+                return false;
+            }
+
+        if(this.order.OrderType === 'Delivery')
+            if(this.address === '' || this.configuration.zipCodes === ''){
+               return false;
+            }
+
+        if(this.order.OrderType === 'PickUp')
+            if(this.order.HourToPick === ''){
+                return false;
+            }
+
+        return true;
+    },
+  
+    buildOrder(){ 
+         this.order.Products = this.cart;
+        if(this.staffName !='')
+            this.order.StaffName = this.staffName;
+        if(this.staffId !='')
+            this.order.staffId = this.staffId
+        if(this.note !='')
+            this.order.Note = this.note;
+        if(this.otherCharges !=[])
+            this.order.OtherCharges = this.otherCharges;
+        if(this.total !='')
+            this.order.Total = (this.total - this.discount).toFixed(2);
+        if(this.subTotal !='')
+            this.order.SubTotal = this.subTotal;
+        if(this.taxes !='')
+            this.order.Taxe = this.taxes;
+        if(this.shipping !=0)
+            this.order.Shipping = this.shipping;
+        this.order.ClientId = this.clientId;
+        this.order.CustomerName = this.CustomerName;
+        this.order.CustomerEmail = this.email;
+        this.order.CustomerPhone = this.phone;
+        this.order.Tip = this.tip;
+        this.order.OrderForCatering = false; 
+        this.order.Date = this.date;
+        if(this.discount > 0)
+            this.order.Discount = this.discount; 
+            return true; 
+        
+        
+           
+    },
+
+    openCardPayment: async function(){
+
+        const flag = this.validateBeforePay();
+        if(!flag )
+            return this.alertRequiredDatas();
+        this.buildOrder()
+
+        return this.$ionic.modalController
+          .create({
+            component: PaymentModal,
+            backdropDismiss: false,
+            keyboardClose: false,
+            cssClass: 'my-custom-class',
+            componentProps: {
+              data: {
+                content: 'New Content',
+              },
+              propsData: { 
+                parent: this, 
+                order: this.order,   
+                canSplitPayment: !this.isTicket,          
+                Acept: this.$t('frontend.home.acept'),
+                Cancel: this.$t('frontend.home.cancel'), 
+                Total: parseFloat(this.order.Total).toFixed(2),
+                Tax:  this.taxes.toString(),
+                TaxName: this.taxesName,     
+                restaurantId: this.restaurantSelectedId,
+                payMethod: this.restaurantActive.payMethod  ,  
+                RestaurantName: this.restaurantActive.restaurantName,              
+                errorPaymentHeader: this.$t('frontend.order.transictionTitle'),
+                errorPaymentMss: this.$t('frontend.order.transictionError'),
+                gooPaymentHeader: this.$t('frontend.order.transictionTitle'),
+                gooPaymentMss: this.$t('frontend.order.transictionOk'),
+                notValidEmail: this.$t('frontend.home.notValidEmail'),
+                codeNotValid: this.$t('frontend.home.zipCodeNotValid'),
+                notValidCC: this.$t('frontend.order.notValidCC'),
+                dataRequired: this.$t('frontend.home.errorRequired'),
+                paymentByCard: this.$t('frontend.order.paymentByCard'),
+                totalForPay: this.$t('frontend.order.totalForPay'),
+                currency: this.restaurantActive.currency,
+                ccard: this.$t('frontend.order.ccard'),
+                expcard: this.$t('frontend.order.expcard'),
+                ccode: this.$t('frontend.order.ccode'),
+                cityText: this.$t('frontend.home.city'),
+                stateText: this.$t('frontend.home.state'),
+                firstNameText: this.$t('frontend.order.firstName'),
+                lastNameText: this.$t('frontend.order.lastName'),
+                postalCode: this.$t('frontend.order.postalCode'),
+                addressLine1: this.$t('frontend.order.addressLine1'),
+                payText: this.$t('frontend.order.pay'),
+                 verifyText: this.$t('frontend.order.verify'),
+                returnTo: 'OrderView',
+                isTicket: this.isTicket,
+              },
+            },
+          })
+          .then(m => m.present())  
+
+         
+
+          
+
+    },
+
+    saveAsTicket: function(){
+      return OrderVue.saveAsTicket();
+    },
+
+
+
+       getFormatPrice(price){
+      const result = new Intl.NumberFormat('en', {style: "currency", currency: this.restaurantActive.currency} ).format(price)
+      return result;
+    },
 
   },
 };
@@ -1156,12 +1528,11 @@ export default {
     }
     .card-categories{
       float: left;
-      margin: 0;
-      height: 150px;
-      padding: 10px 2px;
+      margin: 0;    
+      padding: 5px;
     }
     .card-categories .sc-ion-card-md-s img {
-    height: 120px;
+   
     width: 140px;
     }
     .card-categories ion-card{
@@ -1173,5 +1544,21 @@ export default {
     }
     .card-categories .item-native{
           padding-inline-start: 0 !important;
+    }
+    .elipsy-center{
+      text-overflow: ellipsis;
+      overflow: hidden;
+      display: -webkit-box; 
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;  
+      text-align: center;
+    }
+    .opacity-active{
+      opacity: 1;
+      border: outset;
+    }
+    .opacacity-inactive{
+     opacity: 0.65;
+     border: none;
     }
 </style>

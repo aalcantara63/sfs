@@ -1,95 +1,55 @@
 <template>
-    <div padding >
+    <div >         
 
-        
+        <div v-if="prod.length > 0">
 
-        <ion-header>
+         <h3 style="text-align: center;">{{category}}: {{categoryDescription}}</h3>                                     
            
-          <ion-toolbar>
-
-             <ion-buttons slot="start" @click="done()">
-              <ion-back-button default-href="home"></ion-back-button>
-            </ion-buttons>
-          
-            <ion-label style="padding: 20px 100px;">
-              <h1>{{$t('frontend.product.title')}} {{category}} </h1>                                        
-            </ion-label>
-
-            <ion-label style="padding: 20px 100px;">
-              <h3 style="text-align: center;">{{categoryDescription}}</h3>
-            </ion-label>
-             
-          </ion-toolbar>
           <ion-searchbar  
                 style="padding: 1px;"
                 @ionClear="handleInput('')"
                 @input="$event.target.value? handleInput($event.target.value): handleInput('')"
                 :placeholder="$t('frontend.home.search')">           
             </ion-searchbar>
-        </ion-header>
-
-
-
-        <div v-if="prod.length > 0">
-          <!-- <ion-button expand="block" color="secondary" @click="done()">{{$t('frontend.product.back')}}</ion-button> -->
 
           <v-breakpoint>
             <div slot-scope="scope">
-              <span  > 
-                  <div  v-for="pr in filterProduct" :key="pr._id" :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' :  scope.isMedium ? 'menu-col-6 card-category': 'menu-col-3 card-category' ">
-                    <ion-card style="padding:12px " >
-                      <div >
+              <span  v-if="!scope.isSmall && !scope.noMatch"> 
+                  <div  v-for="pr in filterProduct" :key="pr._id" 
+                   :class="scope.isMedium? 'menu-col-6 card-category': 'menu-col-3 card-category'">
+                                    
+                     <ion-card color="primary"> 
+                          <ion-avatar style="margin-inline: auto; margin-top: 25px;"  v-if="menuactive==='gridPicture'">
+                            <img :src="pr.ImageUrl">
+                          </ion-avatar>  
+                          <h1 v-if="menuactive==='gridPicture'" class="elipsy-center" v-tooltip="pr.Name" style="margin: 5px;">{{pr.Name}}</h1>                       
+                          <ion-label v-else class="ion-text-wrap menu-col-6" >
+                            <h1 class="elipsy-center" v-tooltip="pr.Name">{{pr.Name}}</h1>
+                          </ion-label>
+                           <ion-label style="font-size: 12pt;font-weight: bold;text-align: center;">
+                             <h2>{{ getPrice(pr.SalePrice, pr.VariantGroupId || '') }} </h2>
+                          </ion-label> 
+                          <ion-item color="primary">
+                           <div style="width: 30%;float: left; text-align: center;    margin: 2px;">
+                              <ion-button color="light" style="padding:0"  @click.stop=" productDetail(pr)" >
+                               <span class="iconify" data-icon="ant-design:eye-filled" data-inline="false"  style="  width: 20px; height: 20px; margin: 0;"></span>
+                             </ion-button>
+                           </div>
+                           <div style="width: 30%;float: left; text-align: center;    margin: 2px;">
+                             <ion-button color="light" style="padding:0" @click.stop="share(pr.Name, staticUrl+pr._id)">
+                                <span class="iconify" data-icon="fe:share" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
+                             </ion-button>
+                           </div>
+                            <div style="width: 30%;float: left; text-align: center;    margin: 2px;">
+                             <ion-button color="light" style="padding:0" @click.stop="addToCart(pr.ImageUrl, pr._id, pr.Name, pr.SalePrice, pr.count || 1 , pr.Note ||'', [], pr.AggregateCant)">
+                                <span class="iconify" data-icon="carbon:add" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
+                             </ion-button>
+                           </div>
+                              
+                          </ion-item>
 
-                      <ion-chip style="float:left; margin-bottom: -0.5px;" v-if="getSubcategory(pr.CategoryId) !=''">
-                        <ion-avatar>
-                          <img :src="getSubcategoryImg(pr.CategoryId)">
-                        </ion-avatar>
-                        <ion-label>{{getSubcategory(pr.CategoryId)}}</ion-label>                       
-                      </ion-chip>
+                      </ion-card>
 
-                      <div>
-                        <img v-if="pr.ImageUrl" class="menu-col-12 img-product" :src="pr.ImageUrl">
-
-                          <ion-fab v-if="pr.ImageUrl" horizontal="start" vertical="end" class="menu-share" style="z-index:1;margin-top: -56px;margin-left: 40px;">
-                            <ion-fab-button color="light" size="small" @click="share(pr.Name, staticUrl+pr._id)" >
-                              <span class="iconify" data-icon="fe:share" data-inline="false"></span>
-                            </ion-fab-button>                             
-                          </ion-fab>
-                      </div>
-                                                                          
-                      </div>
-                        
-                        <ion-card-content style="text-align:center">
-                          <ion-card-header>   
-                            
-                            <ion-fab v-if="!pr.ImageUrl" horizontal="end" vertical="end" class="menu-share" style="z-index:1;">
-                              <ion-fab-button color="transparent" size="small" @click="share(pr.Name, staticUrl+pr._id)" >
-                                <span class="iconify" data-icon="fe:share" data-inline="false"></span>
-                              </ion-fab-button>                             
-                            </ion-fab>                       
-
-                            <ion-card-title  @click.stop=" productDetail(pr)"
-                             style="padding: 0;  white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{pr.Name}} 
-                            </ion-card-title>
-
-                            <ion-label style="font-size: 14pt;font-weight: bold;text-align: center;">{{ getPrice(pr.SalePrice, pr.VariantGroupId || '') }} 
-                              <span style="color: #f82525;" v-if="isService">( {{$t('frontend.home.priceEstimated')}} )</span>
-                            </ion-label>                   
-                            <br><span v-if="haveVariant(pr.VariantGroupId)">{{$t('frontend.product.productWithVariant')}}</span> 
-                          </ion-card-header>
-
-
-                            <ion-chip style="padding-right: 0;">                          
-                                <ion-input  type="number" min=1 :value="pr.count || 1" @input="pr.count = $event.target.value" style="text-align: center;max-width: 80px;" ></ion-input>              
-                                <!-- <ion-button size="small" color="primary" v-if="!pr.VariantGroupId"  shape="round" @click.stop="addToCart(pr.ImageUrl, pr._id, pr.Name, pr.SalePrice, pr.count || 1 , pr.Note ||'', [], pr.AggregateCant)"> {{$t('frontend.order.add')}}</ion-button> -->
-                                <ion-button size="small" color="primary"  shape="round" @click.stop=" productDetail(pr)"> {{$t('frontend.order.add')}}</ion-button>
-                                <ion-button size="small" color="danger"  shape="round" @click.stop="removeFromCart(pr._id )">{{$t('frontend.order.remove')}}</ion-button>
-                            </ion-chip>
-
-                          </ion-card-content>
-                      
-                  
-                    </ion-card>
                   </div>                
               </span>
 
@@ -103,18 +63,9 @@
             <!-- <ion-button expand="block" color="secondary" @click="done()">{{$t('frontend.product.back')}}</ion-button> -->
         </div>
         <div v-else>
-            <ion-card>
-              <ion-card-content>
-                <ion-label>
-                    {{$t('frontend.product.noProducts')}} 
-                </ion-label>
-              
-              </ion-card-content>
-            </ion-card>
-
-            <br><br>
-            <!-- <ion-button expand="block" color="secondary" @click="done()">{{$t('frontend.product.back')}}</ion-button> -->
-
+          <ion-label>
+              <!-- {{$t('frontend.product.noProducts')}}  -->
+          </ion-label>             
         </div>
 
     </div>
@@ -152,6 +103,7 @@ export default {
     orderType: {type: String, default: "" }, 
     orderFromCatering: {type: Boolean, default: false},
     isService: {type: Boolean, default: false},
+    menuactive: {type: String, default: "grid" },
   },
  data () {
     return { 
@@ -259,7 +211,7 @@ export default {
             "Aggregates": aggregates,
             "isService": this.isService,
             "fromCatering": this.orderFromCatering,
-            "State": 0,           
+            "State": 0,
          }
      
         const index = this.cart.findIndex(pr => pr.ProductId === id && pr.Price === price );
@@ -304,7 +256,7 @@ export default {
           data: {
             content: 'New Content',
           },
-          propsData: {
+          propsData: {           
             productId: pr._id,
             Name: pr.Name,
             SalePrice: parseFloat(pr.SalePrice),
@@ -316,8 +268,8 @@ export default {
             aggregateCant: pr.AggregateCant || 0,
             Aggregates: pr.Aggregates || [],
             products: this.products,           
-            orderType: this.orderType,           
-            Ingredients: pr.Ingredients || [],           
+            orderType: this.orderType,            
+            Ingredients: pr.Ingredients || [],          
             orderFromCatering: this.orderFromCatering,
             isService: this.isService,           
             currency: this.currency,
@@ -517,5 +469,12 @@ export default {
   width: 30px !important;
   height: 30px !important;
 }
-
+.elipsy-center{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: -webkit-box; 
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;  
+    text-align: center;
+  }
 </style>

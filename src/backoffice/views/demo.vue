@@ -126,6 +126,13 @@
         </ion-input>
     </ion-item>
     <ion-item>
+        <ion-label position="floating">Product Description</ion-label>
+        <ion-input type="text" name="productDescription"
+          @input="productDescription = $event.target.value" 
+          v-bind:value="productDescription">
+        </ion-input>
+    </ion-item>
+    <ion-item>
         <ion-label position="floating">Card Present</ion-label>
         <ion-input type="text" name="cardpresent"
         @input="cardpresent = $event.target.value" 
@@ -190,6 +197,9 @@ export default {
         cardnumber: '',
         cardpresent: '',
 
+        ccode: '',
+        productDescription: '',
+
         response: '',
       }
       
@@ -219,6 +229,8 @@ export default {
       //       break
       // }
       // },false)
+      this.ccode = this.$store.state.restaurantActive.restaurantZipCode
+      console.log("RESTAURANT CODE: " + this.ccode)
   },
   methods: {
 
@@ -278,7 +290,10 @@ export default {
             "InvoiceNumber": this.invoicenumber || '',			
             "TransactionNumber": this.transactionnumber
           },
-          "ClerkID": this.clerk,        
+          "ClerkID": this.clerk,
+          // 'commercialInformation': this.commercialInformation(),
+          "productDescription": this.productDescription,
+          "destinationZipCode": this.ccode       
       }
 
       const anw = await Devices.a930.DoCredit(this.ip, this.port, this.ssl, data, this.callback);
