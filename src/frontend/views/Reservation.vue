@@ -316,6 +316,8 @@ import { Api } from '../../backoffice/api/api.js';
  import Moment from 'moment'
  import moment from 'moment-timezone';
   import { EventBus } from '../event-bus';
+   import { Commons } from '../commons'
+
 
 export default {
     name: 'Reservation',
@@ -364,6 +366,7 @@ export default {
      },     
      created: function(){
 
+        
         if(this.$store.state.customer._id){
           this.clientId= this.$store.state.customer._id;
         this.CustomerName= this.$store.state.customer.Name;
@@ -557,55 +560,10 @@ export default {
           return this.$router.push({ name: 'ReservationDetail', params: {reservation: reservation, currentPageReservation: this.currentPageReservation } })    
       },
 
-      htmlToUse(reservation){
-        var html =' <html><head>';    
-            html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-            html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-            html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-            html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-            html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-            html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-            html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-            
-            html += '</head><body><div >';
-            html += '<table  align=center style="width: 90%;">';
-            html += '<tr><td colspan=6 style="text-align: center;">';
-            html += `<h2>${this.$t('frontend.reservation.create')}</h2>  `;
-            html +=`</td>`;     
-            html += `</tr>`;          
-            html += '<tr><td colspan=6 >'
-            if(reservation.CustomerName)
-              html += `<br> <h4> ${this.$t('frontend.orderType.name')}: ${reservation.CustomerName}</h4>`;
-            if(reservation.CustomerEmail)
-              html += `<br> <h4> ${this.$t('frontend.orderType.email')}: ${reservation.CustomerEmail}</h4>`;
-            if(reservation.CustomerPhone)
-              html += `<br> <h4> ${this.$t('frontend.orderType.phone')}: ${reservation.CustomerPhone}</h4>`;
-            if(reservation.Capacity)
-              html += `<br> <h4> ${this.$t('frontend.reservation.peoples')}: ${reservation.Capacity}</h4>`;
-            if(reservation.Date)
-              html += `<br> <h4> ${this.$t('frontend.reservation.reservationDate')}: ${this.getReservationDate(reservation.Date)}</h4>`;
-            if(reservation.Hour)
-              html += `<br> <h4> ${this.$t('frontend.reservation.reservationHour')}: ${this.getReservationHour(reservation.Hour)}</h4>`;
-            if(reservation.Note)
-              html += `<br> <h4> ${this.$t('frontend.order.notes')}: ${reservation.Note}</h4>`;
-            if(reservation.Reason)
-              html += `<br> <h4> ${this.$t('frontend.reservation.reason')}: ${reservation.Reason}</h4>`;
-            if(reservation.QuotationPayment)
-              html += `<h4> ${this.$t('frontend.order.quotationPayment')}: ${reservation.QuotationPayment}</h4>`;
-
-              
-           
-            html += `</td></tr>`;      
-           
-            html += `</table></div></body></html>`;
-
-            return html;
-      },
-
-      async sendReservationEmail(reservation){
+     async sendReservationEmail(reservation){
 
             this.spinnerEmail = true;
-            const html = this.htmlToUse(reservation); 
+            const html = Commons.htmlSendReservation(reservation);
             let subject = this.$t('frontend.reservation.create') ;            
                     
             var items = {
@@ -620,7 +578,7 @@ export default {
         async sendReservationCustomer(reservation){
 
             this.spinnerEmail = true;
-            const html = this.htmlToUse(reservation); 
+            const html = Commons.htmlSendReservation(reservation);
             let subject = this.$t('frontend.reservation.create') ;            
                     
             var items = {
@@ -777,63 +735,9 @@ export default {
 
       sendPrint:  function(reservation){
 
-            var html =' <html><head>';    
-            html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-            html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-            html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-            html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-            html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-            html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-            html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-            
-            html += `</head><body ><div >`;
-            
-            // html +=`<input type="button" value="Print this page" onClick="${window.close()}">`;
-          
-            html += '<table  align=center style="width: 90%;">';
-            html += '<tr><td colspan=6 style="text-align: center;">';
-           
-            html += `<h2>${this.$t('frontend.reservation.reservationDetail')}</h2>  `;
-            html +=`</td>`;     
-            html += `</tr>`;          
-        html += '<tr><td colspan=6 style="text-align: center;">';
-        html += `<h4>${this.restaurantActive.restaurantName}</h4>  `;       
-        html += `<img src="${this.restaurantActive.restaurantLogo}" style="max-width: 100px;"></img> `;     
-        html +=`</td></tr>`;           
-            html += '<tr><td colspan=6 >'
-            if(reservation.CustomerName)
-              html += `<br> <h4> ${this.$t('frontend.orderType.name')}: ${reservation.CustomerName}</h4>`;
-            if(reservation.CustomerEmail)
-              html += ` <h4> ${this.$t('frontend.orderType.email')}: ${reservation.CustomerEmail}</h4>`;
-            if(reservation.CustomerPhone)
-              html += ` <h4> ${this.$t('frontend.orderType.phone')}: ${reservation.CustomerPhone}</h4>`;
-            if(reservation.Capacity)
-              html += `<h4> ${this.$t('frontend.reservation.peoples')}: ${reservation.Capacity}</h4>`;
-            if(reservation.Date)
-              html += ` <h4> ${this.$t('frontend.reservation.reservationDate')}: ${this.getReservationDate(reservation.Date)}</h4>`;
-            if(reservation.Hour)
-              html += ` <h4> ${this.$t('frontend.reservation.reservationHour')}: ${this.getReservationHour(reservation.Hour)}</h4>`;
-            if(reservation.Note)
-              html += ` <h4> ${this.$t('frontend.order.notes')}: ${reservation.Note}</h4>`;
-            if(reservation.Reason)
-              html += ` <h4> ${this.$t('frontend.reservation.reason')}: ${reservation.Reason}</h4>`;
-            if(reservation.State)
-              html += ` <h4> ${this.$t('frontend.home.state')}: ${this.allState[reservation.State]}</h4>`;
-            if(reservation.Code)
-              html += ` <h4> ${this.$t('frontend.reservation.code')}: ${reservation.Code}</h4>`;
-            if(reservation.QuotationPayment)
-              html += `<h4> ${this.$t('frontend.order.quotationPayment')}: $ ${reservation.QuotationPayment.toFixed(2)}</h4>`;
+            const html = Commons.htmlSendReservation(reservation);
 
-            
-            html += `</td></tr>`;      
-            
-            html += `</table></div></body></html>`;
-
-       
-
-            // var winimp = window.open('', '', 'left=0,top=0,width=800,height=600,toolbar=0,scrollbars=0,status=0');        
-            // var winimp = window.open('/print', 'popimpr');         
-            var winimp = window.open();         
+            var winimp = window.open('/print', 'popimpr');         
             winimp.document.write( html );
             winimp.document.close();
             winimp.focus();

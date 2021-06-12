@@ -12,13 +12,10 @@
             </ion-button>
           </ion-col>
         </ion-row>
-        
          
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-
-
+    <ion-content class="ion-padding"> 
 
         <ion-card  >
           <ion-card-header>
@@ -55,7 +52,7 @@
                     <div  v-if="productVariant.length > 0">
                       <ion-list  v-for="vari in productVariant" :key="vari._id"  style="padding: 0;border: 1px solid;"  >
                           <ion-title style="background: #d6cbcb;padding: 5px;">{{ i18n.t('frontend.home.variants') }}</ion-title>
-                          <ion-radio-group :value="productVariant[0].Variants[0]._id" @ionChange="changeVariant(vari._id, $event.target.value)">
+                          <ion-radio-group :value="variantSelected.variant" @ionChange="changeVariant(vari._id, $event.target.value)">
                             <ion-item v-for="variant in vari.Variants" :key="variant._id"> 
                               <ion-avatar>
                                 <img :src="variant.ImageUrl">
@@ -69,15 +66,26 @@
                       </ion-list>
                     </div>
 
-                    <div  v-if="Aggregates.length > 0">
+                    <div  v-if="getSide(productId).Aggregates.length > 0">
                       <ion-list style="padding: 0;border: 1px solid;"  >
                           <p style="background: #d6cbcb;padding: 5px;">{{i18n.t('frontend.home.sides')}} ( {{aggregateCant}} {{i18n.t('frontend.home.aggregateFree')}} ) </p>
                           
-                          <ion-item v-for="(aggre,index) in Aggregates" :key="index" >
+                          <ion-item v-for="(aggre,index) in getSide(productId).Aggregates" :key="index" >
                             <ion-avatar><img :src="getSide(aggre).ImageUrl"></ion-avatar>
                             <p>{{ getSide(aggre).Name }} - {{ getFormatPrice(getSide(aggre).SalePrice) }} </p> <span style="opacity:0">{{getSide(aggre).c = 1}}</span>
-                            <ion-input slot="end" type="number" value="1" @input="getSide(aggre).c =$event.target.value" style="margin: 0;max-width: 50px; float: right;border: 1px solid #80808075;text-align: center;"></ion-input>
-                            <ion-checkbox  @ionChange="addSide($event.target.checked, aggre, getSide(aggre).c)" slot="end" style="margin: 5px;"></ion-checkbox>
+                            <ion-input slot="end" 
+                              type="number" 
+                              :value="getAggCant(aggre)" 
+                              @input="$event.target.value > 0 ? getSide(aggre).c =$event.target.value : getSide(aggre).c = 1" 
+                              @ionChange="$event.target.value > 0 ? addSideCant(aggre, $event.target.value) : getSide(aggre).c = 1"
+                              style="margin: 0;max-width: 50px; float: right;border: 1px solid #80808075;text-align: center;">
+                            </ion-input>
+                            <ion-checkbox  
+                              @ionChange="addSide($event.target.checked, aggre, getSide(aggre).c)" 
+                              :checked="getAggChecked(aggre)"
+                              slot="end" 
+                              style="margin: 5px;">
+                            </ion-checkbox>
                           </ion-item>
                       </ion-list>
                     </div>
@@ -86,11 +94,11 @@
                       <ion-list style="padding: 0;border: 1px solid;"  >
                           <ion-title style="background: #d6cbcb;padding: 5px;">{{i18n.t('frontend.home.choises')}}</ion-title>
                           <ion-item v-for="(ing,index) in Ingredients" :key="index" >                           
-                            <p>{{ing}}</p>
-                            <ion-toggle checked slot="end"  
-                             @ionChange="getIngredients($event.target.checked, $event.target.value)"                          
-                              :value="ing">
-                            </ion-toggle>
+                            <p>{{ing.name}}</p>
+                            <ion-toggle  slot="end"  
+                             @ionChange="getIngredients($event.target.checked, index)" 
+                             :checked="ing.selected === 1? true : false"> 
+                            </ion-toggle>{{ing.selected}}
 
                           </ion-item>
                       </ion-list>
@@ -98,14 +106,16 @@
 
                     <ion-list  style="padding: 0;border: 1px solid;" >
                         <ion-title style="background: #d6cbcb;padding: 5px;">{{i18n.t('frontend.order.notes')}}</ion-title>
-                        <ion-textarea  :value="thisNote" @input="thisNote = $event.target.value"
-                      ></ion-textarea>   
+                        <ion-textarea  :value="thisNote " @input="thisNote = $event.target.value"
+                      >{{getIngredientNote()}}</ion-textarea>   
                     </ion-list>
                   
                       <ion-list style="padding: 0;border-bottom: 1px solid;border-left: 1px solid;border-right: 1px solid;">
                         <ion-title style="background: #d6cbcb;padding: 5px;"> {{ getFormatPrice(getTotal) }}</ion-title>
                         <ion-input  type="number" min=1 :value="thisCant" @input="thisCant = $event.target.value" style="text-align: center;max-width: 50%; float:left" ></ion-input>              
-                        <ion-button  color="primary" size="normal" style="float:right" @click="linkToCart()"> {{i18n.t('frontend.order.add')}} </ion-button>
+                        <ion-button v-if="forEdit" color="primary" size="normal" style="float:right" @click="linkToCart()"> {{i18n.t('frontend.order.edit')}} </ion-button>
+                        <ion-button  v-else color="primary" size="normal" style="float:right" @click="linkToCart()"> {{i18n.t('frontend.order.add')}} </ion-button>
+                        
                       </ion-list>
                                                     
                     </div>
@@ -157,6 +167,8 @@ export default {
     isService:{ type: Boolean, default: false },   
     currency:  { type: String, default: '' },
     forEdit: { type: Boolean, default: false },
+    indexForEdit: { type: Number, default: -1 },
+    VariantSelected: {type: Object, default:() => {} },
   },
   created: function(){
 
@@ -164,14 +176,23 @@ export default {
 
     this.cart = store.state.cart;
 
-   if(this.productVariant.length > 0){
+   if(this.productVariant.length > 0){      
+     if(this.VariantSelected)
+        this.variantSelected = this.VariantSelected;
+     else {
+      this.variantSelected = {
+        name: this.productVariant[0].Variants[0].Name,
+        variant: this.productVariant[0].Variants[0]._id,
+        }
+     }
      this.thisPrice = this.productVariant[0].Variants[0].SalePrice;
-    this.thisName = this.productVariant[0].Variants[0].Name; 
+     this.thisName =  this.variantSelected.name;
    }
    else{
      this.thisPrice = this.SalePrice;
      this.thisName = '';
    }
+
     
   },
   data() {
@@ -184,7 +205,7 @@ export default {
       thisNote: this.Note,
       thisPrice: this.SalePrice,
       thisName: '',
-      thisAggregates: [],
+      variantSelected: {},
       thisIngredients:[],
       cart: [],
       i18n: {},
@@ -199,14 +220,14 @@ export default {
      
       let cant = this.aggregateCant * this.thisCant;
       let semiTotal = 0;     
-      for(var i=0 ; i < this.thisAggregates.length; i++){  
+      for(var i=0 ; i < this.Aggregates.length; i++){  
        
-        if(cant - this.thisAggregates[i].Cant >= 0){
-          cant -= this.thisAggregates[i].Cant; 
+        if(cant - this.Aggregates[i].Cant >= 0){
+          cant -= this.Aggregates[i].Cant; 
           continue;
         }
         else{
-         semiTotal+= ((this.thisAggregates[i].Cant -cant) * this.thisAggregates[i].SalePrice);   
+         semiTotal+= ((this.Aggregates[i].Cant -cant) * this.Aggregates[i].SalePrice);   
          cant = 0 ;
         }
       } 
@@ -229,6 +250,7 @@ methods: {
       let v =  option[0].Variants.filter(r => r._id == variant)
       this.thisPrice = v[0].SalePrice;
       this.thisName = v[0].Name;
+      this.variantSelected = {name: v[0].Name, variant: variant};
       
       }
 
@@ -257,8 +279,10 @@ methods: {
             {
             text: this.i18n.t('frontend.home.acept'),
             handler: () => {      
-              this.cart = [];
+               this.cart = [];
+               delete this.order.OrderType 
                store.commit('setCart', this.cart); 
+               store.commit('setOrder', this.order); 
                EventBus.$emit('updateCart', true); 
               this.addProduct();
             }
@@ -280,69 +304,44 @@ methods: {
        return this.addProduct();
     },
 
-    editProduct: function(){
-
-       if(this.thisCant <1)
-          return this.cantNoValida();
-
-         let p = {
-           "ImageUrl": this.ImageUrl,
-            "ProductId": this.productId,
-            "Name": this.Name + this.thisName,
-            "Price": this.thisPrice,
-            "Cant": parseInt(this.thisCant),
-            "Note": this.thisNote,
-            "AggregatesCant": this.aggregateCant || 0,
-            "Aggregates": this.thisAggregates,
-            "isService": this.isService,
-            "fromCatering": this.orderFromCatering,
-            "State": 0,
-         }
-     
-        const index = this.cart.findIndex(pr => pr.ProductId === this.productId );
-      
-        if (index !== -1) {
-          this.cart[index] = p;                  
-          this.thisAggregates.forEach(a => this.cart[index].Aggregates.push(a) )
-        }                 
-        store.commit('setCart', this.cart); 
-        EventBus.$emit('updateCart', true); 
-        this.openToast();
-        this.dismissQr();
-    },
 
     addProduct: function(){
-      
-      if(this.forEdit)
-        return this.editProduct();
-          
+
        if(this.thisCant <1)
           return this.cantNoValida();
 
          let p = {
            "ImageUrl": this.ImageUrl,
             "ProductId": this.productId,
-            "Name": this.Name + this.thisName,
+            "Name": this.Name,
             "Price": this.thisPrice,
             "Cant": parseInt(this.thisCant),
             "Note": this.thisNote,
             "AggregatesCant": this.aggregateCant || 0,
-            "Aggregates": this.thisAggregates,
+            "Aggregates": this.Aggregates,
             "isService": this.isService,
             "fromCatering": this.orderFromCatering,
+            "VariantSelected": this.variantSelected,
+            "Ingredients": this.Ingredients,
             "State": 0,
+         }        
+         if(this.forEdit && this.indexForEdit !== -1){
+            this.cart[this.indexForEdit] = p                     
          }
-     
-        const index = this.cart.findIndex(pr => pr.ProductId === this.productId && pr.Price === this.thisPrice );
-      
-        if (index !== -1) {
-          this.cart[index].Cant = parseInt(this.cart[index].Cant) + parseInt(this.thisCant);          
-          this.cart[index].Note += this.thisNote;           
-          this.thisAggregates.forEach(a => this.cart[index].Aggregates.push(a) )
-        }
-        else{
-          this.cart.push(p);
-        }            
+         else{
+          const index = this.cart.findIndex(pr => pr.ProductId === this.productId && pr.Price === this.thisPrice && pr.State === 0);      
+          if (index !== -1) {          
+            this.cart[index].Cant = parseInt(this.cart[index].Cant) + parseInt(this.thisCant);          
+            this.cart[index].Note += this.thisNote;  
+            this.cart[index].VariantSelected =  this.variantSelected;                   
+            this.cart[index].Ingredients =  this.Ingredients;                   
+            this.cart[index].Aggregates =  this.Aggregates;                   
+          }
+          else{
+            this.cart.push(p);
+          } 
+         }
+                 
           store.commit('setCart', this.cart); 
           EventBus.$emit('updateCart', true); 
           this.openToast();
@@ -358,6 +357,23 @@ methods: {
         return producto[0];
       else
         return ''  
+    },
+
+    getAggCant(aggre){
+     
+      let list = this.Aggregates.filter(p => p._id == aggre )
+      if(list.length > 0){      
+        return list[0].Cant;
+      }
+      return 1;
+    },
+
+    getAggChecked(aggre){
+      let list = this.Aggregates.filter(p => p._id == aggre )     
+      if(list.length > 0){      
+        return true
+      }
+      return false;
     },
 
     cantNoValida(){
@@ -378,12 +394,25 @@ methods: {
       .then(a => a.present())
                   
     },
+
+      addSideCant( id, cant){
+      
+       let index = this.Aggregates.findIndex(a => a._id === id)
+       if(index !== -1 && cant > 0){
+          this.Aggregates[index].Cant = parseInt(cant);
+       }
+
+        if(index !== -1 && cant <= 0){
+          this.Aggregates.splice(index, 1)
+       }
+    },
+
  
     addSide(event, id, cant){
   
-      if(!event){
-        let index = this.thisAggregates.findIndex(a => a._id === id)
-        return this.thisAggregates.splice(index, 1)
+      if(!event || cant === 0){       
+         let index = this.Aggregates.findIndex(a => a._id === id)
+          return this.Aggregates.splice(index, 1)
       }
     
       const index1 = this.cart.findIndex(pr => pr.ProductId === this.productId && pr.Price === this.thisPrice );
@@ -400,27 +429,35 @@ methods: {
       let producto = this.products.filter(p => p._id == id)
       if(producto.length > 0 && cant > 0){
         producto[0].Cant = parseInt(cant);
-        this.thisAggregates.push(producto[0])
+        this.Aggregates.push(producto[0]);
       } 
     },
 
-    getIngredients(flag, value){
-          
+    getIngredients(flag, index){
       if(flag){
-        let index = this.thisIngredients.findIndex(p => p === value)
-        if(index !== -1)
-          this.thisIngredients.splice(index, 1)       
+        this.Ingredients[index].selected = 1;          
       }
-      else
-         this.thisIngredients.push(value)
+      else{
+         this.Ingredients[index].selected = 0;         
+      }       
+    },
 
+    getIngredientNote(){
       let str =this.i18n.t('frontend.home.withoutIngredients') + ': '
+      let count = 0
 
-      this.thisIngredients.forEach( e => str += e + '. ')
-      if(this.thisIngredients.length >0)
-        this.thisNote = str
-      else
-      this.thisNote = ''  
+      this.Ingredients.forEach( e => 
+        { 
+          if(e.selected === 0 ) {
+          str += e.name + '. ' ;
+          count ++
+          } 
+        } )
+      if(count >0)
+       return str
+
+      return '';
+      
     },
     
     alertSelectOrderTypeCatering(){

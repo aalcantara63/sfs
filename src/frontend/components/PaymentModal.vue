@@ -12,11 +12,11 @@
               <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false"></span></ion-button> 
             <p 
               style="text-align: center;padding: 10px;color: white;font-size: 32px; margin:0">
-              {{ totalForPay }}: {{getFormatPrice(Total)}} 
+              {{ i18n.t('frontend.order.totalForPay') }}: {{getFormatPrice(Total)}} 
             </p>
-            <ion-item color="primary" v-if="canSplitPayment"  style="display: inline-block;">
-              <strong v-if="!spinner" style="color: white;">{{parent.$t('frontend.payment.splitPayment')}}</strong>                              
-              <ion-toggle  v-if="!spinner" color="secondary" @ionChange="split= !split"  :checked ="split"></ion-toggle>    
+            <ion-item color="primary" v-if="canSplitPayment && !hasDeliverySplitPayment()"  style="display: inline-block;">
+              <strong v-if="!spinner" style="color: white;">{{i18n.t('frontend.payment.splitPayment')}}</strong>                              
+              <ion-toggle  v-if="!spinner" color="secondary" @ionChange="changeSplit()"  :checked ="split"></ion-toggle>    
             </ion-item>
             
           </ion-toolbar>          
@@ -28,7 +28,7 @@
             <ion-item>           
                                     
                 <div class="ion-text-wrap menu-col-4" style="text-align: center;">
-                    <ion-label>{{parent.$t('frontend.payment.splitIn')}}</ion-label>
+                    <ion-label>{{i18n.t('frontend.payment.splitIn')}}</ion-label>
                 </div>
                 <div class="ion-text-wrap menu-col-4" >
                     <ion-input type="number" style="text-align: center;width: 60%;float: left;" min="2" max="4" 
@@ -42,9 +42,9 @@
 
                 <div class="ion-text-wrap menu-col-4" style="text-align: center;" v-if="!readyPayment">
                    <ion-spinner v-if="readyButton"></ion-spinner>
-                    <ion-button color="success" @click="readySplitButton()" v-if="!readyButton" :disabled="!readySplit" :key="keyValidateCount + 1">
+                    <ion-button color="success" @click="readySplitButton()" v-if="!readyButton" :disabled="!readySplit" :key="keyValidateCount+'C'">
                       <span class="iconify" data-icon="ion:checkmark-done-sharp" data-inline="false" style="margin:0;width: 20px;height: 20px;"></span>
-                      {{Acept}}</ion-button>
+                      {{i18n.t('frontend.home.acept')}}</ion-button>
                 </div>          
 
             </ion-item>
@@ -52,13 +52,13 @@
 
           <ion-label v-if="!readySplit" :key="keyValidateCount" color="danger" style="font-weight: 600">
             <span class="iconify" data-icon="el:error-alt" data-inline="false" style="color: red; margin: 5px 0 0 15px; width: 18px;height: 18px;"></span>
-             {{parent.$t('frontend.payment.splitMss')}}</ion-label>
+             {{i18n.t('frontend.payment.splitMss')}}</ion-label>
 
           <ion-card :key="keySplit+'D'">         
             <ion-item v-for="(splitIndex, Index) of arraySplit" v-bind:key="Index" >           
                                     
                 <div class="ion-text-wrap menu-col-4" style="text-align: center;">
-                    <ion-label>{{parent.$t('frontend.payment.splitPay')}} {{Index + 1}}</ion-label>
+                    <ion-label>{{i18n.t('frontend.payment.splitPay')}} {{Index + 1}}</ion-label>
                 </div>             
                 <div class="ion-text-wrap menu-col-4" >
                     <ion-input type="number" style="text-align: center;width: 60%;float: left;" min="2" 
@@ -73,13 +73,13 @@
                  <div class="ion-text-wrap menu-col-4" style="text-align: center;" v-if="order.Payment[Index].state === 0 && readyPayment">
                     <ion-button color="primary" @click="paySplit(Index, splitIndex.total)">
                       <span class="iconify" data-icon="ion:logo-usd" data-inline="false" style="margin:0;width: 20px;height: 20px;"></span>
-                      {{parent.$t('frontend.payment.splitToPay')}}</ion-button>
+                      {{i18n.t('frontend.payment.splitToPay')}}</ion-button>
                 </div>
                
                 <div class="ion-text-wrap menu-col-4" style="text-align: center;" v-if="order.Payment[Index].state===1 && readyPayment">
-                    <ion-button color="success" :key="order.Payment[Index].state">
+                    <ion-button color="success" :key="order.Payment[Index].state+'P'">
                       <span class="iconify" data-icon="ion:checkmark-done-sharp" data-inline="false" style="margin:0;width: 20px;height: 20px;"></span>
-                      {{parent.$t('frontend.payment.splitPayed')}}</ion-button>
+                      {{i18n.t('frontend.payment.splitPayed')}}</ion-button>
                 </div>  
 
                       
@@ -90,62 +90,61 @@
 
         <div v-if="!split" >
 
-         <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner">
+         <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner" :key="keyShare">
             <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
-              v-tooltip="parent.$t('frontend.payment.tjtPayment')"
-              :class="cardPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare">
+              v-tooltip="i18n.t('frontend.payment.tjtPayment')"
+              :class="cardPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>            
             </ion-button> 
 
            
             <ion-button @click="changePayment(), devicePay = true" :style="devicePay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
-               v-tooltip="parent.$t('frontend.payment.devicePayment')"
-               v-if="(payMethod==='SHIFT4' || payMethod==='TSYS' ) && staffName !==''"
-              :class="devicePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+1">
+               v-tooltip="i18n.t('frontend.payment.devicePayment')"
+               v-if="(payMethod==='SHIFT4' || payMethod==='TSYS' ) && staffName !=='' && !hasDeliverySplitPayment()"
+              :class="devicePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <span class="iconify" data-icon="emojione-monotone:mobile-phone" data-inline="false"></span>            
             </ion-button> 
 
               <!-- -->
             <ion-button @click="changePayment(), idtechPay = true" :style="idtechPay? 'float: left;border: solid' : 'float: left'"  
               :disabled="spinner"
-               v-tooltip="parent.$t('frontend.payment.idtechPayment')"
+               v-tooltip="i18n.t('frontend.payment.idtechPayment')"
                v-if="payMethod==='SHIFT4' && staffName !==''"
-              :class="idtechPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+              :class="idtechPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <span class="iconify" data-icon="gg:usb" data-inline="false"></span>        
             </ion-button> 
 
             <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
                 :disabled="spinner"
-                v-tooltip="parent.$t('frontend.payment.cashPayment')"
+                v-tooltip="i18n.t('frontend.payment.cashPayment')"
                 v-if="staffName !==''"
-                :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+                :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
                 <span class="iconify" data-icon="ic:baseline-attach-money" data-inline="false"></span>          
             </ion-button> 
 
-            <ion-button @click="changePayment(), swipePay = true" :style="cashPay? 'float: left;border: solid' : 'float: left'"
+            <ion-button @click="changePayment(), swipePay = true" :style="swipePay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
-               v-tooltip="parent.$t('frontend.payment.swipePayment')"
+               v-tooltip="i18n.t('frontend.payment.swipePayment')"
                v-if="payMethod==='TSYS' && staffName !==''"
-              :class="swipePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+              :class="swipePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <span class="iconify" data-icon="wpf:bank-cards" data-inline="false"></span>
             </ion-button> 
             
             <ion-button  @click="changePayment(), qrPay = true"  
               :disabled="spinner"
-               v-if="payMethod==='SHIFT4' && staffName!== ''"
-               v-tooltip="parent.$t('frontend.payment.qrPayment')"
+               v-if="payMethod==='SHIFT4' && staffName!== '' && !hasDeliverySplitPayment()"
+               v-tooltip="i18n.t('frontend.payment.qrPayment')"
               :style="qrPay? 'float: left;border: solid' : 'float: left'"
-              :class="qrPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
+              :class="qrPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
                 <span class="iconify" data-icon="ion:qr-code-sharp" data-inline="false"></span>              
             </ion-button>
             
             <ion-button  @click="shareQrPayment()"  
-                v-if="payMethod==='SHIFT4' && staffName==='' && !isCatering"
-                :key="keyShare+4"
+                v-if="payMethod==='SHIFT4' && staffName==='' && !isCatering && !hasDeliverySplitPayment()"                
                 :disabled="spinner"
-                v-tooltip="parent.$t('frontend.payment.sharePayment')"
+                v-tooltip="i18n.t('frontend.payment.sharePayment')"
                :style="sharePay? 'float: left;border: solid' : 'float: left'"
                 :class="sharePay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
                 <ion-spinner v-if="spinnerShare" name="lines"></ion-spinner>
@@ -155,19 +154,19 @@
             <ion-button   @click="changePayment(), checkPay = true" 
                 v-if="isCatering"
                 :disabled="spinner"
-                v-tooltip="parent.$t('frontend.payment.checkPayment')"
+                v-tooltip="i18n.t('frontend.payment.checkPayment')"
                 style="float: left;" 
                 :style="checkPay? 'float: left;border: solid' : 'float: left'"
-                :class="checkPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+5">
+                :class="checkPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
                 <span class="iconify" data-icon="la:money-check-alt" data-inline="false" style="width: 40px;height: 40px;"></span>
             </ion-button>
           
           
              <google-pay   v-if="payMethod==='SHIFT4' && staffName==='' && googleData.merchantId"
               @click="changePayment()"
-              :keyGoogle="this.keyGoogle"
+                :keyGoogle="this.keyGoogle"
                 v-tooltip="'Google Pay'"
-              :disabled="spinner"   
+                :disabled="spinner"   
                 style="float: left; margin: 2px" 
                 :Total="this.Total"
                 :parent="this"
@@ -199,7 +198,7 @@
           <ion-card  v-if="cardPay && !spinner" class="scroll" style="height: auto" >  
 
               <ion-item :disabled="spinner? true: false">                  
-                 <ion-label position="floating">{{firstNameText}} <strong style="color: red">*</strong></ion-label>                               
+                 <ion-label position="floating">{{i18n.t('frontend.order.firstName')}} <strong style="color: red">*</strong></ion-label>                               
                   <ion-input type="text" required=true  
                   class="menu-col-8" 
                   :value="firstName" @input="firstName = $event.target.value"
@@ -207,7 +206,7 @@
               </ion-item>    
 
               <ion-item :disabled="spinner? true: false">
-                  <ion-label position="floating">{{lastNameText}} <strong style="color: red">*</strong></ion-label>                                          
+                  <ion-label position="floating">{{i18n.t('frontend.order.lastName')}} <strong style="color: red">*</strong></ion-label>                                          
                   <ion-input type="text" required=true  
                   class="menu-col-8"
                   :value="lastName" @input="lastName = $event.target.value"
@@ -215,7 +214,7 @@
               </ion-item>  
 
               <ion-item :disabled="spinner? true: false">                     
-                  <ion-label position="floating">{{addressLine1}} <strong style="color: red">*</strong></ion-label>                                                                      
+                  <ion-label position="floating">{{i18n.t('frontend.order.addressLine1')}} <strong style="color: red">*</strong></ion-label>                                                                      
                   <ion-input type="text" required=true  
                   class="menu-col-8" 
                   :value="address" @input="address = $event.target.value"
@@ -223,7 +222,7 @@
               </ion-item>   
 
               <ion-item :disabled="spinner? true: false">                  
-                  <ion-label position="floating">{{postalCode}} <strong style="color: red">*</strong></ion-label>                                                                                                    
+                  <ion-label position="floating">{{i18n.t('frontend.order.postalCode')}} <strong style="color: red">*</strong></ion-label>                                                                                                    
                   <ion-input type="tel" required=true  :key="key"
                   class="menu-col-8" 
                   :value="zipCode" @change="zipCode=ValidateCodeInModal( $event.target.value)"
@@ -231,7 +230,7 @@
               </ion-item>         
               
               <ion-item :disabled="spinner? true: false">                  
-                  <ion-label position="floating">{{ccard}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
+                  <ion-label position="floating">{{ i18n.t('frontend.order.ccard')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
                   <ion-input type="tel" required=true autocomplete="cc-number"
                       class="menu-col-8" 
                   :value="cardNumber" @input="cardNumber = $event.target.value"
@@ -239,14 +238,14 @@
               </ion-item>
 
               <ion-item :disabled="spinner? true: false">                    
-                  <ion-label position="floating">{{expcard}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
+                  <ion-label position="floating">{{i18n.t('frontend.order.expcard')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
                   <ion-datetime class="menu-col-8"
                   display-format="MM-YYYY" :max="dateTodaymax + 6 "  picker-format="MM-YYYY"
                   :min="dateTodaymin" required=true @ionChange="expirationCard = $event.target.value"> </ion-datetime>
               </ion-item>
 
               <ion-item :disabled="spinner? true: false">                 
-                  <ion-label position="floating">{{ccode}} <strong style="color: red">*</strong></ion-label>                               
+                  <ion-label position="floating">{{i18n.t('frontend.order.ccode')}} <strong style="color: red">*</strong></ion-label>                               
                   <ion-input type="tel" required=true  
                   class="menu-col-8"
                   :value="cardCode" @input="cardCode = $event.target.value"
@@ -256,8 +255,8 @@
               <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >
                 
 
-                <ion-button :disabled="spinner? true: false"  color="light" @click="dismissModal()">{{Cancel}}</ion-button>
-                <ion-button :disabled="spinner? true: false"  color="light"  @click="sendPayment('')">{{payText}}</ion-button>
+                <ion-button :disabled="spinner? true: false"  color="light" @click="dismissModal()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+                <ion-button :disabled="spinner? true: false"  color="light"  @click="sendPayment('')">{{i18n.t('frontend.order.pay')}}</ion-button>
 
               </ion-toolbar>
   
@@ -276,23 +275,8 @@
                 <olapay-device
                  v-if="payMethod==='TSYS'"
                   :datas="this.olapayData"                 
-                  :parent="this"
-                  :Acept="this.Acept"
-                  :Cancel="this.Cancel"
+                  :parent="this"                 
                   :isTicket="isTicket"
-                  :codeNotValid="this.codeNotValid"
-                  :notValidCC="this.notValidCC"
-                  :dataRequired="this.dataRequired"
-                  :ccard="this.ccard"
-                  :expcard="this.expcard" 
-                  :ccode="this.ccode"  
-                  :cityText="this.cityText"  
-                  :stateText="this.stateText"
-                  :firstNameText="this.firstNameText"
-                  :lastNameText="this.lastNameText"
-                  :postalCode="this.postalCode"
-                  :addressLine1="this.addressLine1"
-                  :verifyText="this.verifyText"
                 >
                 </olapay-device>  
                 
@@ -301,75 +285,32 @@
             <ion-card  v-if="idtechPay"  class="scroll" style="height: auto">                 
                <UsbCardReader
                :parent="this"
-               :Acept="this.Acept"
-               :Cancel="this.Cancel"
-               :ccode="this.ccode" 
-                :cityText="this.cityText"  
-                :stateText="this.stateText"
-                :postalCode="this.postalCode"
-                :addressLine1="this.addressLine1"
-                :codeNotValid="this.codeNotValid"
-                :dataRequired="this.dataRequired"
-               ></UsbCardReader>              
-                
+               ></UsbCardReader> 
             </ion-card>
-
-            
             
              <ion-card  v-if="swipePay"  class="scroll" style="height: auto">                 
                <UsbCardSwipe
                :parent="this"
-               :Acept="this.Acept"
-               :Cancel="this.Cancel"             
                ></UsbCardSwipe> 
-            </ion-card>
-
-              
-         
-            
+            </ion-card>            
 
              <ion-card  v-if="cashPay"  class="scroll" style="height: auto">                 
                <UsbCashDoor
                :parent="this"
-               :Acept="this.Acept"
-               :Cancel="this.Cancel"             
                ></UsbCashDoor> 
             </ion-card>
-
           
             <ion-card  v-if="qrPay " class="scroll" style="height: auto" >
               <qr-modal
                 :parent="this.parent"
                 :splitOrder="false" 
                 :staffName="this.staffName"                  
-                :Acept="this.Acept"
-                :Cancel="this.Cancel"
                 :Total="this.Total"
                 :Tax="this.Tax"
                 :TaxName="this.TaxName"
                 :restaurantId="this.restaurantId"
                 :payMethod="this.payMethod"   
-                :errorPaymentHeader="this.errorPaymentHeader"
-                :errorPaymentMss="this.errorPaymentMss"
-                :gooPaymentHeader="this.gooPaymentHeader"
-                :gooPaymentMss="this.gooPaymentMss"
-                :notValidEmail="this.notValidEmail"
-                :codeNotValid="this.codeNotValid"
-                :notValidCC="this.notValidCC"
-                :dataRequired="this.dataRequired" 
-                :paymentByCard="this.paymentByCard"  
                 :currency="this.currency"   
-                :totalForPay="this.totalForPay" 
-                :ccard="this.ccard"
-                :expcard="this.expcard" 
-                :ccode="this.ccode"  
-                :cityText="this.cityText"  
-                :stateText="this.stateText"
-                :firstNameText="this.firstNameText"
-                :lastNameText="this.lastNameText"
-                :postalCode="this.postalCode"
-                :addressLine1="this.addressLine1"
-                :verifyText="this.verifyText"
                 :returnTo="this.returnTo"
                 :RestaurantName="this.RestaurantName"
                 :order="this.order"
@@ -380,21 +321,21 @@
             <ion-card v-if="sharePay">
 
                <div>   
-                <h5>{{parent.$t('frontend.payment.verifyMss')}}</h5>
+                <h5>{{i18n.t('frontend.payment.verifyMss')}}</h5>
               </div>
 
               <ion-toolbar ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >
      
-                <ion-button :disabled="spinner? true: false"   color="light" @click="cancelSharePayment">{{Cancel}}</ion-button>
-                <ion-button :disabled="spinner? true: false"  color="light"  @click="validateSharePayment">{{verifyText}}</ion-button>
+                <ion-button :disabled="spinner? true: false"   color="light" @click="cancelSharePayment">{{i18n.t('frontend.home.cancel')}}</ion-button>
+                <ion-button :disabled="spinner? true: false"  color="light"  @click="validateSharePayment">{{i18n.t('frontend.order.verify')}}</ion-button>
               </ion-toolbar>
-          </ion-card>
+            </ion-card>
                      
 
           <ion-card v-if="checkPay && !spinner">
 
             <ion-item >
-                <ion-label position="floating">{{parent.$t('frontend.order.routingNumber')}} <strong style="color: red">*</strong></ion-label>                                          
+                <ion-label position="floating">{{i18n.t('frontend.order.routingNumber')}} <strong style="color: red">*</strong></ion-label>                                          
                 <ion-input type="text" required=true  
                 class="menu-col-8"
                   :value="routingNumber"
@@ -405,7 +346,7 @@
             </ion-item>  
 
             <ion-item >
-                <ion-label position="floating">{{parent.$t('frontend.order.accountNumber')}} <strong style="color: red">*</strong></ion-label>                                          
+                <ion-label position="floating">{{i18n.t('frontend.order.accountNumber')}} <strong style="color: red">*</strong></ion-label>                                          
                 <ion-input type="text" required=true  
                 class="menu-col-8"
                    :value="accountCheckNumber" 
@@ -415,7 +356,7 @@
             </ion-item>  
 
             <ion-item >
-                <ion-label position="floating">{{parent.$t('frontend.order.bankName')}}<strong style="color: red">*</strong></ion-label>                                          
+                <ion-label position="floating">{{i18n.t('frontend.order.bankName')}}<strong style="color: red">*</strong></ion-label>                                          
                 <ion-input type="text" required=true  
                 class="menu-col-8"
                     :value="bankName" 
@@ -426,8 +367,8 @@
 
             <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >
                 
-                <ion-button :disabled="spinner? true: false"   color="light" @click="dismissModal()">{{Cancel}}</ion-button>
-                <ion-button :disabled="spinner? true: false"  color="light"  @click="payByCheck">{{payText}}</ion-button>
+                <ion-button :disabled="spinner? true: false"   color="light" @click="dismissModal()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+                <ion-button :disabled="spinner? true: false"  color="light"  @click="payByCheck">{{i18n.t('frontend.order.pay')}}</ion-button>
               
             </ion-toolbar>
 
@@ -479,23 +420,24 @@ import ApplePay from './ApplePay'
 import {Utils} from '../../backoffice/utils/utils'
 import { Plugins } from '@capacitor/core';
  const { Share } = Plugins;
-//  const { Network } = Plugins;
+import {i18n} from '@/plugins/i18n'
+import store from '../../main'
 import  RoutingValidator from 'bank-routing-number-validator';
+import { Commons } from '../commons';
  
 export default {
    name: 'PaymentModal',  
    created: async function(){   
-     
+    
+    this.i18n = i18n;  
     if(this.order.StaffName)
       if(this.order.StaffName !=='')
         this.staffName = this.order.StaffName
-    
+   
      if(this.staffName ==='' && this.payMethod==='SHIFT4'){
         await this.getWalletInformation();       
         this.keyGoogle ++;
-     }       
-    
-   
+     } 
       if(this.canSplitPayment){
         if(this.order.Payment && this.order._id){
           if(this.order.Payment.length >0){
@@ -513,58 +455,34 @@ export default {
         }
       }
 
-
-
      EventBus.$on('resposeSplitPayment', (value) => { this.makeSplitPayment(value)});
 
      if(this.isTicket)
       this.deviceTransactionType = '03';
 
-      this.shareText1 = this.parent.$t('frontend.payment.shareText1');
-      this.shareText2 = this.parent.$t('frontend.payment.shareText2');
+      this.shareText1 = this.i18n.t('frontend.payment.shareText1');
+      this.shareText2 = this.i18n.t('frontend.payment.shareText2');
+      this.ccode = this.i18n.t('frontend.order.ccode');
+
+      this.allTypeOrder = {'Delivery':this.i18n.t('frontend.app.deliver'), 'PickUp':this.i18n.t('frontend.app.pickup'), 'On Table':this.i18n.t('frontend.app.table'), 'Curbside':this.i18n.t('frontend.app.curbside'), };
      
    },
    props: {  
     parent: {type: Object, default: ()=> {}} ,
     order: {type: Object, default: ()=> {}} ,
     canSplitPayment: {type: Boolean, default: false } ,
-    isCatering: {type: Boolean, default: false } ,
-    Acept:  {type: String, default:"" } ,
-    Cancel:  {type: String, default:"" } ,
+    isCatering: {type: Boolean, default: false } ,   
     Total:  {type: String, default:"" } ,
     Tax:  {type: String, default:"" } ,
     TaxName:  {type: String, default:"" } ,
     restaurantId:  {type: String, default:"" } ,
     payMethod:  {type: String, default:"" } ,    
-    errorPaymentHeader:  {type: String, default:"" } ,
-    errorPaymentMss:  {type: String, default:"" } ,
-    gooPaymentHeader:  {type: String, default:"" } ,
-    gooPaymentMss:  {type: String, default:"" } ,
-    notValidEmail:  {type: String, default:"" } ,
-    codeNotValid:  {type: String, default:"" } ,
-    notValidCC:  {type: String, default:"" } ,
-    dataRequired:  {type: String, default:"" } ,   
-    paymentByCard:   {type: String, default:"" } ,  
     currency:   {type: String, default:"" } ,  
-    totalForPay:   {type: String, default:"" } , 
-    ccard: {type: String, default:"" } ,
-    expcard: {type: String, default:"" } , 
-    ccode:   {type: String, default:"" } , 
-    cityText: {type: String, default:"" } ,
-    stateText: {type: String, default:"" } ,
-    firstNameText: {type: String, default:"" } ,
-    lastNameText: {type: String, default:"" } ,
-    postalCode: {type: String, default:"" } ,
-    addressLine1: {type: String, default:"" } ,
-    payText: {type: String, default:"" } ,
-    verifyText: {type: String, default:"" } ,
     returnTo:  {type: String, default:"" } ,
     RestaurantName:   {type: String, default:"" } ,
-    isTicket: {type: Boolean, default: false } ,
-     
+    isTicket: {type: Boolean, default: false } ,     
   },
   components:{
-    // toggles,toggle,
      QrModal,
      GooglePay,
      ApplePay,
@@ -575,8 +493,9 @@ export default {
      UsbCardSwipe
   },
    data () {
-    return {      
-      keyGoogle: 0,                 
+    return {    
+        i18n: {},  
+        keyGoogle: 0,                 
         spinner: false ,
         dateTodaymin: new Date().toISOString().substr(0, 7),
         dateTodaymax:  new Date().getFullYear(),
@@ -596,7 +515,6 @@ export default {
         defaultSlplit: 2,
         keySplit: 2,
         keyValidateCount: 3 ,
-        // order: {},
         readyPayment: false,
         readySplit: true,
         arraySplit: [],
@@ -619,8 +537,7 @@ export default {
         bankName: '',
         readyButton: false,
         googleData: {},
-
-        
+        ccode: '',
         
         deviceData: {
              'amountInformation': {
@@ -642,21 +559,19 @@ export default {
             'tip': this.order.Tip,
             'total': this.order.Total,
             'subtotal': this.order.SubTotal,
-            'tax': this.order.Taxe.toFixed(2),  
-            'device': this.parent.$store.state.device 
+            'tax': this.order.Taxe,  
+            'device': store.state.device 
         },
         deviceTransactionType: '01',
         shareText1: ' ',
         shareText2: '',
-        allTypeOrder:{'Delivery':this.parent.$t('frontend.app.deliver'), 'PickUp':this.parent.$t('frontend.app.pickup'), 'On Table':this.parent.$t('frontend.app.table'), 'Curbside':this.parent.$t('frontend.app.curbside'), },
+        allTypeOrder: {},
     }
   }, 
 
    methods: {
     commercialInformation(){
-          let commercialInfo = []
-          console.log("Esta es la orden")
-          console.log(this.order)
+          let commercialInfo = []        
           this.order.Products.forEach(p => {
               let obj = {
                   'description': p.Name,
@@ -665,9 +580,7 @@ export default {
                   'total': parseFloat(p.Price * p.Cant).toFixed(2)
               }
               commercialInfo.push(obj)
-          });
-          console.log("Commercial PLAIN:")
-          console.log(commercialInfo)
+          });         
           return commercialInfo
     },
 
@@ -676,10 +589,10 @@ export default {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.dataRequired,
+          message: this.i18n.t('frontend.home.errorRequired'),
           buttons: [                   
           {
-              text: this.Acept,
+              text: this.i18n.t('frontend.home.acept'),
               handler: () => {                                 
                             
               },
@@ -701,10 +614,10 @@ export default {
                 .create({
                     cssClass: 'my-custom-class',
                     header: 'Error',
-                    message: this.notValidCC,
+                    message:  this.i18n.t('frontend.order.notValidCC'),
                     buttons: [                   
                     {
-                        text: this.Acept,
+                        text: this.i18n.t('frontend.home.acept'),
                         handler: () => {                                 
                                         
                         },
@@ -744,10 +657,10 @@ export default {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.codeNotValid ,
+        message: this.i18n.t('frontend.home.zipCodeNotValid') ,
         buttons: [                   
         {
-          text: this.Acept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -762,7 +675,7 @@ export default {
       return this.$ionic.toastController
       
         .create({
-          message: `${this.cityText}: ${this.city} | ${this.stateText}: ${this.state}`,
+          message: `${this.i18n.t('frontend.home.city')}: ${this.city} | ${this.i18n.t('frontend.home.state')}: ${this.state}`,
           duration: 2000,
           position: 'top',
           color:'success'
@@ -776,10 +689,10 @@ export default {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.notValidEmail , 
+        message: this.i18n.t('frontend.home.notValidEmail'),
         buttons: [                   
         {
-          text: this.Acept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -812,8 +725,8 @@ export default {
     async goodPaymentToast() {
       return this.$ionic.toastController      
         .create({
-            header: this.gooPaymentHeader,
-            message:  this.gooPaymentMss,           
+            header: this.i18n.t('frontend.order.transictionTitle'),
+            message: this.i18n.t('frontend.order.transictionOk'),           
             position: 'middle',
             color:'success',
              buttons: [
@@ -831,8 +744,8 @@ export default {
     async errorPaymentToast() {
       return this.$ionic.toastController      
         .create({
-            header: this.errorPaymentHeader,
-            message:  this.errorPaymentMss,           
+            header:  this.i18n.t('frontend.order.transictionTitle'),
+            message:  this.i18n.t('frontend.order.transictionError'),           
             position: 'middle',
             color:'danger',
              buttons: [
@@ -963,9 +876,9 @@ export default {
 
     async responseDevicePay(response){
      
-        let mss = this.parent.$t('frontend.payment.doingPayment');
+        let mss = this.i18n.t('frontend.payment.doingPayment');
         if(this.isTicket)
-          mss = this.parent.$t('frontend.payment.authorizingPayment');
+          mss = this.i18n.t('frontend.payment.authorizingPayment');
 
       this.$ionic.loadingController
       .create({
@@ -997,7 +910,7 @@ export default {
         this.$ionic.loadingController
         .create({
           cssClass: 'my-custom-class',
-          message: this.parent.$t('frontend.payment.doingPayment'),
+          message: this.i18n.t('frontend.payment.doingPayment'),
           backdropDismiss: false
         })
         .then ( loading =>{
@@ -1040,7 +953,7 @@ export default {
          if(this.cardNumber ==='' || this.expirationCard === '' || this.cardCode=== ''||
         this.firstName ==='' || this.lastName === '' || this.zipCode=== '' || this.address === '')
             return this.alertRequiredDatas();
-        // moment.tz(order.Date, moment.tz.guess()).format('MM/DD/YYYY HH:mm:ss');
+       
         data =  {
           firstName: this.firstName,
           lastName: this.lastName,
@@ -1061,9 +974,9 @@ export default {
       }  
       data.tax = data.tax.toFixed(2);
       data.tip = data.tip.toFixed(2)
-      let mss = this.parent.$t('frontend.payment.doingPayment');
+      let mss = this.i18n.t('frontend.payment.doingPayment');
       if(this.isTicket)
-         mss = this.parent.$t('frontend.payment.authorizingPayment');
+         mss = this.i18n.t('frontend.payment.authorizingPayment');
 
         if(this.returnTo === 'OrderCatering'){
           data.tax = 1;
@@ -1089,15 +1002,27 @@ export default {
                    if(!response) {
                      this.dismissModal();
                      loading.dismiss();
-                    return this.errorPaymentDetail(this.parent.$t('frontend.payment.insuficientFunds')); 
-                   }                   
+                    return this.errorPaymentDetail(this.i18n.t('frontend.payment.insuficientFunds')); 
+                   }  
+                   else{
+                      response.returnTo = this.returnTo;
+                      await this.parent.recivePayment(response);
+                      this.dismissModal();						
+                      loading.dismiss();
+                   }                 
                 }                 
-                else
-                 response = await payAuthorizeNet.payOrder(data);                
-                response.returnTo = this.returnTo;
-                await this.parent.recivePayment(response);
-                this.dismissModal();						
-                loading.dismiss();
+                else{
+                  
+                  if(this.hasDeliverySplitPayment()){
+                    loading.dismiss();
+                    return this.deliveryPayment(data);
+                  }
+                  response = await payAuthorizeNet.payOrder(data);                
+                  response.returnTo = this.returnTo;
+                  await this.parent.recivePayment(response);
+                  this.dismissModal();						
+                  loading.dismiss();
+                }
                 
               } catch (error) {
                 loading.dismiss();
@@ -1109,6 +1034,13 @@ export default {
     
        
        
+    },
+
+    hasDeliverySplitPayment(){
+      const shipping = store.state.shipping.shipping;
+      if(this.order.OrderType === 'Delivery' && shipping > 0 && store.state.configuration.hasDeliveryPayment)
+        return true;
+      return false;
     },
   
 
@@ -1155,49 +1087,19 @@ export default {
               propsData: { 
                 parent:this,
                 order: this.order,             
-                Acept: this.Acept,
-                Cancel: this.Cancel, 
                 Total: total.toString(),
                 Tax:  this.Tax,
                 TaxName: this.TaxName,     
                 restaurantId: this.restaurantId,
                 payMethod: this.payMethod  ,                
-                errorPaymentHeader: this.errorPaymentHeader,
-                errorPaymentMss: this.errorPaymentMss,
-                gooPaymentHeader: this.gooPaymentHeader,
-                gooPaymentMss: this.gooPaymentMss,
-                notValidEmail: this.notValidEmail,
-                codeNotValid: this.codeNotValid,
-                notValidCC: this.notValidCC,
-                dataRequired: this.dataRequired,
-                paymentByCard: this.paymentByCard,
-                totalForPay: this.totalForPay,
                 currency: this.currency,
-                ccard: this.ccard,
-                expcard: this.expcard,
-                ccode: this.ccode,
-                cityText: this.cityText,
-                stateText: this.stateText,
-                firstNameText: this.firstNameText,
-                lastNameText: this.lastNameText,
-                postalCode: this.postalCode,
-                addressLine1: this.addressLine1,
-                payText: this.payText,
-                verifyText: this.verifyText,
-                returnTo: 'OrderView',
-                qrPayment: this.parent.$t('frontend.payment.qrPayment'),
-                cardPayment: this.parent.$t('frontend.payment.tjtPayment'),
-                cashPayment: this.parent.$t('frontend.payment.cashPayment'),
+                returnTo: 'OrderView',  
                 googleData: this.googleData,
-                doingPayment: this.parent.$t('frontend.payment.doingPayment'),
                 staffName: this.staffName,
                 deviceTransactionType: this.deviceTransactionType,
-                deviceData: splitDeviceData,
-                shareText1: this.shareText1,
-                shareText2: this.shareText2,
+                deviceData: splitDeviceData,              
                 restaurantName: this.RestaurantName,
                 customerName: this.order.CustomerName,
-
               },
             },
           })
@@ -1208,15 +1110,64 @@ export default {
       let splitTotal = 0
       for (var i=0; i< this.order.Payment.length; i++) {
         if(this.order.Payment[i].paymentInfo)
-          splitTotal += this.order.Payment[i].total;        
-      }     
+          splitTotal += parseFloat(this.order.Payment[i].total);        
+      }  
+     
       if(parseFloat(this.order.Total) === parseFloat(splitTotal) || parseFloat(this.order.Total) < parseFloat(splitTotal))
         return true; 
       return false;
 
     },
 
-    async makeSplitPayment(value){      
+    async deliveryPayment(data){
+
+            this.$ionic.loadingController
+      .create({
+        cssClass: 'my-custom-class',
+        message: this.i18n.t('frontend.payment.doingPayment'),
+        backdropDismiss: false
+      })
+      .then ( loading =>{
+          loading.present()
+          setTimeout( async() => {
+              try {
+                const shipping = store.state.shipping.shipping;
+                data.total =  (parseFloat(data.total) - shipping).toFixed(2);
+                this.order.Payment= [{'total':  data.total, 'state': 0},{'total': shipping, 'state': 0}]
+                this.order.State = 0;     
+                const res = await Api.postIn('Order', this.order)
+                if(res.status === 200 && res.statusText === "OK"){
+                  store.commit('setOrder', res.data)
+                  this.order = res.data;   
+
+                   const response = await payAuthorizeNet.payOrder(data);
+                  if(response){
+
+                      this.indexForPay = 0;
+                      await this.makeSplitPayment(response);
+                    
+                      data.total = shipping.toFixed(2);
+                      data.tip = 0;
+                      data.tax = 1;
+                      const response1 = await payAuthorizeNet.payOrder(data, true);
+                      if(response1){
+                      this.indexForPay = 1;
+                      await this.makeSplitPayment(response1, true);
+                      loading.dismiss();              
+                      }
+                    }
+                }
+                               
+              } catch (error) {
+                loading.dismiss();
+                  return this.errorPaymentDetail(error);                 
+              }
+          })
+      })
+    },
+
+    async makeSplitPayment(value, flag){    
+      if(!flag) flag = false; 
      
      this.order.Payment[this.indexForPay].state = 1;
      this.order.Payment[this.indexForPay].paymentInfo = value;
@@ -1228,7 +1179,7 @@ export default {
         const response = await Api.putIn('Order', this.order)      
       
         if(response.status === 200 && response.statusText === "OK"){ 
-           this.parent.$store.commit('setOrder', response.data)  
+          store.commit('setOrder', response.data)  
             this.arraySplit[this.indexForPay].state = 1      
               const paymentEntry = {                       
                         "Method": value.method,
@@ -1236,20 +1187,20 @@ export default {
                         "InvoiceNumber": value.transId,
                         "ModelId": response.data._id,
                         "ModelFrom": "Order"  ,
-                        "StaffName": this.order.StaffName,                  
+                        "StaffName": this.order.StaffName, 
+                        "DeliveryPayment": flag,                 
                    }
               await Api.postIn('allpayments', paymentEntry);   
             this.dismissModal();
             return this.parent.finishPayment(response.data);
         }
         return this.dismissModal();
-          
       }
       else{  
         try {
            const response1 = await Api.putIn('Order', this.order)
            if(response1.status === 200 && response1.statusText === "OK"){
-            this.parent.$store.commit('setOrder', response1.data)             
+            store.commit('setOrder', response1.data)             
             this.arraySplit[this.indexForPay].state = 1;
             const paymentEntry = {                       
                         "Method": value.method,
@@ -1257,7 +1208,8 @@ export default {
                         "InvoiceNumber": value.transId,
                         "ModelId": response1.data._id,
                         "ModelFrom": "Order",
-                        "StaffName": this.order.StaffName                    
+                        "StaffName": this.order.StaffName,
+                        "DeliveryPayment": flag,                 
                    }
               await Api.postIn('allpayments', paymentEntry); 
               
@@ -1324,7 +1276,7 @@ export default {
         const response = await Api.postIn('Order', this.order)
         if(response.status === 200 && response.statusText === "OK"){
           this.readyButton = false
-          this.parent.$store.commit('setOrder', response.data)
+          store.commit('setOrder', response.data)
           this.order = response.data;   
           this.readyPayment = true;            
         }     
@@ -1355,6 +1307,7 @@ export default {
       this.changePayment();
       this.sharePay = true;
       this.spinnerShare = true; 
+
           
 
       const data = {
@@ -1410,7 +1363,7 @@ export default {
      try {  
 
       var response = await payAuthorizeNet.validateStatusQrOrder(data);  
-      let mss = this.parent.$t('frontend.payment.goodPayment') +': '+ this.getFormatPrice(response.total);
+      let mss = this.i18n.t('frontend.payment.goodPayment') +': '+ this.getFormatPrice(response.total);
       mss += ' TransId: ' + response.transId; 
       this.paymentSuccessfull(mss)    
       this.spinner = false; 
@@ -1499,10 +1452,10 @@ export default {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.parent.$t('frontend.order.badroutingNumber'),
+          message: this.i18n.t('frontend.order.badroutingNumber'),
           buttons: [                   
           {
-              text: this.parent.$t('frontend.home.acept'),
+              text: this.i18n.t('frontend.home.acept'),
               handler: () => {                                 
                             
               },
@@ -1520,7 +1473,7 @@ export default {
         this.$ionic.loadingController
         .create({
           cssClass: 'my-custom-class',
-          message: this.parent.$t('frontend.payment.doingPayment'),
+          message: this.i18n.t('frontend.payment.doingPayment'),
           backdropDismiss: false
         })
         .then ( loading =>{
@@ -1552,165 +1505,24 @@ export default {
 
     },
 
+    
+
     async getWalletInformation(){
-      const  newT =  parseInt( this.Total.toString().replace('.', ''));
-      const basket = {"invoice": 666, "total": newT };       
-      try {
-        
-      this.spinner = true;
-      const ipClient = await Api.getClientIp();
-      const res = await Api.walletInformation(basket, this.restaurantId, ipClient.data.ip); 
-      if(res.status === 200 && res.statusText === "OK"){
-               
-        this.googleData.merchantId = res.data.walletConfig.merchantID.toString();  
-        this.googleData.gateway = res.data.walletConfig.googlePay.gateway;           
-        this.googleData.allowedAuthMethods= res.data.walletConfig.googlePay.allowedAuthMethods;         
-        this.googleData.allowedCardNetworks= res.data.walletConfig.googlePay.allowedCardNetworks;  
-        this.googleData.currencyCode =res.data.walletConfig.currencyCode; 
-        this.googleData.countryCode =res.data.walletConfig.countryCode;      
-         this.spinner = false;
-      } 
-         this.spinner = false;
-         return false;
-      } catch (error) {
-        console.log(error);
-        this.spinner = false;        
-      }     
-      
+     
+        this.googleData.merchantId = store.state.walletConfig.merchantId;  
+        this.googleData.gateway = store.state.walletConfig.gateway;           
+        this.googleData.allowedAuthMethods= store.state.walletConfig.allowedAuthMethods;         
+        this.googleData.allowedCardNetworks= store.state.walletConfig.allowedCardNetworks;  
+        this.googleData.currencyCode = store.state.walletConfig.currencyCode; 
+        this.googleData.countryCode = store.state.walletConfig.countryCode; 
     
     },
 
-   async htmlToUse(order){
-
-      let totalWithoutQuotation = 0;
-      if(order.QuotationPayment)        
-            totalWithoutQuotation = order.Total - order.QuotationPayment;
-        else
-            totalWithoutQuotation = order.Total;
-
-       var date = moment.tz(order.Date, moment.tz.guess()).format('MM-DD-YYYY hh:mm A');
-        if(order.OrderForCatering === true)
-          date = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;
-       
-        let orderInfo = '';
-        if(order.OrderType == 'Delivery')
-            orderInfo = order.AddressToDeliver
-        if(order.OrderType == 'PickUp')
-            orderInfo = moment.tz(order.HourToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;       
-        if(order.OrderType == 'On Table')
-            orderInfo = order.tableService
-
-
-        let Cookername = '';
-
-        try {
-          if(this.showCooker && order.Cooker){          
-          const response = await Api.fetchById('Staff', order.Cooker);
-          
-          if(response.status === 200){           
-            Cookername = response.data.FirstName + ' '+ response.data.LastName;            
-            }  
-          }
-        } catch (error) {
-          console.log(error)
-        }
-
-      
-
-        var html =' <html><head>';    
-        html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-        html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-        html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-        html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-        html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-        html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-        html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-        
-        html += '</head><body><div >';
-        html += '<table  align=center style="width: 90%;">';
-        html += '<tr><td colspan=6 style="text-align: center;">';
-        html += `<h2>${this.RestaurantName}</h2>  `;          
-        html +=`</td>`;     
-        html += `</tr>`;          
-        html += '<tr><td colspan=6 >'       
-        html += `<h4>${this.parent.$t('frontend.order.date')}: ${date} </h4><hr>`;
-        html += `<h4>${this.parent.$t('frontend.order.client')}: ${order.CustomerName} </h4>`;
-        html += `<h4>${this.parent.$t('frontend.orderType.phone')}: ${order.CustomerPhone} </h4>`;      
-        html += `<h4>${this.parent.$t('frontend.order.orderFor')} ${this.allTypeOrder[order.OrderType]}: ${orderInfo} </h4>`;
-        if(Cookername !== '')
-        html += `<h4>${this.parent.$t('frontend.order.cooker')}: ${Cookername} </h4>`;
-        html += '<hr>';  
-        html += '<br>'; 
-        html += `<tr><br><td colspan=6 style="border-top: 1px solid black;"><h4 ><strong>${this.parent.$t('frontend.order.products')}</strong></h4></td></tr> <tr></tr>`;
-        for(var i = 0; i<order.Products.length ; i++){
-            html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><strong >${order.Products[i].Name}</strong>` ;
-            if(order.Products[i].Note !='')
-                html +=`<p style="background: #f1f1004d;">${order.Products[i].Note}</p> `;
-            html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p >( ${order.Products[i].Cant} X ${this.getFormatPrice(order.Products[i].Price)})</p> </td>`;
-            html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p >${ this.getFormatPrice( order.Products[i].Price * order.Products[i].Cant )}</p> </td>`;
-            html += `</tr>`;
-           if(order.Products[i].Aggregates.length > 0){
-                html +=`<tr style="padding: 20px 35px;"> ${this.parent.$t('frontend.home.aggregateFree')}: ${order.Products[i].CantAggr=order.Products[i].AggregatesCant * order.Products[i].Cant} </tr>`;
-
-                 for(var a=0; a<order.Products[i].Aggregates.length; a++){
-                    let agg = order.Products[i].Aggregates[a]
-                    html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><p style="padding-left: 20px;">${agg.Name} <br>${this.getFormatPrice(agg.SalePrice)}</p>` ;
-                    html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p > ${agg.Cant}</p> </td>`;
-                    html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p > ${ this.getFormatPrice( agg.AllTotal ) }</p> </td></tr >`;            
-                 }
-            }
-            
-        }
-       
-        if(order.OtherCharges.length >0){
-            html += `<tr ><td colspan=6 ><h4 ><strong>${this.parent.$t('frontend.order.otherCharges')}</strong></h4></td></tr>`;
-            for(var e = 0; e< order.OtherCharges.length ; e++){
-                html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p>${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
-            }
-        }
-       
-        
-        html += `<tr ><td colspan=5 ><br><p ><strong>${this.parent.$t('frontend.order.subtotal')}</strong></p></td> <td ><br> <p >${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;      
-       html += `<tr><td  colspan=5 ><p  ><strong>${this.parent.$t('frontend.order.taxe')} ${order.Taxe}%</strong></p></td> <td > <p >${ this.getFormatPrice(order.Taxe * order.SubTotal / 100) } </p> </td></tr>`;      
-        if(order.OrderType == 'Delivery' && order.Shipping)
-            html +=  `<tr ><td colspan=5  ><p  ><strong>${this.parent.$t('frontend.order.deliver')}</strong></p></td><td  ><p >${this.getFormatPrice(order.Shipping)}</p></td></tr>`;
-        if(order.Tip)
-            html += `<tr ><td  colspan=5 ><p ><strong>${this.parent.$t('frontend.order.tip')} ${order.Tip}%</strong></p></td><td ><p>${ this.getFormatPrice(order.Tip * order.SubTotal / 100) } </p> </td></tr>`;
-        html += `<tr><td colspan=5 style="border-bottom: 1px solid #dbd1d1;"><p  ><strong>${this.parent.$t('frontend.order.total')}</strong></p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <strong > ${this.getFormatPrice(order.Total)}</strong> </td></tr>`;
-        
-        if(order.QuotationPayment)
-          html += `<tr style="border-bottom: 1px solid #399922;"><td colspan=5 ><p  ><strong>${this.parent.$t('frontend.order.quotationPayment')}</strong></p></td> <td > <strong >${this.getFormatPrice(order.QuotationPayment)}</strong> </td></tr>`;
-        if(order.PendingPayment)
-          html += `<tr style="border-bottom: 1px solid #ff5500;"><td colspan=5 style="border-bottom: 1px solid #ff5500;"><p  ><strong>${this.parent.$t('frontend.order.pendingPayment')}</strong></p></td> <td  style="border-bottom: 1px solid #ff5500;"> <strong >${this.getFormatPrice(order.PendingPayment)}</strong> </td></tr>`;
-        if(order.PendingPayment > 0 && order.Deadline){
-            html += `<tr ><td colspan=6 ><h4 ><strong>${this.parent.$t('frontend.order.parcialPayment')}</strong></h4></td></tr>`;
-            for(var dead = 0; dead < order.Deadline.length ; dead ++){
-                html += ` <tr ><td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><p >${order.Deadline[dead].Date}  </p></td> `
-                html += ` <td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><strong >  ${order.Deadline[dead].Percent}%  =  ${ this.getFormatPrice((totalWithoutQuotation * order.Deadline[dead].Percent) / 100)}</strong></td> `
-                if(order.Deadline[dead].State === 1)
-                html += ` <td style="border-bottom: 1px solid #dbd1d1;"> <strong  style= "color: #399922;  ">${this.parent.$t('frontend.order.payed')}</strong></td>`;
-                else html += ` <td style="border-bottom: 1px solid #dbd1d1;"><strong  style= "color: #ff5500; ">${this.parent.$t('frontend.order.toPay')}</strong> </td>`;
-                html += ` </tr>`;
-            }
-          }        
-        if(order.Note)
-            html += `<tr ><td style="width: 20%;border-bottom: 1px solid grey;"><h4 >${this.parent.$t('frontend.order.notes')}</h4></td><td colspan=5 style="width: 80%;border-bottom: 1px solid grey;" ><p >${order.Note}</p></td></tr>`;
-        html += '<tr><td colspan=6 style=" text-align: center;">';
-        html += `<h2>${this.RestaurantName}</h2>  `;      
-        if(this.restaurantWeb)  
-            html += `<h4>${this.restaurantWeb}  </h4>`;   
-        html +=`</td>`;     
-        html += `</tr>`;       
-        html += `</table></div></body></html>`;
-        return html;
-    },
-
+   
+ 
    async printOrder(order){
         
-        var html = await this.htmlToUse(order)
-
-      
-        
+        var html = Commons.htmlToSendEmailOrder(order);
           var winimp = window.open('/print', 'popimpr');
           winimp.document.open();
           winimp.document.write( html );
@@ -1720,6 +1532,10 @@ export default {
           winimp.close();
 
    },
+
+   changeSplit(){
+     this.split= !this.split;
+   }
 
 }, 
   

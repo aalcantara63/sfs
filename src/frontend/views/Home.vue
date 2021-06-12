@@ -5,7 +5,7 @@
         <ion-spinner  name="lines" class="spinner"></ion-spinner>
       </div>
 
-      <div v-if="!spinner && restaurantSelected"> 
+      <div v-if="!spinner && restaurantSelectedId !==''"> 
         <!-- <ion-label>{{$t('frontend.home.selectOrderType')}}</ion-label>   <br>     -->
           <ion-button v-if="configuration.viewDelivery && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" style="width: 23%;" color="primary" @click="showDeliver" :class="isDelivery? 'ion-color ion-color-primary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-primary md button button-solid ion-activatable ion-focusable hydrated disable-hover'" >{{$t('frontend.app.deliver')}}</ion-button>
           <ion-button style="width: 23%;" color="secondary" v-if="configuration.selectPickHour && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" @click="showPickUp " :class="isPick? 'ion-color ion-color-secondary md button button-solid ion-activatable ion-focusable hydrated button-disabled-menu ':'ion-color ion-color-secondary md button button-solid ion-activatable ion-focusable hydrated'" >{{$t('frontend.app.pickup')}}</ion-button>
@@ -152,7 +152,7 @@
         </ion-card>          
       </modal>
        
-      <div  v-if="!showProduct && !spinner && restaurantSelected">
+      <div  v-if="!showProduct && !spinner && restaurantSelectedId !==''">
        
           <ion-toolbar>
             <!-- <h1 >{{$t('frontend.menu.menu')}}</h1> -->
@@ -223,15 +223,9 @@
       </div>
 
 
-      <vue-product  v-if="showProduct && !spinner"      
-        :restaurantSelectedId="this.restaurantSelectedId"
-        :restaurantName="this.restaurantActive.restaurantName"
-        :currency="this.restaurantActive.currency"
-        :cart="this.cart" 
-        :prod="this.prod"
-        :products="this.products" 
-        :categories="this.categories"
-        :variants="this.variants"
+      <vue-product  v-if="showProduct && !spinner"  
+        :prod="this.prod"       
+        :categories="this.categories"       
         :category="this.categoryName" 
         :categoryDescription="this.categoryDescription"
         :orderType="this.orderType">
@@ -267,18 +261,17 @@ import { EventBus } from '../event-bus';
 
 export default {
   name: "Home",
-  props: {
-    msg: String,
-    menuListSinCatering: {type: Array, default:() => [] },
-    categoryMenuListSinCatering: {type: Array, default:() => [] },
-    restaurantSelected: {type: Boolean, default:false } ,
-    restaurantSelectedId:  {type: String, default: "" }, 
-    products: {type: Array, default:() => [] }, 
-    variants: {type: Array, default: () => [] },  
-    taxes: {type: Number, default:0 } ,
-    shipping: {type: Number, default:0 } ,
+  props: {    
   }, 
   created: async function(){ 
+
+    this.menuListSinCatering = this.$store.state.menuSinCatering || [];
+    this.categoryMenuListSinCatering = this.$store.state.categoryMenuListSinCatering || [];
+    this.restaurantSelectedId = this.$store.state.restaurantActive.restaurantId || ''; 
+    this. products = this.$store.state.products|| [];
+    this.variants = this.$store.state.variants|| [];
+    this.taxes = this.$store.state.tax.taxesName || 0;
+    this.shipping = this.$store.state.shipping.shipping || 0;
 
     if(this.$store.state.customer._id){
       this.clientId= this.$store.state.customer._id;            
@@ -352,6 +345,13 @@ export default {
   data () {
     return {
       modelName: 'Customer',
+      menuListSinCatering: [],
+      categoryMenuListSinCatering: [],
+      restaurantSelectedId : '',
+      products: [],
+      variants : [],
+      taxes: 0,
+      shipping: 0,
       isDelivery: false,
       isPick: false,
       isTable: false,
@@ -1093,14 +1093,8 @@ export default {
     .then(a => a.present())
   },
 
-  showOrder(){
-   
-    if(this.cart.length > 0)
-      if(this.cart[0].fromCatering === true)
-        return this.$router.push({ name: 'OrderCatering' }) 
-    if(this.$store.state.allTickets.length)
-      return this.$router.push({ name: 'OrderTicket' }) 
-    else
+  showOrder(){  
+  
       this.$router.push({ name: 'OrderFront' }) 
   }
 

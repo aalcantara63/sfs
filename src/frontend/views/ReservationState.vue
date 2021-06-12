@@ -10,7 +10,7 @@
                 <h1> Detalles de la Reservación</h1>            
                        
             </ion-label>    
-            <ion-chip color="primary" slot="end" @click="sendReservationEmail(reservation)" v-if="clientId !==''" v-tooltip="$t('frontend.tooltips.forward')">
+            <ion-chip color="primary" slot="end" @click="sendReservationEmail(reservation)"  v-tooltip="$t('frontend.tooltips.forward')">
                 <span  class="iconify" data-icon="carbon:mail-all" data-inline="false"></span>
                 <ion-spinner v-if="spinnerEmail"></ion-spinner>
             </ion-chip>       
@@ -201,6 +201,7 @@ import { Api } from '../../backoffice/api/api.js';
 import moment from 'moment-timezone';
  import { EventBus } from '../event-bus';
  import PaymentSplited from '../components/PaymentSplited'
+ import { Commons } from '../commons'
 
 addIcons({
   "ios-add": add.ios,
@@ -211,12 +212,10 @@ export default {
     name: 'ReservationState', 
     components:{
         VBreakpoint: VBreakpoint
-    },
-     props:{          
-        restaurantSelectedId: {type: String, default:"" } ,
-     }, 
+    },     
     created: function(){
-            
+
+        this.restaurantSelectedId = this.$store.state.restaurantActive.restaurantId || '';             
         this.reservation = this.$route.params.reservation;
         this.configuration = this.$store.state.configuration;
         this.restaurantActive = this.$store.state.restaurantActive
@@ -234,6 +233,7 @@ export default {
     }, 
     data() {
         return {
+            restaurantSelectedId: '',
             parent: this,
             showStates: '',              
             currentState: this.showStates,
@@ -467,54 +467,7 @@ export default {
     
         sendPrint:  function(){
 
-            var html =' <html><head>';    
-            html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-            html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-            html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-            html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-            html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-            html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-            html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-            
-            html += '</head><body><div >';
-            html += '<table  align=center style="width: 90%;">';
-            html += '<tr><td colspan=6 style="text-align: center;">';
-            html += `<h2>${this.$t('frontend.reservation.reservationDetail')}</h2>  `;
-            html +=`</td>`;     
-            html += `</tr>`; 
-             html += '<tr><td colspan=6 style="text-align: center;">';
-            html += `<h4>${this.restaurantActive.restaurantName}</h4>  `;       
-            html += `<img src="${this.restaurantActive.restaurantLogo}" style="max-width: 100px;"></img> `;     
-            html +=`</td></tr>`;         
-            html += '<tr><td colspan=6 >'
-            if(this.reservation.CustomerName)
-              html += `<h4> ${this.$t('frontend.orderType.name')}: ${this.reservation.CustomerName}</h4>`;
-            if(this.reservation.CustomerEmail)
-              html += ` <h4> ${this.$t('frontend.orderType.email')}: ${this.reservation.CustomerEmail}</h4>`;
-            if(this.reservation.CustomerPhone)
-              html += ` <h4> ${this.$t('frontend.orderType.phone')}: ${this.reservation.CustomerPhone}</h4>`;
-            if(this.reservation.Capacity)
-              html += ` <h4> ${this.$t('frontend.reservation.peoples')}: ${this.reservation.Capacity}</h4>`;
-            if(this.reservation.Date)
-              html += ` <h4> ${this.$t('frontend.reservation.reservationDate')}: ${this.getReservationDate(this.reservation.Date)}</h4>`;
-            if(this.reservation.Hour)
-              html += ` <h4> ${this.$t('frontend.reservation.reservationHour')}: ${this.getReservationHour(this.reservation.Hour)}</h4>`;
-            if(this.reservation.Note)
-              html += ` <h4> ${this.$t('frontend.order.notes')}: ${this.reservation.Note}</h4>`;
-            if(this.reservation.Reason)
-              html += ` <h4> ${this.$t('frontend.reservation.reason')}: ${this.reservation.Reason}</h4>`;
-            if(this.reservation.State)
-              html += ` <h4> ${this.$t('frontend.home.state')}: ${this.allState[this.reservation.State]}</h4>`;
-            if(this.reservation.Code)
-              html += ` <h4> ${this.$t('frontend.reservation.code')}: ${this.reservation.Code}</h4>`;
-            if(this.reservation.QuotationPayment)
-              html += `<h4> ${this.$t('frontend.order.quotationPayment')}:$ ${this.reservation.QuotationPayment.toFixed(2)}</h4>`;
-
-           
-            html += `</td></tr>`;      
-           
-            html += `</table></div></body></html>`;
-
+           const html = Commons.htmlSendReservation(this.reservation);
 
             var winimp = window.open('/print', 'popimpr');         
             winimp.document.write( html );
@@ -528,66 +481,7 @@ export default {
 
             this.spinnerEmail = true
            
-            var html =' <html><head>';    
-            html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-            html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-            html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-            html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-            html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-            html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-            html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-            
-            html += '</head><body><div >';
-            html += '<table  align=center style="width: 90%;">';
-             html += '<tr><td colspan=6 style="text-align: center;">';
-            html += `<h2>${this.restaurantName}</h2>  `;
-            html += `<img src="${this.restaurantActive.restaurantLogo}" style="max-width: 100px;"></img> `;     
-            html +=`</td>`;     
-            html += `</tr>`;
-            html += '<tr><td colspan=6 style="text-align: center;">';
-            html += `<h2>${this.$t('frontend.reservation.create')}</h2>  `;
-            html +=`</td>`;     
-            html += `</tr>`;          
-            html += '<tr><td colspan=6 >'
-            if(reservation.CustomerName)
-              html += `<h4> ${this.$t('frontend.orderType.name')}: ${reservation.CustomerName}</h4>`;
-            if(reservation.CustomerEmail)
-              html += ` <h4> ${this.$t('frontend.orderType.email')}: ${reservation.CustomerEmail}</h4>`;
-            if(reservation.CustomerPhone)
-              html += `<h4> ${this.$t('frontend.orderType.phone')}: ${reservation.CustomerPhone}</h4>`;
-            if(reservation.Capacity)
-              html += ` <h4> ${this.$t('frontend.reservation.peoples')}: ${reservation.Capacity}</h4>`;
-            if(reservation.Date)
-              html += `<h4> ${this.$t('frontend.reservation.reservationDate')}: ${this.getReservationDate(reservation.Date)}</h4>`;
-            if(reservation.Hour)
-              html += ` <h4> ${this.$t('frontend.reservation.reservationHour')}: ${this.getReservationHour(reservation.Hour)}</h4>`;
-            if(reservation.Note)
-              html += ` <h4> ${this.$t('frontend.order.notes')}: ${reservation.Note}</h4>`;
-            if(reservation.Reason)
-              html += `<h4> ${this.$t('frontend.reservation.reason')}: ${reservation.Reason}</h4>`;
-            if(reservation.QuotationPayment)
-              html += `<h4> ${this.$t('frontend.order.quotationPayment')}: $ ${reservation.QuotationPayment}</h4>`;
-            if(reservation.restaurantNotes)
-              html += `<h4> ${this.$t('frontend.reservation.restaurantNotes')}: ${reservation.restaurantNotes}</h4>`;
-
-
-              
-           
-            html += `</td></tr>`; 
-            html += '<tr> <td colspan=6 align="center"  style="border-bottom: 1px solid grey;">';
-            html += `<a href="mailto:${this.restaurantActive.restaurantEmail}" style="margin: 0 10px;"><img style="width: 32px;" src="https://storagemenusuccess.blob.core.windows.net/logo/email-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantFacebok)
-                html += `<a href="${this.restaurantActive.restaurantFacebok}" style="margin: 0 10px;"><img style="width: 32px;" src="https://storagemenusuccess.blob.core.windows.net/logo/Facebook-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantInstagram)
-                html += `<a  href="${this.restaurantActive.restaurantInstagram}" style="margin: 0 10px;"><img style="width: 32px;"  src="https://storagemenusuccess.blob.core.windows.net/logo/instagram-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantTwitter)
-                html += `<a href="${this.restaurantActive.restaurantTwitter}" style="margin: 0 10px;"><img style="width: 32px;"  src="https://storagemenusuccess.blob.core.windows.net/logo/Twitter-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantYoutube)
-                html += `<a href="${this.restaurantActive.restaurantYoutube}" style="margin: 0 10px;"><img style="width: 32px;"  src="https://storagemenusuccess.blob.core.windows.net/logo/Youtube-icon.png"></img> </a>`;
-        
-        html += '</td></tr>'     
-           
-            html += `</table></div></body></html>`;
+            const html = Commons.htmlSendReservation(reservation);
 
             let subject = this.$t('frontend.reservation.create')+' ' + this.$t('frontend.reservation.state4') ;
             

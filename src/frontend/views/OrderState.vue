@@ -10,8 +10,7 @@
                 <h1  v-if="order.OrderForCatering"> {{$t('frontend.order.orderDetail')}} |  {{$t('frontend.menu.catering')}}</h1>            
                 <h1 v-else> {{$t('frontend.order.orderDetail')}} </h1>            
             </ion-label>
-           
-              
+                          
           </ion-toolbar>
         </ion-header>
 
@@ -167,7 +166,7 @@
                                     <span class="iconify" v-if="!spinnerCarArrived" data-icon="clarity:car-solid" data-inline="false" style="width: 20px;height: 20px; margin: 0;"></span>
                                 </ion-button>
                             </ion-item>
-                            <ion-item v-if="order.CarArrived && !spinnerCarArrived && order.State !==5" :key="keyCarArrived+1">
+                            <ion-item v-if="order.CarArrived && !spinnerCarArrived && order.State !==5" :key="keyCarArrived+'1'">
                                 <ion-label style="display: contents;">{{$t('frontend.tooltips.carInRestaurant') }}</ion-label>     
                                 <span class="iconify" data-icon="clarity:car-solid" data-inline="false" style="width: 20px;height: 20px; float: left; margin: 15px;color: #48bc76;"></span>                               
                             </ion-item>
@@ -253,7 +252,7 @@
 
                         <ion-range
                          v-if="order.OrderType != 'Delivery' && showStates < 5 "
-                         :key="key"
+                         :key="key+'1'"
                             min="1" 
                             max="4"
                             step="1" 
@@ -291,12 +290,12 @@
                                     <ion-label class="ion-text-wrap menu-col-3 elipsis-menu"><h3  style="font-size: 16px;font-weight: bold;">{{$t('frontend.order.total')}}</h3></ion-label>
                                 </ion-item>
                             </ion-item-sliding>
-                            <ion-item-sliding v-for="product in order.Products" v-bind:key="product.ProductId">
+                            <ion-item-sliding v-for="(product, index2) in order.Products" v-bind:key="index2">
 
                                 <ion-item>
                                     <div class="ion-text-wrap menu-col-4" >
-                                        <p> <strong>{{ product.Name }}</strong></p>
-                                        <p v-if="product.Note !=''" style="background: #f1f1004d;">{{product.Note}}</p>
+                                        <p> <strong>{{ product.Name }} <span v-if="product.VariantSelected"> {{ product.VariantSelected.name }}</span></strong></p>
+                                        <p v-if="hasSomeNote(product)" style="background: #f1f1004d;">{{getIngredientNote(product)}} <br> {{product.Note}}</p>
                                     </div>
                                     <ion-label class="ion-text-wrap menu-col-2">                        
                                         <h3>{{ product.Cant }}</h3>                       
@@ -306,6 +305,9 @@
                                     </ion-label>
                                     <ion-label class="ion-text-wrap menu-col-3" >
                                         <h3>{{ getFormatPrice(product.Price * product.Cant) }}</h3>
+                                         <div v-if="product.State === 1" style="position: absolute;right: 0;top: 30%;">
+                                            <span class="iconify" data-icon="websymbol:ok" data-inline="false" style="color: green;margin:0;width: 20px; height: 20px;" ></span>
+                                        </div> 
                                     </ion-label>
                                 </ion-item>
 
@@ -456,7 +458,8 @@
                             <ion-label class="ion-text-wrap" >
                                 <h2 class="titles-order"> {{$t('frontend.order.notes')}}</h2> 
                             </ion-label>
-                            <ion-label>{{order.Note}} </ion-label>
+                            <ion-label style="-webkit-user-modify: read-write-plaintext-only;text-align: left;display: inline-table;">
+                                {{order.Note}} </ion-label>
                         </ion-card>
 
                     </ion-card>
@@ -477,7 +480,7 @@
 
                         <div v-if="parcialPayment && order.Deadline" class="subtitles-order" style="display: flex;overflow: auto;">
                             
-                            <ion-card v-for="(dead, index) in order.Deadline" v-bind:key="index" 
+                            <ion-card v-for="(dead, index3) in order.Deadline" v-bind:key="index3" 
                              :class="scope.isSmall || scope.noMatch ? 'subtitles-order menu-col-6' :'subtitles-order menu-col-3'" 
                              :style="index === 0 ? 'text-align: center;display: inline-block; border: 2px solid #21e321a6;' : 'display: inline-block; text-align: center;'">
                                 
@@ -525,6 +528,7 @@ import moment from 'moment-timezone';
 import Localization from '../../backoffice/views/Localization'
 import { EventBus } from '../event-bus';
  import Moment from 'moment'
+  import { Commons } from '../commons'
 
 addIcons({
   "ios-add": add.ios,
@@ -536,19 +540,14 @@ export default {
     components:{
         Localization,
         VBreakpoint: VBreakpoint
-    },
-     props:{           
-       
-        taxes: {type: Number, default:1 } ,
-        shippingName: {type: String, default:"" } ,
-        shipping: {type: Number, default:0 } ,
-
- 
-        products: {type: Array, default:() => [] },
-        restaurantSelectedId: {type: String, default:"" } ,
-       
-     }, 
+    },     
     created: function(){
+
+        this.taxes = this.$store.state.tax.taxesName || 0;
+        this.shippingName = this.$store.state.shipping.shippingName || '';
+        this.shipping = this.$store.state.shipping.shipping || 0;
+         this.restaurantSelectedId = this.$store.state.restaurantActive.restaurantId || ''; 
+        this.products = this.$store.state.products|| [];
 
         if(this.$store.state.customer._id){
             this.clientId= this.$store.state.customer._id;
@@ -636,6 +635,11 @@ export default {
     data() {
         return {
             order: [],
+            taxes : 0,
+            shippingName : '',
+            shipping: 0,
+            restaurantSelectedId: '', 
+            products: [],
             CustomerName: '',
             clientId: '',
             showStates: '',
@@ -1002,180 +1006,9 @@ export default {
         }   
         
         },
-
-       async sendEmail(order){
-           this.spinnerEmail = true;
-            var date = moment.tz(order.Date, moment.tz.guess()).format('MM-DD-YYYY hh:mm A');
-               if(order.OrderForCatering === true)
-                  date = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;
-
-
-            const  allStates = [this.$t('frontend.order.state0'),this.$t('frontend.order.state1'), this.$t('frontend.order.state2'),
-            this.$t('frontend.order.state3'), this.$t('frontend.order.state4'), this.$t('frontend.order.state5')];
-
-            let orderInfo = '';
-            if(order.OrderType == 'Delivery Catering')
-                orderInfo = order.AddressToDeliver
-            if(order.OrderType == 'PickUp Catering')
-                orderInfo = date
-            if(order.OrderType == 'On Table Catering')
-                orderInfo = order.tableServices
-
-           
-            var html =' <html><head>';    
-            html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-            html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-            html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-            html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-            html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-            html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-            html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-            
-            html += '</head><body><div >';
-            html += '<table  align=center style="width: 90%;">';
-            html += '<tr><td colspan=6 style="text-align: center;">';
-            html += `<h2>${this.restaurantActive.restaurantName}</h2>  `;
-            html += `<img src="${this.restaurantActive.restaurantLogo}" style="max-width: 100px;"></img> `;     
-            html +=`</td>`;     
-            html += `</tr>`;          
-            html += '<tr><td colspan=6 >'
-            if(order.Payment){
-            html += `<br> <h4> ${this.$t('frontend.order.payment')}:</h4>`;
-            for (const payment of order.Payment) {
-                if(payment.paymentInfo)
-                html += `<br> <h4> 
-                    ${this.$t('frontend.order.total')}: <strong>  ${ this.getFormatPrice(payment.total)} </strong>  |
-                    ${this.$t('frontend.order.transId')}: <strong>  ${ payment.paymentInfo.transId} </strong>  |
-                    ${this.$t('frontend.order.paymentMethod')}: <strong>  ${ payment.PaymentMethod} </strong> 
-                </h4>`;
-            }
-            }
-            html += `<h4>${this.$t('frontend.order.date')}: ${date} </h4><hr>`;
-            html += `<h4>${this.$t('frontend.order.client')}: ${order.CustomerName} </h4>`;
-            html += `<h4>${this.$t('frontend.orderType.phone')}: ${order.CustomerPhone} </h4>`;      
-            html += `<h4>${this.$t('frontend.order.orderFor')} ${this.allTypeOrder[order.OrderType]}: ${orderInfo} </h4>`;
-          
-            html += `<h4>${this.$t('frontend.order.orderState')}: ${allStates[order.State]} </h4>`;
-            if(order.State === 6)
-                html += `<h4>${this.$t('frontend.order.cancelReason')}: ${order.CancelNote}</h4>`;
-        
-            html += '<hr>';
-            html += '<tr><td colspan=6 >'
-            if(order.EventName)
-                html += `<h4> ${this.$t('frontend.order.eventName')}: ${order.EventName} </h4>`;
-            if(order.CateringEvent)
-                html += `<h4> ${this.$t('frontend.home.eventType')}: ${order.CateringEvent} </h4>`;
-            if(order.NumberOfGuess)
-                html += `<h4> ${this.$t('frontend.order.guessNumber')}: ${order.NumberOfGuess} </h4>`;
-            if(order.EventDate)
-                html += `<h4> ${this.$t('frontend.order.eventDate')}: ${moment.tz(order.EventDate, moment.tz.guess()).format('MM-DD-YYYY')}  </h4>`;
-            if(order.EventTimeStart)
-                html += `<h4> ${this.$t('frontend.order.eventStartHour')}: ${moment.tz(order.EventTimeStart, moment.tz.guess()).format('hh:mm A')} </h4>`;
-            if(order.EventTimeEnd)
-                html += `<h4> ${this.$t('frontend.order.eventEndHour')}:  ${moment.tz(order.EventTimeEnd, moment.tz.guess()).format('hh:mm A')}  </h4>`;
-            html += `</td></tr>`;
-            html += '<hr>'; 
-
-            html += `</td></tr>`;      
-            html += `<tr ><td colspan=6 ><h4 ><strong>${this.$t('frontend.order.products')}</strong></h4></td></tr> <tr></tr>`;
-            for(var i = 0; i<order.Products.length ; i++){
-                html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><strong >${order.Products[i].Name}</strong>` ;
-                if(order.Products[i].Note !='')
-                    html +=`<p style="background: #f1f1004d;">${order.Products[i].Note}</p> `;
-                html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p >( ${order.Products[i].Cant} X  ${this.getFormatPrice(order.Products[i].Price)})</p> </td>`;
-                html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p >${ this.getFormatPrice(order.Products[i].Price * order.Products[i].Cant )}</p> </td>`;
-                html += `</tr>`;
-            if(order.Products[i].Aggregates.length > 0){
-                    html +=`<tr style="padding: 20px 35px;"> ${this.$t('frontend.home.aggregateFree')}: ${order.Products[i].CantAggr=order.Products[i].AggregatesCant * order.Products[i].Cant} </tr>`;
-
-                    for(var a=0; a<order.Products[i].Aggregates.length; a++){
-                        let agg = order.Products[i].Aggregates[a]
-                        html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><p style="padding-left: 20px;">${agg.Name} <br> ${this.getFormatPrice(agg.SalePrice)}</p>` ;
-                        html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p > ${agg.Cant}</p> </td>`;
-                        html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p > ${ this.getFormatPrice( agg.AllTotal ) }</p> </td></tr >`;            
-                    }
-                }
-                
-            }
-
-            if(order.OtherCharges.length >0){
-                html += `<tr ><td colspan=6 ><h4 ><strong>${this.$t('frontend.order.otherCharges')}</strong></h4></td></tr>`;
-                for(var e = 0; e< order.OtherCharges.length ; e++){
-                    html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p>${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
-                }
-            }
-            html += `<tr ><td colspan=5 ><p ><strong>${this.$t('frontend.order.subtotal')}</strong></p></td> <td > <p > ${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;
-            if(order.Discount)
-                html +=  `<tr ><td colspan=5 ><p  ><strong>${this.$t('frontend.reservation.discount')}</strong></p></td><td  ><p > ${this.getFormatPrice(order.Discount)}</p></td></tr>`;            
-            html += `<tr><td  colspan=5><p  ><strong>${this.$t('frontend.order.taxe') } ${order.Taxe } %</strong></p></td> <td > <p >${  this.getFormatPrice(order.Taxe * order.SubTotal / 100) } </p> </td></tr>`;
-            if(order.OrderType == 'Delivery' && order.Shipping)
-                html +=  `<tr ><td colspan=5 ><p  ><strong>${this.$t('frontend.order.deliver')}</strong></p></td><td  ><p >${this.getFormatPrice(order.Shipping)}</p></td></tr>`;
-            if(order.Tip)
-                html += `<tr ><td  colspan=5 ><p ><strong>${this.$t('frontend.order.tip')} ${order.Tip }%</strong></p></td><td ><p> ${  this.getFormatPrice(order.Tip * order.SubTotal / 100) }</p> </td></tr>`;
-            html += `<tr><td colspan=5 style="border-bottom: 1px solid #dbd1d1;"><p  ><strong>${this.$t('frontend.order.total')}</strong></p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <strong >${this.getFormatPrice(order.Total)}</strong> </td></tr>`;
-            if(order.QuotationPayment)
-                html += `<tr><td colspan=5 style="border-bottom: 1px solid #399922;"><p  ><strong>${this.$t('frontend.order.quotationPayment')}</strong></p></td> <td style="border-bottom: 1px solid #399922;"> <strong >${this.getFormatPrice(order.QuotationPayment)}</strong> </td></tr>`;
-             if(order.PendingPayment)
-                html += `<tr><td colspan=5 style="border-bottom: 1px solid #ff5500;"><p  ><strong>${this.$t('frontend.order.pendingPayment')}</strong></p></td> <td style="border-bottom: 1px solid #ff5500;"> <strong > ${this.getFormatPrice(order.PendingPayment)}</strong> </td></tr>`;
-            if(order.PendingPayment > 0 && order.Deadline){
-                html += `<tr ><td colspan=6 ><h4 ><strong>${this.$t('frontend.order.parcialPayment')}</strong></h4></td></tr>`;
-                for(var dead = 0; dead < order.Deadline.length ; dead ++){
-                    html += ` <tr ><td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><p >${order.Deadline[dead].Date}  </p></td> `
-                    html += ` <td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><strong >  ${order.Deadline[dead].Percent}%  =  ${ this.getFormatPrice(this.totalWithoutQuotation * order.Deadline[dead].Percent / 100)}</strong></td> `
-                    if(order.Deadline[dead].State === 1)
-                    html += ` <td style="border-bottom: 1px solid #dbd1d1;"> <strong  style= "color: #399922;  ">${this.$t('frontend.order.payed')}</strong></td>`;
-                    else html += ` <td style="border-bottom: 1px solid #dbd1d1;"><strong  style= "color: #ff5500; ">${this.$t('frontend.order.toPay')}</strong> </td>`;
-                    html += ` </tr>`;
-                }
-            }
-            if(order.Note)
-                html += `<tr ><td style="width: 20%;border-bottom: 1px solid grey;"><h4 >${this.$t('frontend.order.notes')}</h4></td><td colspan=5 style="width: 80%;border-bottom: 1px solid grey;" ><p >${order.Note}</p></td></tr>`;
-            html += '<tr><td colspan=6 style=" text-align: center;">';
-            html += `<h2>${this.restaurantActive.restaurantName}</h2>  `;
-            html += `<h4>${this.restaurantActive.restaurantPhone} </h4> `;
-            html += `<h4>${this.restaurantActive.restaurantAddress}  </h4>`; 
-            if(this.restaurantActive.restaurantWeb)  
-                html += `<h4>${this.restaurantActive.restaurantWeb}  </h4>`;   
-            html +=`</td>`;     
-            html += `</tr>`; 
-            html += '<tr> <td colspan=6 align="center"  style="border-bottom: 1px solid grey;">';
-            html += `<a href="mailto:${this.restaurantActive.restaurantEmail}" style="margin: 0 10px;"><img style="width: 32px;" src="https://storagemenusuccess.blob.core.windows.net/logo/email-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantFacebok)
-                html += `<a href="${this.restaurantActive.restaurantFacebok}" style="margin: 0 10px;"><img style="width: 32px;" src="https://storagemenusuccess.blob.core.windows.net/logo/Facebook-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantInstagram)
-                html += `<a  href="${this.restaurantActive.restaurantInstagram}" style="margin: 0 10px;"><img style="width: 32px;"  src="https://storagemenusuccess.blob.core.windows.net/logo/instagram-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantTwitter)
-                html += `<a href="${this.restaurantActive.restaurantTwitter}" style="margin: 0 10px;"><img style="width: 32px;"  src="https://storagemenusuccess.blob.core.windows.net/logo/Twitter-icon.png"></img> </a>`;
-            if(this.restaurantActive.restaurantYoutube)
-                html += `<a href="${this.restaurantActive.restaurantYoutube}" style="margin: 0 10px;"><img style="width: 32px;"  src="https://storagemenusuccess.blob.core.windows.net/logo/Youtube-icon.png"></img> </a>`;
-            
-            html += '</td></tr>'
-            html += `</table></div></body></html>`;
-
-             let subject = this.$t('frontend.order.invoice') ;
-            if(order.OrderForCatering){
-                if(order.QuotationPaymentDetail)
-                    subject += order.QuotationPaymentDetail.transId;
-                subject += ' | '+ this.$t('frontend.menu.catering') ;
-            }
-            else{
-                if(order.Payment)
-                if(order.Payment[0].paymentInfo)
-                    subject += '-'+ order.Payment[0].paymentInfo.transId;
-            }   
-                          
-            subject += ' ' + this.restaurantActive.restaurantName    
-              
-                    
-            var items = {
-                "email": order.CustomerEmail,
-                "mess": html,
-                "subject": subject
-            }
-            await Api.sendEmail(items);
-            this.spinnerEmail = false;
-
-         },
+        async sendEmail(order){
+        Commons.sendOrderEmail(order);
+    },
 
         alertNotProductForReoder(){
             return  this.$ionic.alertController
@@ -1291,6 +1124,15 @@ export default {
             })
         .then(a => a.present())
         },
+
+    getIngredientNote(car){
+      return Commons.getIngredientNote(car);
+      
+    },
+
+    hasSomeNote(car){
+      return Commons.hasSomeNote(car);
+    },
 
   }, 
 

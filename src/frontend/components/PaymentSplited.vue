@@ -8,12 +8,12 @@
             <span class="iconify" data-icon="ic:round-local-printshop" data-inline="false"></span></ion-button> 
         <p 
           style="text-align: center;padding: 10px;color: white;font-size: 32px; margin:0">
-          {{ totalForPay }}: {{getFormatPrice(Total)}}
+          {{ i18n.t('frontend.order.totalForPay') }}: {{getFormatPrice(Total)}}
         </p>      
       </ion-toolbar>
       <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner">
             <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'"
-             v-tooltip="cardPayment"
+             v-tooltip="i18n.t('frontend.payment.tjtPayment')"
             :class="cardPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
             <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>
             </ion-button> 
@@ -38,7 +38,7 @@
 
              <ion-button @click="changePayment(), cashPay = true, printOrder(order)" :style="cashPay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
-               v-tooltip="cashPayment"
+               v-tooltip="i18n.t('frontend.payment.cashPayment')"
                v-if="payMethod==='SHIFT4' && staffName !==''"
               :class="cashPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" :key="keyShare+3">
             <span class="iconify" data-icon="ic:baseline-attach-money" data-inline="false"></span>          
@@ -48,7 +48,7 @@
            @click="changePayment(), qrPay = true"
            v-if="payMethod==='SHIFT4' && staffName!== ''"
             :style="qrPay? 'float: left;border: solid' : 'float: left'"
-             v-tooltip="qrPayment"
+             v-tooltip="i18n.t('frontend.payment.qrPayment')"
             :class="qrPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
             <span class="iconify" data-icon="ion:qr-code-sharp" data-inline="false"></span>
           </ion-button>
@@ -85,7 +85,7 @@
         <ion-card  v-if="cardPay" class="scroll" style="height: auto" >  
 
           <ion-item :disabled="spinner? true: false">                  
-              <ion-label position="floating">{{firstNameText}} <strong style="color: red">*</strong></ion-label>                               
+              <ion-label position="floating">{{ i18n.t('frontend.order.firstName')}} <strong style="color: red">*</strong></ion-label>                               
               <ion-input type="text" required=true  
               class="menu-col-8" 
               :value="firstName" @input="firstName = $event.target.value"
@@ -93,7 +93,7 @@
           </ion-item>    
 
           <ion-item :disabled="spinner? true: false">
-              <ion-label position="floating">{{lastNameText}} <strong style="color: red">*</strong></ion-label>                                          
+              <ion-label position="floating">{{ i18n.t('frontend.order.lastName')}} <strong style="color: red">*</strong></ion-label>                                          
               <ion-input type="text" required=true  
               class="menu-col-8"
               :value="lastName" @input="lastName = $event.target.value"
@@ -101,7 +101,7 @@
           </ion-item>  
 
           <ion-item :disabled="spinner? true: false">                     
-              <ion-label position="floating">{{addressLine1}} <strong style="color: red">*</strong></ion-label>                                                                      
+              <ion-label position="floating">{{i18n.t('frontend.order.addressLine1')}} <strong style="color: red">*</strong></ion-label>                                                                      
               <ion-input type="text" required=true  
               class="menu-col-8" 
               :value="address" @input="address = $event.target.value"
@@ -109,7 +109,7 @@
           </ion-item>   
 
             <ion-item :disabled="spinner? true: false">                  
-                <ion-label position="floating">{{postalCode}} <strong style="color: red">*</strong></ion-label>                                                                                                    
+                <ion-label position="floating">{{i18n.t('frontend.order.postalCode')}} <strong style="color: red">*</strong></ion-label>                                                                                                    
                 <ion-input type="tel" required=true  :key="key"
                 class="menu-col-8" 
                 :value="zipCode" @change="zipCode=ValidateCodeInModal( $event.target.value)"
@@ -117,7 +117,7 @@
             </ion-item>         
               
             <ion-item :disabled="spinner? true: false">                  
-                <ion-label position="floating">{{ccard}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
+                <ion-label position="floating">{{i18n.t('frontend.order.ccard')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
                 <ion-input type="tel" required=true autocomplete="cc-number"
                     class="menu-col-8" 
                 :value="cardNumber" @input="cardNumber = $event.target.value"
@@ -125,14 +125,14 @@
             </ion-item>
 
             <ion-item :disabled="spinner? true: false">                    
-                <ion-label position="floating">{{expcard}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
+                <ion-label position="floating">{{i18n.t('frontend.order.expcard')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
                 <ion-datetime class="menu-col-8"
                 display-format="MM-YYYY" :max="dateTodaymax + 6 "  picker-format="MM-YYYY"
                 :min="dateTodaymin" required=true @ionChange="expirationCard = $event.target.value"> </ion-datetime>
             </ion-item>
 
             <ion-item :disabled="spinner? true: false">                 
-                <ion-label position="floating">{{ccode}} <strong style="color: red">*</strong></ion-label>                               
+                <ion-label position="floating">{{i18n.t('frontend.order.ccode')}} <strong style="color: red">*</strong></ion-label>                               
                 <ion-input type="tel" required=true  
                 class="menu-col-8"
                 :value="cardCode" @input="cardCode = $event.target.value"
@@ -142,8 +142,8 @@
             <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >
               
 
-              <ion-button :disabled="spinner? true: false"  color="light" @click="dismissModal()">{{Cancel}}</ion-button>
-              <ion-button :disabled="spinner? true: false"  color="light"  @click="sendPayment('')">{{payText}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="light" @click="dismissModal()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="light"  @click="sendPayment('')">{{i18n.t('frontend.order.pay')}}</ion-button>
 
             </ion-toolbar>
 
@@ -151,11 +151,11 @@
 
          <ion-card v-if="sharePay"  class="scroll" style="height: auto">
             <div>   
-              <h5>{{parent.$t('frontend.payment.verifyMss')}}</h5>
+              <h5>{{i18n.t('frontend.payment.verifyMss')}}</h5>
             </div>
           <ion-toolbar  style="display: flow-root;padding: 5px;" color="primary" >  
-            <ion-button :disabled="spinner? true: false"   color="light" @click="cancelSharePayment">{{Cancel}}</ion-button>
-            <ion-button :disabled="spinner? true: false"  color="light"  @click="validateSharePayment">{{verifyText}}</ion-button>
+            <ion-button :disabled="spinner? true: false"   color="light" @click="cancelSharePayment">{{i18n.t('frontend.home.cancel')}}</ion-button>
+            <ion-button :disabled="spinner? true: false"  color="light"  @click="validateSharePayment">{{i18n.t('frontend.order.verify')}}</ion-button>
           </ion-toolbar>
         </ion-card>          
 
@@ -165,35 +165,13 @@
               <qr-modal
               :parent="this.parent"
               :splitOrder="true"
-              :order="this.order"      
-              :Acept="this.Acept"
-              :Cancel="this.Cancel"
+              :order="this.order"             
               :Total="this.Total"
               :Tax="this.Tax"
               :TaxName="this.TaxName"
               :restaurantId="this.restaurantId"
-              :payMethod="this.payMethod"   
-              :errorPaymentHeader="this.errorPaymentHeader"
-              :errorPaymentMss="this.errorPaymentMss"
-              :gooPaymentHeader="this.gooPaymentHeader"
-              :gooPaymentMss="this.gooPaymentMss"
-              :notValidEmail="this.notValidEmail"
-              :codeNotValid="this.codeNotValid"
-              :notValidCC="this.notValidCC"
-              :dataRequired="this.dataRequired" 
-              :paymentByCard="this.paymentByCard"  
+              :payMethod="this.payMethod"  
               :currency="this.currency"   
-              :totalForPay="this.totalForPay" 
-              :ccard="this.ccard"
-              :expcard="this.expcard" 
-              :ccode="this.ccode"  
-              :cityText="this.cityText"  
-              :stateText="this.stateText"
-              :firstNameText="this.firstNameText"
-              :lastNameText="this.lastNameText"
-              :postalCode="this.postalCode"
-              :addressLine1="this.addressLine1"
-              :verifyText="this.verifyText"
               :returnTo="this.returnTo"
               :staffName="this.staffName"
               ></qr-modal>
@@ -212,33 +190,15 @@
 
         <ion-card  v-if="idtechPay"  class="scroll" style="height: auto">                 
             <UsbCardReader
-            :parent="this"
-            :Acept="this.Acept"
-            :Cancel="this.Cancel"
-            :ccode="this.ccode" 
-            :cityText="this.cityText"  
-            :stateText="this.stateText"
-            :postalCode="this.postalCode"
-            :addressLine1="this.addressLine1"
-            :codeNotValid="this.codeNotValid"
-            :dataRequired="this.dataRequired"
-            ></UsbCardReader>              
+              :parent="this">
+            </UsbCardReader>              
             
         </ion-card>
 
          <ion-card  v-if="cashPay"  class="scroll" style="height: auto">                 
                <UsbCashDoor
-               :parent="this"
-               :Acept="this.Acept"
-               :Cancel="this.Cancel"
-               :ccode="this.ccode" 
-                :cityText="this.cityText"  
-                :stateText="this.stateText"
-                :postalCode="this.postalCode"
-                :addressLine1="this.addressLine1"
-                :codeNotValid="this.codeNotValid"
-                :dataRequired="this.dataRequired"
-               ></UsbCashDoor> 
+                  :parent="this">
+                </UsbCashDoor> 
          </ion-card>
   </div>
 </template>
@@ -266,55 +226,28 @@ import { Plugins } from '@capacitor/core';
  const { Share } = Plugins;
  import UsbCardReader from './UsbCardReader'
  import UsbCashDoor from './UsbCashDoor'
+ import {i18n} from '@/plugins/i18n'
+ import { Commons } from '../commons';
 
 export default {
    name: 'PaymentSplitedModal',
    created: function(){
-    
+    this.i18n = i18n;  
    },
    props: {  
     googleData: {type: Object, default: ()=> {}} ,
     order: {type: Object, default:() => {} },      
-    parent: {type: Object, default:() => {} },      
-    Acept:  {type: String, default:"" } ,
-    Cancel:  {type: String, default:"" } ,
+    parent: {type: Object, default:() => {} },     
     Total:  {type: String, default:"" } ,
     Tax:  {type: String, default:"" } ,
     TaxName:  {type: String, default:"" } ,
     restaurantId:  {type: String, default:"" } ,
-    payMethod:  {type: String, default:"" } ,    
-    errorPaymentHeader:  {type: String, default:"" } ,
-    errorPaymentMss:  {type: String, default:"" } ,
-    gooPaymentHeader:  {type: String, default:"" } ,
-    gooPaymentMss:  {type: String, default:"" } ,
-    notValidEmail:  {type: String, default:"" } ,
-    codeNotValid:  {type: String, default:"" } ,
-    notValidCC:  {type: String, default:"" } ,
-    dataRequired:  {type: String, default:"" } ,   
-    paymentByCard:   {type: String, default:"" } ,  
-    currency:   {type: String, default:"" } ,  
-    totalForPay:   {type: String, default:"" } , 
-    ccard: {type: String, default:"" } ,
-    expcard: {type: String, default:"" } , 
-    ccode:   {type: String, default:"" } , 
-    cityText: {type: String, default:"" } ,
-    stateText: {type: String, default:"" } ,
-    firstNameText: {type: String, default:"" } ,
-    lastNameText: {type: String, default:"" } ,
-    postalCode: {type: String, default:"" } ,
-    addressLine1: {type: String, default:"" } ,
-    payText: {type: String, default:"" } ,
-    verifyText: {type: String, default:"" } ,
+    payMethod:  {type: String, default:"" } ,
+    currency:   {type: String, default:"" } , 
     returnTo:  {type: String, default:"" } ,
-    staffName: {type: String, default:"" } ,
-    qrPayment: {type: String, default:"" } ,
-    cardPayment: {type: String, default:"" } ,
-    cashPayment: {type: String, default:"" } ,
-    doingPayment: {type: String, default:"" } ,
+    staffName: {type: String, default:"" } ,   
     deviceTransactionType: {type: String, default:"02" } ,
     deviceData: {type: Object, default: ()=> {}} ,
-    shareText1: {type: String, default:"" },
-    shareText2: {type: String, default:"" },
     restaurantName: {type: String, default:"" },
     customerName: {type: String, default:"" },
     
@@ -327,7 +260,8 @@ export default {
    UsbCashDoor
   },
    data () {
-    return {                       
+    return {   
+        i18n: {},                  
         spinner: false ,
         dateTodaymin: new Date().toISOString().substr(0, 7),
         dateTodaymax:  new Date().getFullYear(),
@@ -363,10 +297,10 @@ export default {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.dataRequired,
+          message: this.i18n.t('frontend.home.errorRequired'),
           buttons: [                   
           {
-              text: this.Acept,
+              text: this.i18n.t('frontend.home.acept'),
               handler: () => {                                 
                             
               },
@@ -388,10 +322,10 @@ export default {
                 .create({
                     cssClass: 'my-custom-class',
                     header: 'Error',
-                    message: this.notValidCC,
+                    message: this.i18n.t('frontend.order.notValidCC'),
                     buttons: [                   
                     {
-                        text: this.Acept,
+                        text: this.i18n.t('frontend.home.acept'),
                         handler: () => {                                 
                                         
                         },
@@ -431,10 +365,10 @@ export default {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.codeNotValid ,
+        message: this.i18n.t('frontend.home.zipCodeNotValid') ,
         buttons: [                   
         {
-          text: this.Acept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -449,7 +383,7 @@ export default {
       return this.$ionic.toastController
       
         .create({
-          message: `${this.cityText}: ${this.city} | ${this.stateText}: ${this.state}`,
+          message: `${this.i18n.t('frontend.home.city')}: ${this.city} | ${this.i18n.t('frontend.home.state')}: ${this.state}`,
           duration: 2000,
           position: 'top',
           color:'success'
@@ -463,10 +397,10 @@ export default {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.notValidEmail , 
+        message:  this.i18n.t('frontend.home.notValidEmail') , 
         buttons: [                   
         {
-          text: this.Acept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -499,8 +433,8 @@ export default {
     async goodPaymentToast() {
       return this.$ionic.toastController      
         .create({
-            header: this.gooPaymentHeader,
-            message:  this.gooPaymentMss,            
+            header: this.i18n.t('frontend.order.transictionTitle'),
+            message:   this.i18n.t('frontend.order.transictionOk'),            
             position: 'middle',
             color:'success',
              buttons: [
@@ -518,8 +452,8 @@ export default {
     async errorPaymentToast() {
       return this.$ionic.toastController      
         .create({
-            header: this.errorPaymentHeader,
-            message:  this.errorPaymentMss,            
+            header: this.i18n.t('frontend.order.transictionTitle'),
+            message:  this.i18n.t('frontend.order.transictionError'),            
             position: 'middle',
             color:'danger',
              buttons: [
@@ -629,7 +563,7 @@ export default {
        this.$ionic.loadingController
         .create({
           cssClass: 'my-custom-class',
-          message:  this.doingPayment,
+          message:  this.i18n.t('frontend.payment.doingPayment'),
           backdropDismiss: false
         })
         .then ( loading =>{
@@ -654,7 +588,7 @@ export default {
         this.$ionic.loadingController
         .create({
           cssClass: 'my-custom-class',
-          message:  this.doingPayment,
+          message:  this.i18n.t('frontend.payment.doingPayment'),
           backdropDismiss: false
         })
         .then ( loading =>{
@@ -728,14 +662,14 @@ export default {
       this.$ionic.loadingController
         .create({
           cssClass: 'my-custom-class',
-          message:  this.doingPayment,
+          message:  this.i18n.t('frontend.payment.doingPayment'),
           backdropDismiss: false
         })
         .then ( loading =>{
                 loading.present()
                 setTimeout( async() => {
                     try {
-                       var response = await payAuthorizeNet.payOrder(data);                
+                        var response = await payAuthorizeNet.payOrder(data);                
                         response.returnTo = this.returnTo;
                         this.parent.makeSplitPayment(response)
                         this.dismissModal();						
@@ -791,9 +725,9 @@ export default {
         if(response !=='Error'){
            this.hasQrPayment = response; 
           await Share.share({
-            title: `${this.customerName}${this.shareText1}${this.restaurantName} (${this.getFormatPrice(this.Total)})${this.shareText2}`,
+            title: `${this.customerName}${this.i18n.t('frontend.payment.shareText1')}${this.restaurantName} (${this.getFormatPrice(this.Total)})${this.i18n.t('frontend.payment.shareText2')}`,
             url: this.hasQrPayment,
-            dialogTitle: `${this.customerName}${this.shareText1}${this.restaurantName}  (${this.getFormatPrice(this.Total)})${this.shareText2}`,
+            dialogTitle: `${this.customerName}${this.i18n.t('frontend.payment.shareText1')}${this.restaurantName}  (${this.getFormatPrice(this.Total)})${this.i18n.t('frontend.payment.shareText2')}`,
           });   
           this.spinnerShare = false;
         } 
@@ -805,7 +739,6 @@ export default {
        
      } catch (error) {
       this.spinnerShare = false;
-       console.log(error)
        this.paymentError(error);       
      }
   
@@ -821,7 +754,7 @@ export default {
      try {  
 
       var response = await payAuthorizeNet.validateStatusQrOrder(data);  
-      let mss = this.parent.$t('frontend.payment.goodPayment') +': '+ this.getFormatPrice(response.total);
+      let mss = this.i18n.t('frontend.payment.goodPayment') +': '+ this.getFormatPrice(response.total);
       mss += ' TransId: ' + response.transId; 
       this.paymentSuccessfull(mss)    
       this.spinner = false; 
@@ -893,122 +826,20 @@ export default {
     .then(a => a.present())
   },
 
-     async htmlToUse(order){
+   async printOrder(order){
 
-        const partOfTotal = order.Total / this.Total
+      const partOfTotal = order.Total / this.Total
         const taxGeneral = (parseFloat(order.Taxe) * parseFloat(order.SubTotal) )/ 100;
         const tipGeneral =  (parseFloat(order.Tip) * parseFloat(order.SubTotal) )/ 100;
         const partialTip =  tipGeneral /  partOfTotal;
         const partialTax =  taxGeneral /  partOfTotal;
 
-      let totalWithoutQuotation = 0;
-      if(order.QuotationPayment)        
-            totalWithoutQuotation = this.Total - order.QuotationPayment;
-        else
-            totalWithoutQuotation = this.Total;
-
-       var date = moment.tz(order.Date, moment.tz.guess()).format('MM-DD-YYYY hh:mm A');
-        if(order.OrderForCatering === true)
-          date = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;
-       
-    
-
-
+        order.Total = this.Total;
+        order.Taxe = partialTax;
+        order.Tip = partialTip;
         
-
-    
-
-      
-
-        var html =' <html><head>';    
-        html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-        html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-        html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-        html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-        html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-        html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-        html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
         
-        html += '</head><body><div >';
-        html += '<table  align=center style="width: 90%;">';
-        html += '<tr><td colspan=6 style="text-align: center;">';
-        html += `<h2>${this.restaurantName}</h2>  `;          
-        html +=`</td>`;     
-        html += `</tr>`;          
-        html += '<tr><td colspan=6 >'       
-        html += `<h4>Date: ${date} </h4><hr>`;
-        html += `<h4>Customer: ${order.CustomerName} </h4>`;
-        html += `<h4>Phone: ${order.CustomerPhone} </h4>`;   
-       
-        html += '<hr>';  
-        html += '<br>'; 
-        html += `<tr><br><td colspan=6 style="border-top: 1px solid black;"><h4 ><strong>Items</strong></h4></td></tr> <tr></tr>`;
-        for(var i = 0; i<order.Products.length ; i++){
-            html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><strong >${order.Products[i].Name}</strong>` ;
-            if(order.Products[i].Note !='')
-                html +=`<p style="background: #f1f1004d;">${order.Products[i].Note}</p> `;
-            html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p >( ${order.Products[i].Cant} X ${this.getFormatPrice(order.Products[i].Price)})</p> </td>`;
-            html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p >${ this.getFormatPrice( order.Products[i].Price * order.Products[i].Cant )}</p> </td>`;
-            html += `</tr>`;
-           if(order.Products[i].Aggregates.length > 0){
-                html +=`<tr style="padding: 20px 35px;"> Free Sides: ${order.Products[i].CantAggr=order.Products[i].AggregatesCant * order.Products[i].Cant} </tr>`;
-
-                 for(var a=0; a<order.Products[i].Aggregates.length; a++){
-                    let agg = order.Products[i].Aggregates[a]
-                    html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><p style="padding-left: 20px;">${agg.Name} <br>${this.getFormatPrice(agg.SalePrice)}</p>` ;
-                    html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p > ${agg.Cant}</p> </td>`;
-                    html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p > ${ this.getFormatPrice( agg.AllTotal ) }</p> </td></tr >`;            
-                 }
-            }
-            
-        }
-       
-        if(order.OtherCharges.length >0){
-            html += `<tr ><td colspan=6 ><h4 ><strong>Other Charges</strong></h4></td></tr>`;
-            for(var e = 0; e< order.OtherCharges.length ; e++){
-                html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p>${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
-            }
-        }
-       
-        
-        html += `<tr ><td colspan=5 ><br><p ><strong>Subtotal</strong></p></td> <td ><br> <p >${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;      
-       html += `<tr><td  colspan=5 ><p  ><strong>Taxes ${order.Taxe}%</strong></p></td> <td > <p >${ this.getFormatPrice(partialTax) } </p> </td></tr>`;      
-        if(order.OrderType == 'Delivery' && order.Shipping)
-            html +=  `<tr ><td colspan=5  ><p  ><strong>Deliver</strong></p></td><td  ><p >${this.getFormatPrice(order.Shipping)}</p></td></tr>`;
-        if(order.Tip)
-            html += `<tr ><td  colspan=5 ><p ><strong>Tip ${order.Tip}%</strong></p></td><td ><p>${ this.getFormatPrice(partialTip) } </p> </td></tr>`;
-        html += `<tr><td colspan=5 style="border-bottom: 1px solid #dbd1d1;"><p  ><strong>Total </strong></p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <strong > ${this.getFormatPrice(this.Total)}</strong> </td></tr>`;
-        
-        if(order.QuotationPayment)
-          html += `<tr style="border-bottom: 1px solid #399922;"><td colspan=5 ><p  ><strong>Quotation</strong></p></td> <td > <strong >${this.getFormatPrice(order.QuotationPayment)}</strong> </td></tr>`;
-        if(order.PendingPayment)
-          html += `<tr style="border-bottom: 1px solid #ff5500;"><td colspan=5 style="border-bottom: 1px solid #ff5500;"><p  ><strong>Pending</strong></p></td> <td  style="border-bottom: 1px solid #ff5500;"> <strong >${this.getFormatPrice(order.PendingPayment)}</strong> </td></tr>`;
-        if(order.PendingPayment > 0 && order.Deadline){
-            html += `<tr ><td colspan=6 ><h4 ><strong>Parcial Payment</strong></h4></td></tr>`;
-            for(var dead = 0; dead < order.Deadline.length ; dead ++){
-                html += ` <tr ><td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><p >${order.Deadline[dead].Date}  </p></td> `
-                html += ` <td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><strong >  ${order.Deadline[dead].Percent}%  =  ${ this.getFormatPrice((totalWithoutQuotation * order.Deadline[dead].Percent) / 100)}</strong></td> `
-                if(order.Deadline[dead].State === 1)
-                html += ` <td style="border-bottom: 1px solid #dbd1d1;"> <strong  style= "color: #399922;  ">Payed</strong></td>`;
-                else html += ` <td style="border-bottom: 1px solid #dbd1d1;"><strong  style= "color: #ff5500; ">Pending</strong> </td>`;
-                html += ` </tr>`;
-            }
-          }        
-        if(order.Note)
-            html += `<tr ><td style="width: 20%;border-bottom: 1px solid grey;"><h4 >Notes</h4></td><td colspan=5 style="width: 80%;border-bottom: 1px solid grey;" ><p >${order.Note}</p></td></tr>`;
-        html += '<tr><td colspan=6 style=" text-align: center;">';
-        html += `<h2>${this.restaurantName}</h2>  `;      
-        if(this.restaurantWeb)  
-            html += `<h4>${this.restaurantWeb}  </h4>`;   
-        html +=`</td>`;     
-        html += `</tr>`;       
-        html += `</table></div></body></html>`;
-        return html;
-    },
-
-   async printOrder(order){
-        
-        var html = await this.htmlToUse(order)
+        var html = Commons.htmlToSendEmailOrder(order);
         
           var winimp = window.open('/print', 'popimpr');
           winimp.document.open();

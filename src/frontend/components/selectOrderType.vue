@@ -2,10 +2,10 @@
   <div>
     <ion-header>
       <ion-toolbar>
-        <ion-title v-if="login">{{logIn}}</ion-title>
-        <ion-title v-if="forgotPassword">{{restablacerPassword}}</ion-title>
-        <ion-title v-if=" create"> {{createUser}}</ion-title>
-        <ion-title v-if=" update !==''">{{updateData}}</ion-title>
+        <ion-title v-if="login">{{i18n.t('frontend.menu.logIn')}}</ion-title>
+        <ion-title v-if="forgotPassword">{{i18n.t('frontend.menu.restablacerPassword')}}</ion-title>
+        <ion-title v-if=" create"> {{i18n.t('frontend.menu.createUser')}}</ion-title>
+        <ion-title v-if=" update !==''">{{i18n.t('frontend.menu.updateData')}}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -19,30 +19,30 @@
               <div style="text-align: right; margin: 2px 10px;"  >
                 <ion-chip outline @click="create=true, login=false, forgotPassword = false" :disabled="spinner? true: false" >
                   <span class="iconify" data-icon="bx:bxs-user-plus" data-inline="false"></span>
-                  <ion-label>{{register}}</ion-label>
+                  <ion-label>{{i18n.t('frontend.menu.register')}}</ion-label>
                 </ion-chip>             
               </div>
              
             </ion-card-title>
               <ion-card >                
                 <ion-item> 
-                  <ion-input type="email" name="email" :placeholder="placeholderEmail"
+                  <ion-input type="email" name="email" :placeholder="i18n.t('frontend.orderType.email')"
                   @input="email = $event.target.value" :value="email"
                   @change="validateEmail($event.target.value)">
                   </ion-input>
                 </ion-item>
                 <ion-item>
-                  <ion-input type="password" name="password" :placeholder="placeholderPassword"
+                  <ion-input type="password" name="password" :placeholder="i18n.t('frontend.orderType.password')"
                   @input="password = $event.target.value"  :value="password">
                   </ion-input>
                 </ion-item>
                 <ion-item>
-                  <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="close">{{buttonCancel}}</ion-button>
-                  <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="customerLogIng">{{buttonAcept}}</ion-button>
+                  <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="close()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+                  <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="customerLogIng">{{i18n.t('frontend.home.acept')}}</ion-button>
                   
                 </ion-item>
                 <p style="font-size: 16px;text-align: right; padding: 0 20px;"><a :disabled="spinner? true: false"
-                @click="create=false, login=false, forgotPassword = true">{{ forgotPasswordText }}</a></p>
+                @click="create=false, login=false, forgotPassword = true">{{ i18n.t('frontend.menu.forgotPassword') }}</a></p>
                 
             </ion-card>
 
@@ -57,21 +57,21 @@
               <div style="text-align: right; margin: 2px 10px;"  >
                 <ion-chip outline @click="create=true, login=false, forgotPassword = false" :disabled="spinner? true: false">
                   <span class="iconify" data-icon="bx:bxs-user-plus" data-inline="false"></span>
-                  <ion-label>{{register}}</ion-label>
+                  <ion-label>{{i18n.t('frontend.menu.register')}}</ion-label>
                 </ion-chip>             
               </div>
              
             </ion-card-title>         
         <ion-card >                
           <ion-item> 
-            <ion-input type="email" name="email" :placeholder="placeholderEmail"
+            <ion-input type="email" name="email" :placeholder="i18n.t('frontend.orderType.email')"
             @input="email=$event.target.value" :value="email"
             @change="validateEmail($event.target.value)">
             </ion-input>
           </ion-item>               
           <ion-item>
-            <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="close">{{buttonCancel}}</ion-button>
-            <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="restorePassword">{{buttonAcept}}</ion-button>                  
+            <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="close()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+            <ion-button :disabled="spinner? true: false" color="primary" class="menu-col-6" size="normal" @click="restorePassword">{{i18n.t('frontend.home.acept')}}</ion-button>                  
           </ion-item>               
         </ion-card>
        
@@ -85,13 +85,13 @@
 
         <ion-card  > 
           <ion-item> 
-            <ion-input type="email" name="email" :placeholder="placeholderEmail"
+            <ion-input type="email" name="email" :placeholder="i18n.t('frontend.orderType.email')"
             @input="email = $event.target.value" 
             v-bind:value="email" @change="duplicateEmail(email)">
             </ion-input>
           </ion-item>          
           <ion-item>
-            <ion-input type="text" name="name" :placeholder="placeholderName"
+            <ion-input type="text" name="name" :placeholder=" i18n.t('frontend.orderType.name')"
             :disabled="clientId !='' && !update" @input="CustomerName = $event.target.value" 
             v-bind:value="CustomerName">
             </ion-input>
@@ -110,27 +110,27 @@
                 </ion-select-option>             
             </ion-select>
                       
-            <ion-input type="text" name="phone" :placeholder="placeholderPhone" id="phone-validator"
+            <ion-input type="text" name="phone" :placeholder="i18n.t('frontend.orderType.phone')" id="phone-validator"
             :disabled="clientId !='' && !update" @input="phone = $event.target.value"         
             v-bind:value="phone" @change="phone = validatePhone($event.target.value)">
             </ion-input>
           </ion-item>
 
           <ion-item>
-            <ion-label>{{contactedBy}}</ion-label>
+            <ion-label>{{i18n.t('frontend.orderType.contactedBy')}}</ion-label>
             <ion-select placeholder="Select One" interface="popover" :disabled="clientId !='' && !update" 
             :value="marketingEmail?'marketingEmail' : marketingPhone ? 'marketingPhone' :'' "
             @ionChange="changeMarketing($event.target.value)">
-              <ion-select-option value="marketingEmail">{{placeholderEmail}}</ion-select-option>
-              <ion-select-option value="marketingPhone">{{placeholderPhone}}</ion-select-option>
+              <ion-select-option value="marketingEmail">{{i18n.t('frontend.orderType.email')}}</ion-select-option>
+              <ion-select-option value="marketingPhone">{{i18n.t('frontend.orderType.phone')}}</ion-select-option>
             </ion-select>
           </ion-item>
 
       
 
           <ion-item>
-            <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="close">{{buttonCancel}}</ion-button>
-            <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="saveCustomer">{{buttonAcept}}</ion-button>
+            <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="close()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+            <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="saveCustomer">{{i18n.t('frontend.home.acept')}}</ion-button>
           </ion-item>
        
         </ion-card> 
@@ -147,11 +147,11 @@
           
           <ion-segment @ionChange="$event.target.value === 'passw'? showPasswordTab = true : showPasswordTab = false" value="data">
             <ion-segment-button value="data">
-              <span class="iconify" data-icon="bx:bxs-edit" data-inline="false" style="width: 15px;height: 15px;"></span> {{newData}}
+              <span class="iconify" data-icon="bx:bxs-edit" data-inline="false" style="width: 15px;height: 15px;"></span> {{i18n.t('frontend.menu.newData')}}
               <!-- DATA -->
             </ion-segment-button>
             <ion-segment-button value="passw">
-            <span class="iconify" data-icon="teenyicons:password-outline" data-inline="false"  style="width: 15px;height: 15px;"></span> {{newPassword}}
+            <span class="iconify" data-icon="teenyicons:password-outline" data-inline="false"  style="width: 15px;height: 15px;"></span> {{i18n.t('frontend.menu.newPassword')}}
             <!-- PASSWORD -->
             </ion-segment-button>            
           </ion-segment>        
@@ -160,13 +160,13 @@
         
          <ion-card  v-if="!showPasswordTab">             
             <ion-item> 
-              <ion-input type="email" name="email" :placeholder="placeholderEmail"
+              <ion-input type="email" name="email" :placeholder="i18n.t('frontend.orderType.email')"
               @input="email = $event.target.value" 
               v-bind:value="email" @change="validateEmail(email)">
               </ion-input>
             </ion-item>
             <ion-item>
-              <ion-input type="text" name="name" :placeholder="placeholderName"
+              <ion-input type="text" name="name" :placeholder="i18n.t('frontend.orderType.name')"
               :disabled="clientId !='' && !update" @input="CustomerName = $event.target.value" 
               v-bind:value="CustomerName">
               </ion-input>
@@ -185,27 +185,27 @@
                   </ion-select-option>             
               </ion-select>
                         
-              <ion-input type="text" name="phone" :placeholder="placeholderPhone" id="phone-validator"
+              <ion-input type="text" name="phone" :placeholder="i18n.t('frontend.orderType.phone')" id="phone-validator"
               :disabled="clientId !='' && !update" @input="phone = $event.target.value"         
               v-bind:value="phone" @change="phone = validatePhone($event.target.value)">
               </ion-input>
             </ion-item>
 
             <ion-item>
-              <ion-label>{{contactedBy}}</ion-label>
+              <ion-label>{{i18n.t('frontend.orderType.contactedBy')}}</ion-label>
               <ion-select placeholder="Select One" interface="popover" :disabled="clientId !='' && !update" 
               :value="marketingEmail?'marketingEmail' : marketingPhone ? 'marketingPhone' :'' "
               @ionChange="changeMarketing($event.target.value)">
-                <ion-select-option value="marketingEmail">{{placeholderEmail}}</ion-select-option>
-                <ion-select-option value="marketingPhone">{{placeholderPhone}}</ion-select-option>
+                <ion-select-option value="marketingEmail">{{i18n.t('frontend.orderType.email')}}</ion-select-option>
+                <ion-select-option value="marketingPhone">{{i18n.t('frontend.orderType.phone')}}</ion-select-option>
               </ion-select>
             </ion-item>
 
         
 
             <ion-item>
-              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="close">{{buttonCancel}}</ion-button>
-              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="saveCustomer">{{buttonAcept}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="close()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="saveCustomer">{{i18n.t('frontend.home.acept')}}</ion-button>
             </ion-item>
           
         </ion-card>  
@@ -213,12 +213,12 @@
         <ion-card  v-if="showPasswordTab">             
             
             <ion-item>
-            <ion-input type="password" name="password" :placeholder="newPassword"
+            <ion-input type="password" name="password" :placeholder="i18n.t('frontend.menu.newPassword')"
             @input="password = $event.target.value" >
             </ion-input>
           </ion-item>
           <ion-item>
-            <ion-input type="password" name="password" :placeholder="confirmPassword"
+            <ion-input type="password" name="password" :placeholder="i18n.t('frontend.menu.confirmPassword')"
             :key="key"
             :value="passwordConfirmed"
             @input="passwordConfirmed=$event.target.value"
@@ -227,8 +227,8 @@
           </ion-item>
 
             <ion-item>
-              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="close">{{buttonCancel}}</ion-button>
-              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="resetPassword">{{buttonAcept}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="close()">{{i18n.t('frontend.home.cancel')}}</ion-button>
+              <ion-button :disabled="spinner? true: false"  color="primary" class="menu-col-6" size="large" @click="resetPassword">{{i18n.t('frontend.home.acept')}}</ion-button>
             </ion-item>
           
         </ion-card> 
@@ -251,47 +251,51 @@ import { findNumbers  } from 'libphonenumber-js'
 import LibCodes from 'zipcodes'
 import { countries } from '../../backoffice/utils/countries.js'
 import CountryFlag from 'vue-country-flag'
+import store from '../../main'
+import {i18n} from '@/plugins/i18n'
 
 
 
 export default {
-  name: 'Modal',
+  name: 'Customer',
   props: {
-    parent: { type: Object, default:() => {} }, 
+    // parent: { type: Object, default:() => {} }, 
     title: { type: String, default: 'Super Modal' },   
-    buttonAcept: { type: String },
-    buttonCancel: { type: String },
-    placeholderEmail: { type: String },
-    placeholderName: { type: String },
-    placeholderPhone: { type: String },  
-    placeholderPassword: { type: String },
-    requiredData: { type: String },   
-    contactedBy: { type: String },
+    // buttonAcept: { type: String },
+    // buttonCancel: { type: String },
+    // placeholderEmail: { type: String },
+    // placeholderName: { type: String },
+    // placeholderPhone: { type: String },  
+    // placeholderPassword: { type: String },
+    // requiredData: { type: String },   
+    // contactedBy: { type: String },
     restaurantEmail: { type: String },
     update: { type: String, default: '' },
-    notValidEmail: { type:String },
+    // notValidEmail: { type:String },
     newRoute:  { type:String, default: '' },
-    logIn: { type: String },
-    register: { type: String },
-    restablacerPassword: { type: String },
-    updateData:  { type: String },
-    forgotPasswordText: { type: String },
-    createUser: { type: String },
-    newPassword: { type: String },
-    confirmPassword: { type: String },
-    mssForgotPassword: { type: String },
-    errorLogIn: { type: String },
-    errEmailExist: { type: String },
-    errPassNotCoinc:  { type: String },
-    userNotFound: { type: String },
-    newData: { type: String },
-    mssUpdateData: { type: String },
-    mssCreateUser: { type: String },
-    mssPasswordChangedCorrectly: { type: String },
+    // logIn: { type: String },
+    // register: { type: String },
+    // restablacerPassword: { type: String },
+    // updateData:  { type: String },
+    // forgotPasswordText: { type: String },
+    // createUser: { type: String },
+    // newPassword: { type: String },
+    // confirmPassword: { type: String },
+    // mssForgotPassword: { type: String },
+    // errorLogIn: { type: String },
+    // errEmailExist: { type: String },
+    // errPassNotCoinc:  { type: String },
+    // userNotFound: { type: String },
+    // newData: { type: String },
+    // mssUpdateData: { type: String },
+    // mssCreateUser: { type: String },
+    // mssPasswordChangedCorrectly: { type: String },
     
   },
   created: function(){
-    
+
+     this.i18n = i18n; 
+        
     if(this.update !=''){
       this.login = false;
       this.create = false;
@@ -304,7 +308,7 @@ export default {
   data() {
     return {
       content: 'Content',
-
+      i18n: {},
       CustomerName: '',
       email:'',
       password: '',
@@ -341,7 +345,7 @@ methods: {
       this.CustomerName =''  
       this.phone = '' 
       this.email = '' 
-      this.parent.$store.commit("setCustomer", {});
+      store.commit("setCustomer", {});
     }
  
     return this.$ionic.modalController.dismiss()
@@ -373,16 +377,16 @@ methods: {
       .then(response => {
         this.spinner = false; 
         
-        this.parent.$store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));
+        store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));
         
         this.$ionic.alertController
           .create({
               cssClass: 'my-custom-class',
               header: '',
-              message: this.mssUpdateData,
+              message: this.i18n.t('frontend.menu.mssUpdateData'),
               buttons: [                   
               {
-                  text: this.buttonAcept,
+                  text: this.i18n.t('frontend.home.acept'), 
                   handler: () => {                               
                                 
                   },
@@ -402,7 +406,7 @@ methods: {
               message: e,
               buttons: [                   
               {
-                  text: this.buttonAcept,
+                  text: this.i18n.t('frontend.home.acept'),
                   handler: () => {                                 
                                 
                   },
@@ -422,10 +426,10 @@ methods: {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.requiredData,
+        message: this.i18n.t('frontend.home.errorRequired'),
         buttons: [                   
         {
-          text: this.buttonAcept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -467,7 +471,7 @@ methods: {
           
           this.email = response.data.EmailAddress 
                      
-         this.parent.$store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));
+         store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));
                     
           var nn = findNumbers(this.phone,{v2:true});
           if(nn.length > 0){
@@ -491,7 +495,7 @@ methods: {
                 message: e,
                 buttons: [                   
                 {
-                    text: this.buttonAcept,
+                    text: this.i18n.t('frontend.home.acept'),
                     handler: () => {                                 
                                   
                     },
@@ -519,9 +523,9 @@ methods: {
             .create({
                 cssClass: 'my-custom-class',
                 header: '',
-                message: this.mssForgotPassword,
+                message: this.i18n.t('frontend.menu.mssForgotPassword'),
                 buttons: [                   
-                { text: this.buttonAcept,
+                { text: this.i18n.t('frontend.home.acept'),
                     handler: () => { },
                 },
                 ],
@@ -538,10 +542,10 @@ methods: {
           .create({
               cssClass: 'my-custom-class',
               header: 'Error',
-              message: this.userNotFound,
+              message: this.i18n.t('frontend.menu.userNotFound'),
               buttons: [                   
               {
-                text: this.buttonAcept,
+                text: this.i18n.t('frontend.home.acept'),
                 handler: () => {},
               },
               ],
@@ -566,7 +570,7 @@ methods: {
         this.spinner = false; 
         if(response.status === 200 ) {
           
-          this.parent.$store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));                    
+          store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));                    
           this.clientId = response.data._id            
           this.CustomerName = response.data.Name  
           this.phone = response.data.Phone  
@@ -604,10 +608,10 @@ methods: {
             .create({
                 cssClass: 'my-custom-class',
                 header: 'Error',
-                message: this.errorLogIn,
+                message: this.i18n.t('frontend.menu.errorLogIn'),
                 buttons: [                   
                 {
-                    text: this.buttonAcept,
+                    text: this.i18n.t('frontend.home.acept'),
                     handler: () => {                                 
                                   
                     },
@@ -659,17 +663,17 @@ methods: {
     Api.postIn('Customer', client)
       .then(response => {
         if(response.status === 200){
-           this.parent.$store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));
+            store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));
             this.spinner = false
             this.$ionic.modalController.dismiss() ;
             this.$ionic.alertController
               .create({
               cssClass: 'my-custom-class',
               header: '',
-              message: this.mssCreateUser,
+              message: this.i18n.t('frontend.menu.mssCreateUser'),
               buttons: [                   
               {
-                  text: this.buttonAcept,
+                  text: this.i18n.t('frontend.home.acept'),
                   handler: () => {},
               },
               ],
@@ -688,7 +692,7 @@ methods: {
                 message: e,
                 buttons: [                   
                 {
-                    text: this.buttonAcept,
+                    text: this.i18n.t('frontend.home.acept'),
                     handler: () => {                                
                                   
                     },
@@ -772,8 +776,8 @@ methods: {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.errPassNotCoinc ,
-          buttons: [ {text: this.buttonAcept, handler: () => {  },},],
+          message: this.i18n.t('frontend.menu.errPassNotCoinc') ,
+          buttons: [ {text: this.i18n.t('frontend.home.acept'), handler: () => {  },},],
           })
           .then(a => a.present())
     }
@@ -796,10 +800,10 @@ methods: {
           .create({
               cssClass: 'my-custom-class',
               header: '',
-              message: this.mssPasswordChangedCorrectly,
+              message: this.i18n.t('frontend.menu.mssPasswordChangedCorrectly'),
               buttons: [                   
               {
-                  text: this.buttonAcept,
+                  text: this.i18n.t('frontend.home.acept'),
                   handler: () => {                                 
                                 
                   },
@@ -819,7 +823,7 @@ methods: {
               message: e,
               buttons: [                   
               {
-                text: this.buttonAcept,
+                text: this.i18n.t('frontend.home.acept'),
                 handler: () => {},
               },
               ],
@@ -838,7 +842,7 @@ methods: {
         message: this.zipCodeNotValid ,
         buttons: [                   
         {
-          text: this.buttonAcept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -856,7 +860,7 @@ methods: {
         message: this.deliveryZone,
         buttons: [                   
         {
-          text: this.buttonAcept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -872,10 +876,10 @@ methods: {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.notValidEmail,
+        message: this.i18n.t('frontend.home.notValidEmail'),
         buttons: [                   
         {
-          text: this.buttonAcept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },
@@ -891,10 +895,10 @@ methods: {
     .create({
         cssClass: 'my-custom-class',
         header: 'Error',
-        message: this.errEmailExist,
+        message: this.i18n.t('frontend.menu.errEmailExist'),
         buttons: [                   
         {
-          text: this.buttonAcept,
+          text: this.i18n.t('frontend.home.acept'),
           handler: () => {                                 
                         
           },

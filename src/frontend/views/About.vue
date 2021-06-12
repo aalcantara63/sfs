@@ -48,7 +48,7 @@
                 </a>
           </div>
 
-          <ion-car >
+          <ion-car v-if="abouts.length > 0">
                 <ion-slides pager="true"  :options="slideOpts" >               
 
                 <ion-slide v-for="about in abouts" :key="about._id"  >
@@ -227,12 +227,15 @@ export default {
     name: 'About',
     created: async function(){
 
-
-        this.allRestaurant = this.$store.state.allRestaurant;
-        this.configuration = this.$store.state.configuration;
-        this.restaurantActive = this.$store.state.restaurantActive       
+        this.menuListSinCatering = this.$store.state.menuSinCatering || [];
+        this.menuListConCatering = this.$store.state.menuConCatering || [];
+        this.restaurantSelectedId = this.$store.state.restaurantActive.restaurantId || '';
+        this.allRestaurant = this.$store.state.allRestaurant || [];
+        this.configuration = this.$store.state.configuration || {};
+        this.restaurantActive = this.$store.state.restaurantActive || {}      
         this.allRestaurants= this.allRestaurant.filter(p => p._id != this.restaurantSelectedId);        
         this.sliderstData();
+         
 
     //    const res = await Api.getCaptchaKey(this.restaurantSelectedId)
     //     this.captchaKey = res.data
@@ -251,11 +254,16 @@ export default {
             if(location.length > 0)
                 this.embebedMap += location[1];
         }
+
+       
             
 
         }, 
     data() {
-        return {           
+        return {  
+            menuListSinCatering: [],
+            menuListConCatering: [],   
+            restaurantSelectedId: '',       
             slideOpts:{speed: 400, slideShadows: true, initialSlide:1,  slidesPerView: 3,},
             abouts: [],
             spinner: false,
@@ -276,10 +284,7 @@ export default {
             captchaKey: '',
         }
     },
-    props: {     
-    restaurantSelectedId:  {type: String, default:"" } ,
-    menuListSinCatering: {type: Array, default:() => [] },
-    menuListConCatering: {type: Array, default:() => [] },   
+    props: {   
   },  
   components:{
    StarRating,
@@ -287,33 +292,21 @@ export default {
 //    VueRecaptcha ,
   },
     methods:{
-        sliderstData: function(){
-            this.spinner =true
-            Api.fetchAll("About").then(response => {                        
-                if(response.status === 200){                     
-                     
-                     this.abouts = response.data;
-                      this.spinner = false 
-                }  
-            })
-            .catch(e => {
-                this.spinner = false
-                 return  this.$ionic.alertController
-                .create({
-                    cssClass: 'my-custom-class',
-                    header: 'Error',
-                    message: e,
-                    buttons: [                   
-                    {
-                        text: this.buttonAcept,
-                        handler: () => {                                 
-                                    
-                        },
-                    },
-                    ],
-                })
-                .then(a => a.present())     
-                });
+
+
+        sliderstData:async function(){
+            
+            try {
+                this.spinner =true
+                const response =await Api.fetchAll("About");
+                if(response.status === 200) this.abouts = response.data;
+                this.spinner = false 
+                
+            } catch (error) {
+                this.spinner = false 
+                console.log(error);
+                
+            }          
         },
 
         callChangeRestaurant: function(restaurantId){
@@ -444,11 +437,12 @@ export default {
         },
 
         goMenu: function(){
-        return this.$router.push({ name: 'Home' })
+            return this.$router.push({ name: 'Home',params: {url: this.$store.state.restaurantActive.restaurantUrl} })
         },
 
         goCatering: function(){
-        return this.$router.push({ name: 'Catering'  })
+            return this.$router.push({ name: 'Catering', params: {isCatering: true, url: this.$store.state.restaurantActive.restaurantUrl}  })
+        // return this.$router.push({ name: 'Home', params: {isCatering: true, url: this.$store.state.restaurantActive.restaurantUrl} })
         },      
 
        getReservationHour(thisHour){
@@ -622,6 +616,12 @@ export default {
 }
 .swiper-container-horizontal>.swiper-pagination-bullets {
     bottom: 12px !important;
+    
+}
+.swiper-pagination-bullet {
+    width: 12px !important;
+    height: 12px !important;
+    opacity: 1 !important;
 }
 
 

@@ -22,7 +22,7 @@
             <div  v-if="manual" class="scroll" style="height: auto" >  
 
               <ion-item :disabled="spinner? true: false">                  
-                 <ion-label position="floating">{{firstNameText}} <strong style="color: red">*</strong></ion-label>                               
+                 <ion-label position="floating">{{i18n.t('frontend.order.firstName')}} <strong style="color: red">*</strong></ion-label>                               
                   <ion-input type="text" required=true  
                   class="menu-col-8" 
                   :value="firstName" @input="firstName = $event.target.value"
@@ -30,7 +30,7 @@
               </ion-item>    
 
               <ion-item :disabled="spinner? true: false">
-                  <ion-label position="floating">{{lastNameText}} <strong style="color: red">*</strong></ion-label>                                          
+                  <ion-label position="floating">{{ i18n.t('frontend.order.lastName')}} <strong style="color: red">*</strong></ion-label>                                          
                   <ion-input type="text" required=true  
                   class="menu-col-8"
                   :value="lastName" @input="lastName = $event.target.value"
@@ -38,7 +38,7 @@
               </ion-item>  
 
               <ion-item :disabled="spinner? true: false">                     
-                  <ion-label position="floating">{{addressLine1}} <strong style="color: red">*</strong></ion-label>                                                                      
+                  <ion-label position="floating">{{i18n.t('frontend.order.addressLine1')}} <strong style="color: red">*</strong></ion-label>                                                                      
                   <ion-input type="text" required=true  
                   class="menu-col-8" 
                   :value="address" @input="address = $event.target.value"
@@ -46,7 +46,7 @@
               </ion-item>   
 
               <ion-item :disabled="spinner? true: false">                  
-                  <ion-label position="floating">{{postalCode}} <strong style="color: red">*</strong></ion-label>                                                                                                    
+                  <ion-label position="floating">{{i18n.t('frontend.order.postalCode')}} <strong style="color: red">*</strong></ion-label>                                                                                                    
                   <ion-input type="tel" required=true  :key="key"
                   class="menu-col-8" 
                   :value="zipCode" @change="zipCode=ValidateCodeInModal( $event.target.value)"
@@ -54,7 +54,7 @@
               </ion-item>         
               
               <ion-item :disabled="spinner? true: false">                  
-                  <ion-label position="floating">{{ccard}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
+                  <ion-label position="floating">{{i18n.t('frontend.order.ccard')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
                   <ion-input type="tel" required=true autocomplete="cc-number"
                       class="menu-col-8" 
                   :value="cardNumber" @input="cardNumber = $event.target.value"
@@ -62,14 +62,14 @@
               </ion-item>
 
               <ion-item :disabled="spinner? true: false">                    
-                  <ion-label position="floating">{{expcard}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
+                  <ion-label position="floating">{{i18n.t('frontend.order.expcard')}} <strong style="color: red">*</strong></ion-label>                                                                                                                                
                   <ion-datetime class="menu-col-8"
                   display-format="YY/MM" :max="dateTodaymax + 6 "  picker-format="YY/MM"
                   :min="dateTodaymin" required=true @ionChange="expirationCard = $event.target.value"> </ion-datetime>
               </ion-item>
 
               <ion-item :disabled="spinner? true: false">                 
-                  <ion-label position="floating">{{ccode}} <strong style="color: red">*</strong></ion-label>                               
+                  <ion-label position="floating">{{i18n.t('frontend.order.ccode')}} <strong style="color: red">*</strong></ion-label>                               
                   <ion-input type="tel" required=true  
                   class="menu-col-8"
                   :value="cardCode" @input="cardCode = $event.target.value"
@@ -79,7 +79,7 @@
               <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >
                 
 
-                <ion-button :disabled="spinner? true: false"  color="light" @click="cancel()">{{Cancel}}</ion-button>
+                <ion-button :disabled="spinner? true: false"  color="light" @click="cancel()">{{i18n.t('frontend.home.cancel')}}</ion-button>
                 <ion-button :disabled="spinner? true: false"  color="light"  @click="makeManual()">Ok</ion-button>
 
               </ion-toolbar>
@@ -88,9 +88,9 @@
 
             <div v-if="swipe">             
                  <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" >  
-                    <ion-button :disabled="spinner? true: false"  color="light" @click="cancel()">{{Cancel}}</ion-button>
+                    <ion-button :disabled="spinner? true: false"  color="light" @click="cancel()">{{i18n.t('frontend.home.cancel')}}</ion-button>
                     <ion-button :disabled="spinner? true: false"  color="light"  @click="makeSwipe()">Send</ion-button>
-                    <ion-button :disabled="spinner? true: false"  color="light"  @click="verifySwipe()">{{verifyText}}</ion-button>
+                    <ion-button :disabled="spinner? true: false"  color="light"  @click="verifySwipe()">{{i18n.t('frontend.order.verify')}}</ion-button>
               </ion-toolbar>
             </div>  
 
@@ -154,7 +154,7 @@
 
                     <ion-button  
                             :disabled="spinner? true: false" fill="outline" 
-                            @click="cancel">{{Cancel}}</ion-button>
+                            @click="cancel">{{i18n.t('frontend.home.cancel')}}</ion-button>
                 
 
                 </div>
@@ -179,20 +179,20 @@
 import { OlaPay } from '../../backoffice/api/olapay';
 import LibCodes from 'zipcodes'
 import moment from 'moment-timezone';
+ import {i18n} from '@/plugins/i18n'
 
 
 export default {
     name: 'OlaPayDevice',
-    created: async function(){  
-        console.log('Datas')      
-        console.log(JSON.parse(JSON.stringify(this.datas)))
-
+    created: async function(){ 
+        this.i18n = i18n;   
         this.ip = this.datas.device.ip
         this.port = this.datas.device.port
        
     },  
     data() {
-        return {     
+        return { 
+            i18n: {},    
             spinner: false,
             spinner1: false,
             ssl: true,
@@ -230,23 +230,8 @@ export default {
     }, 
     props:{
         parent: {type: Object, default: ()=> {}} ,
-        Acept:  {type: String, default:"" } ,
-        Cancel:  {type: String, default:"" } ,           
         isTicket:  {type: Boolean, default:false } ,           
         datas: {type: Object, default: ()=> {}} ,        
-         codeNotValid:  {type: String, default:"" } ,
-        notValidCC:  {type: String, default:"" } ,
-        dataRequired:  {type: String, default:"" } ,   
-        ccard: {type: String, default:"" } ,
-        expcard: {type: String, default:"" } , 
-        ccode:   {type: String, default:"" } , 
-        cityText: {type: String, default:"" } ,
-        stateText: {type: String, default:"" } ,
-        firstNameText: {type: String, default:"" } ,
-        lastNameText: {type: String, default:"" } ,
-        postalCode: {type: String, default:"" } ,
-        addressLine1: {type: String, default:"" } ,
-        verifyText: {type: String, default:"" } ,
     },   
     
     methods:{
@@ -266,17 +251,12 @@ export default {
             if(this.isTicket) response = await this.senAuthoManual();
             else response = await this.senPaymentManual(); 
             if(response){
-                console.log('RESPONSE MANUAL')
-                console.log(response);
                 return this.parent.responseDevicePay(response);
             }
             else this.paymentError('Try another payment method.'); 
         },
 
          async senAuthoManual(){       
-            
-            console.log('DATA for OLAPAY SALE')
-            console.log(JSON.parse(JSON.stringify(this.datas)));
              
             if(this.ip !=='' && this.port !==''){
                try {                                      
@@ -320,10 +300,7 @@ export default {
         },
 
         async senPaymentManual(){       
-            
-            console.log('DATA for OLAPAY SALE')
-            console.log(JSON.parse(JSON.stringify(this.datas)));
-             
+              
             if(this.ip !=='' && this.port !==''){
                try {
                                       
@@ -374,7 +351,6 @@ export default {
             else response = await this.senPaymentSwipe(); 
             if(response){
                 console.log('RESPONSE SWIPE')
-                console.log(response);
             }
             else this.paymentError('Try another payment method.');
         },
@@ -386,8 +362,6 @@ export default {
                     this.spinner = true;
                     const resp = await OlaPay.authorizeEmv(this.ip, this.port, this.ssl, this.datas);
                    if(resp)  {
-                        console.log('RESPONSE AUTHORIZE SWIPE')
-                        console.log(resp);
                         this.referToFind = resp.ref;
                         this.spinner = false;
                         return resp;
@@ -408,16 +382,12 @@ export default {
 
         async senPaymentSwipe(){       
             
-            console.log('DATA for OLAPAY SALE')
-            console.log(JSON.parse(JSON.stringify(this.datas)));
-             
+            
             if(this.ip !=='' && this.port !==''){
                try {
                     this.spinner = true;
                     const resp = await OlaPay.saleEmv(this.ip, this.port, this.ssl, this.datas);
                    if(resp){
-                        console.log('RESPONSE SALE SWIPE')
-                        console.log(resp);
                         this.referToFind = resp.ref;
                         this.spinner = false;                    
                         return resp
@@ -438,9 +408,7 @@ export default {
         async verifySwipe(){
             const response = await this.getStatus();          
             if(response){
-                console.log('RESPONSE PARA MANDAR A AL PARENT');
-                console.log(response);
-                return this.parent.responseDevicePay(response);
+                 return this.parent.responseDevicePay(response);
             }
             else this.paymentError('Try another payment method.');
         },
@@ -458,7 +426,6 @@ export default {
                      this.spinner = true;
                     const resp = await OlaPay.status(this.ip, this.port, this.ssl, item);
                     if(resp){
-                        console.log('RESPONSE STATUS')
                         console.log(resp);
                         this.spinner = false;
                         
@@ -526,10 +493,10 @@ export default {
             .create({
                 cssClass: 'my-custom-class',
                 header: 'Error',
-                message: this.codeNotValid ,
+                message: this.i18n.t('frontend.home.zipCodeNotValid') ,
                 buttons: [                   
                 {
-                text: this.Acept,
+                text: this.i18n.t('frontend.home.acept'),
                 handler: () => {                                 
                                 
                 },
@@ -543,7 +510,7 @@ export default {
         return this.$ionic.toastController
         
             .create({
-            message: `${this.cityText}: ${this.city} | ${this.stateText}: ${this.state}`,
+            message: `${i18n.t('frontend.home.city')}: ${this.city} | ${i18n.t('frontend.home.state')}: ${this.state}`,
             duration: 2000,
             position: 'top',
             color:'success'
@@ -562,10 +529,10 @@ export default {
                     .create({
                         cssClass: 'my-custom-class',
                         header: 'Error',
-                        message: this.notValidCC,
+                        message: this.i18n.t('frontend.order.notValidCC'),
                         buttons: [                   
                         {
-                            text: this.Acept,
+                            text: this.i18n.t('frontend.home.acept'),
                             handler: () => {                                 
                                             
                             },
@@ -584,10 +551,10 @@ export default {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.dataRequired,
+          message: this.i18n.t('frontend.home.errorRequired'),
           buttons: [                   
           {
-              text: this.Acept,
+              text: this.i18n.t('frontend.home.acept'),
               handler: () => {                                 
                             
               },
@@ -634,8 +601,6 @@ export default {
                      this.spinner = true;
                     const resp = await OlaPay.search(this.ip, this.port, this.ssl, item);
                     if(resp){
-                        console.log('RESPONSE STATUS')
-                        console.log(resp);
                         this.spinner = false;
                         return resp;                        
                     }
@@ -667,8 +632,6 @@ export default {
                     const resp = await OlaPay.capture(this.ip, this.port, this.ssl, item);
                     this.spinner = false;
                     if(resp){
-                            console.log('RESPONSE CAPTURE')
-                            console.log(resp);                           
                             return resp
                     }
                    this.spinner = false;
@@ -698,15 +661,12 @@ export default {
                 const resp = await OlaPay.goReturn(this.ip, this.port, this.ssl, item);
                  this.spinner = false;
                 if(resp){
-                     console.log('RESPONSE RETURN')
-                    console.log(resp);                   
                     return resp
                 } 
                 this.spinner = false;
                     return false;            
                 
             } catch (error) {
-                console.log(error);
                  this.spinner = false;
                     return false;
             }        
@@ -732,15 +692,12 @@ export default {
                 const resp = await OlaPay.goVoid(this.ip, this.port, this.ssl, item);
                 this.spinner = false;
                 if(resp){
-                    console.log('RESPONSE VOID')
-                    console.log(resp);                
                     return resp
                 }
                 this.spinner = false;
                     return false;
                 
             } catch (error) {
-                console.log(error);
                 this.spinner = false;
                     return false;
                 }        
@@ -751,15 +708,12 @@ export default {
         },
         
         async searchDevice(){
-            console.log(this.ip)
             if(this.ip !=='' && this.port !==''){
               try {
                    this.spinner = true;        
                    const resp = await OlaPay.getDevice(this.ip, this.port, this.ssl);
                     this.spinner = false;
                    if(resp){
-                        console.log('RESPONSE GET DEVICE')
-                        console.log(resp.data);
                         return resp
                    }
                    this.spinner = false;
@@ -785,7 +739,7 @@ export default {
                 message: mss,
                 buttons: [                   
                 {
-                    text: this.Acept,
+                    text: this.i18n.t('frontend.home.acept'),
                     handler: () => {                                 
                                     
                     },

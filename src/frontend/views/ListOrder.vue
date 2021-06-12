@@ -208,7 +208,7 @@ import { QrcodeStream } from 'vue-qrcode-reader';
  import Moment from 'moment';
   import LibCodes from 'zipcodes'
    import { VBreakpoint } from 'vue-breakpoint-component'
-
+ import { Commons } from '../commons'
 
 
 export default {
@@ -216,6 +216,8 @@ export default {
   name: 'ListOrder',
 
   created: async function(){  
+
+    this.products = this.$store.state.products|| [];
 
      if(this.$store.state.customer._id){
          this.clientId= this.$store.state.customer._id;   
@@ -240,11 +242,9 @@ export default {
 
      EventBus.$on('sendReorder', (value) => {           
       this.reOrder(value);
-       EventBus.$off('sendReorder');
     });
      EventBus.$on('sendPrint', (value) => {           
       this.printOrder(value);
-      EventBus.$off('sendPrint');
     });
 
   },
@@ -259,13 +259,12 @@ export default {
       VBreakpoint: VBreakpoint,
   },
    props:{  
-
-    products: {type: Array, default:() => [] }, 
     fromMyAccount:  {type: String, default:"" },
   },
   data () {
     return { 
       orders: [],
+      products:  [],
       name: '',
       spinner: false,
       allStates: [this.$t('frontend.order.state0'),this.$t('frontend.order.state1'), this.$t('frontend.order.state2'),
@@ -336,178 +335,10 @@ export default {
       return formatDate;
 
     },
-
-    async htmlToUse(order, showLogo){
-
-      let totalWithoutQuotation = 0;
-      if(order.QuotationPayment)        
-            totalWithoutQuotation = order.Total - order.QuotationPayment;
-        else
-            totalWithoutQuotation = order.Total;
-
-       var date = moment.tz(order.Date, moment.tz.guess()).format('MM-DD-YYYY hh:mm A');
-        if(order.OrderForCatering === true)
-          date = moment.tz(order.DateToPick, moment.tz.guess()).format('MM-DD-YYYY') + ' ' +  moment.tz(order.HourToPick, moment.tz.guess()).format('hh:mm A') ;
-
-        const  allStates = [this.$t('frontend.order.state0'),this.$t('frontend.order.state1'), this.$t('frontend.order.state2'),
-        this.$t('frontend.order.state3'), this.$t('frontend.order.state4'), this.$t('frontend.order.state5'), this.$t('frontend.order.state6'), this.$t('frontend.order.state7'), this.$t('frontend.order.state8')];
-
-        let orderInfo = '';
-        if(order.OrderType == 'Delivery')
-            orderInfo = order.AddressToDeliver
-        if(order.OrderType == 'PickUp')
-            orderInfo = order.HourToPick
-        if(order.OrderType == 'On Table')
-            orderInfo = order.tableService
-
-
-        let Cookername = '';
-
-        try {
-          if(this.showCooker && order.Cooker){          
-          const response = await Api.fetchById('Staff', order.Cooker);
-          
-          if(response.status === 200){           
-            Cookername = response.data.FirstName + ' '+ response.data.LastName;            
-            }  
-          }
-        } catch (error) {
-          console.log(error)
-        }
-
-      
-
-        var html =' <html><head>';    
-        html +='<style> .progressBar { width: 100%;  border-bottom: 1px solid black;display: list-item;list-style: unset; padding: 0}';
-        html += '.progressBar li {list-style-type: none; float: left; position: relative; text-align: center; margin:0}';
-        html += '.progressBar li .before {content: " "; line-height: 30px; border-radius: 50%; width: 30px; height: 30px; border: 1px solid #ddd;';
-        html += 'display: block;text-align: center;margin: 0 auto 10px;background-color: white}';
-        html += '.progressBar li .after { content: "";position: absolute;width: 100%;height: 4px;background-color: #ddd;top: 15px;left: -50%;z-index: -1;}';
-        html += '.progressBar li .one .after {content: none;}.progressBar li.active {color: black;}';
-        html += '.progressBar li.active .before { border-color: #63ee68; background-color: #63ee68}.progressBar .active:after {background-color: #4ca44f;} </style>';
-        
-        html += '</head><body><div >';
-        html += '<table  align=center style="width: 90%;">';
-        html += '<tr><td colspan=6 style="text-align: center;">';
-        html += `<h2>${this.restaurantActive.restaurantName}</h2>  `;
-        if(showLogo)
-          html += `<img src="${this.restaurantActive.restaurantLogo}" style="max-width: 100px;"></img> `;     
-        html +=`</td>`;     
-        html += `</tr>`;          
-        html += '<tr><td colspan=6 >'
-         if(order.Payment){
-           html += `<h4> ${this.$t('frontend.order.payment')}:</h4>`;
-           for (const payment of order.Payment) {
-            if(payment.paymentInfo)
-              html += `<p> 
-                ${this.$t('frontend.order.total')}: <strong>  ${ payment.total} </strong>  |
-                ${this.$t('frontend.order.transId')}: <strong>  ${ payment.paymentInfo.transId} </strong>  |
-                ${this.$t('frontend.order.paymentMethod')}: <strong>  ${ payment.PaymentMethod} </strong> 
-              </p>`;
-          }
-        }
-        html += `<h4>${this.$t('frontend.order.date')}: ${date} </h4><hr>`;
-        html += `<h4>${this.$t('frontend.order.client')}: ${order.CustomerName} </h4>`;
-        html += `<h4>${this.$t('frontend.orderType.phone')}: ${order.CustomerPhone} </h4>`;      
-        html += `<h4>${this.$t('frontend.order.orderFor')} ${this.allTypeOrder[order.OrderType]}: ${orderInfo} </h4>`;
-        if(Cookername !== '')
-        html += `<h4>${this.$t('frontend.order.cooker')}: ${Cookername} </h4>`;
-        html += `<h4>${this.$t('frontend.order.orderState')}: ${allStates[order.State]} </h4>`;
-        if(order.State == 6)
-            html += `<h4>${this.$t('frontend.order.cancelReason')}: ${order.CancelNote}</h4>`;
-
-        html += '<hr>';
-        html += '<tr><td colspan=6 >'
-         if(order.EventName)
-            html += `<h4> ${this.$t('frontend.order.eventName')}: ${order.EventName} </h4>`;
-         if(order.CateringEvent)
-            html += `<h4> ${this.$t('frontend.home.eventType')}: ${order.CateringEvent} </h4>`;
-        if(order.NumberOfGuess)
-            html += `<h4> ${this.$t('frontend.order.guessNumber')}: ${order.NumberOfGuess} </h4>`;
-        if(order.EventDate)
-            html += `<h4> ${this.$t('frontend.order.eventDate')}: ${ moment.tz(order.EventDate, moment.tz.guess()).format('MM-DD-YYYY')} </h4>`;
-        if(order.EventTimeStart)
-            html += `<h4> ${this.$t('frontend.order.eventStartHour')}: ${ moment.tz(order.EventTimeStart, moment.tz.guess()).format('hh:mm A')}</h4>`;
-        if(order.EventTimeEnd)
-            html += `<h4> ${this.$t('frontend.order.eventEndHour')}: ${ moment.tz(order.EventTimeEnd, moment.tz.guess()).format('hh:mm A')}</h4>`;
-        html += `</td></tr>`; 
-              
-        // html += `</td></tr>`;
-        html += '<br>'; 
-        html += `<tr><br><td colspan=6 style="border-top: 1px solid black;"><h4 ><strong>${this.$t('frontend.order.products')}</strong></h4></td></tr> <tr></tr>`;
-        for(var i = 0; i<order.Products.length ; i++){
-            html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><strong >${order.Products[i].Name}</strong>` ;
-            if(order.Products[i].Note !='')
-                html +=`<p style="background: #f1f1004d;">${order.Products[i].Note}</p> `;
-            html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p >( ${order.Products[i].Cant} X ${this.getFormatPrice(order.Products[i].Price)})</p> </td>`;
-            html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p >${ this.getFormatPrice( order.Products[i].Price * order.Products[i].Cant )}</p> </td>`;
-            html += `</tr>`;
-           if(order.Products[i].Aggregates.length > 0){
-                html +=`<tr style="padding: 20px 35px;"> ${this.$t('frontend.home.aggregateFree')}: ${order.Products[i].CantAggr=order.Products[i].AggregatesCant * order.Products[i].Cant} </tr>`;
-
-                 for(var a=0; a<order.Products[i].Aggregates.length; a++){
-                    let agg = order.Products[i].Aggregates[a]
-                    html += `<tr ><td  colspan=4 style="width: 50%;border-bottom: 1px solid #dbd1d1;" ><p style="padding-left: 20px;">${agg.Name} <br>${this.getFormatPrice(agg.SalePrice)}</p>` ;
-                    html +=`</td><td style="width: 25%;border-bottom: 1px solid #dbd1d1;" > <p > ${agg.Cant}</p> </td>`;
-                    html += `<td style="width: 25%;border-bottom: 1px solid #dbd1d1;"> <p > ${ this.getFormatPrice( agg.AllTotal ) }</p> </td></tr >`;            
-                 }
-            }
-            
-        }
-       
-        if(order.OtherCharges.length >0){
-            html += `<tr ><td colspan=6 ><h4 ><strong>${this.$t('frontend.order.otherCharges')}</strong></h4></td></tr>`;
-            for(var e = 0; e< order.OtherCharges.length ; e++){
-                html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p>${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
-            }
-        }
-       
-        
-        html += `<tr ><td colspan=5 ><br><p ><strong>${this.$t('frontend.order.subtotal')}</strong></p></td> <td ><br> <p >${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;      
-       html += `<tr><td  colspan=5 ><p  ><strong>${this.$t('frontend.order.taxe')} ${order.Taxe}%</strong></p></td> <td > <p >${ this.getFormatPrice(order.Taxe * order.SubTotal / 100) } </p> </td></tr>`;      
-        if(order.OrderType == 'Delivery' && order.Shipping)
-            html +=  `<tr ><td colspan=5  ><p  ><strong>${this.$t('frontend.order.deliver')}</strong></p></td><td  ><p >${this.getFormatPrice(order.Shipping)}</p></td></tr>`;
-        if(order.Tip)
-            html += `<tr ><td  colspan=5 ><p ><strong>${this.$t('frontend.order.tip')} ${order.Tip}%</strong></p></td><td ><p>${ this.getFormatPrice(order.Tip * order.SubTotal / 100) } </p> </td></tr>`;
-        html += `<tr><td colspan=5 style="border-bottom: 1px solid #dbd1d1;"><p  ><strong>${this.$t('frontend.order.total')}</strong></p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <strong > ${this.getFormatPrice(order.Total)}</strong> </td></tr>`;
-        
-        if(order.QuotationPayment)
-          html += `<tr style="border-bottom: 1px solid #399922;"><td colspan=5 ><p  ><strong>${this.$t('frontend.order.quotationPayment')}</strong></p></td> <td > <strong >${this.getFormatPrice(order.QuotationPayment)}</strong> </td></tr>`;
-        if(order.PendingPayment)
-          html += `<tr style="border-bottom: 1px solid #ff5500;"><td colspan=5 style="border-bottom: 1px solid #ff5500;"><p  ><strong>${this.$t('frontend.order.pendingPayment')}</strong></p></td> <td  style="border-bottom: 1px solid #ff5500;"> <strong >${this.getFormatPrice(order.PendingPayment)}</strong> </td></tr>`;
-        if(order.PendingPayment > 0 && order.Deadline){
-            html += `<tr ><td colspan=6 ><h4 ><strong>${this.$t('frontend.order.parcialPayment')}</strong></h4></td></tr>`;
-            for(var dead = 0; dead < order.Deadline.length ; dead ++){
-                html += ` <tr ><td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><p >${order.Deadline[dead].Date}  </p></td> `
-                html += ` <td colspan=3 style="border-bottom: 1px solid #dbd1d1;"><strong >  ${order.Deadline[dead].Percent}%  =  ${ this.getFormatPrice((totalWithoutQuotation * order.Deadline[dead].Percent) / 100)}</strong></td> `
-                if(order.Deadline[dead].State === 1)
-                html += ` <td style="border-bottom: 1px solid #dbd1d1;"> <strong  style= "color: #399922;  ">${this.$t('frontend.order.payed')}</strong></td>`;
-                else html += ` <td style="border-bottom: 1px solid #dbd1d1;"><strong  style= "color: #ff5500; ">${this.$t('frontend.order.toPay')}</strong> </td>`;
-                html += ` </tr>`;
-            }
-          }
-        
-        if(order.Note)
-            html += `<tr ><td style="width: 20%;border-bottom: 1px solid grey;"><h4 >${this.$t('frontend.order.notes')}</h4></td><td colspan=5 style="width: 80%;border-bottom: 1px solid grey;" ><p >${order.Note}</p></td></tr>`;
-        html += '<tr><td colspan=6 style=" text-align: center;">';
-        html += `<h2>${this.restaurantActive.restaurantName}</h2>  `;
-        html += `<h4>${this.restaurantActive.restaurantPhone} </h4> `;
-        html += `<h4>${this.restaurantActive.restaurantAddress}  </h4>`; 
-        if(this.restaurantWeb)  
-            html += `<h4>${this.restaurantWeb}  </h4>`;   
-        html +=`</td>`;     
-        html += `</tr>`;       
-        html += `</table></div></body></html>`;
-
-        return html;
-
-
-
-    },
-
+   
     async printOrder(order){
         
-        var html = await this.htmlToUse(order, true)
+        var html = Commons.htmlToSendEmailOrder(order);
         
           var winimp = window.open('/print', 'popimpr');
           winimp.document.open();
@@ -519,23 +350,9 @@ export default {
 
    },
 
-       async sendEmail(order){
-
-         this.spinnerEmail = true;
-        
-        var html = await this.htmlToUse(order, true)
-        
-          var items = {
-            "email": order.CustomerEmail,
-            "mess": html,
-            "subject": this.$t('frontend.order.invoice') + '-'+ order.Payment[0].paymentInfo.transId +' ' + this.restaurantActive.restaurantName
-          }
-         await Api.sendEmail(items);   
-         this.spinnerEmail = false;
-
-         return true;
-
-   },
+    async sendEmail(order){
+      Commons.sendOrderEmail(order);
+    },
 
     alertSelectOrderType(order){
       return  this.$ionic.alertController
@@ -578,71 +395,36 @@ export default {
       return this.reOrder(order)
     },
 
-  async reOrder(order){
-    
-    for(var i=0; i< order.Products.length; i++){
-      const inx = this.products.findIndex(pr => pr._id === order.Products[i].ProductId);      
-      if(inx !== -1){
-        if(this.products[inx].Available === false){         
-           order.Products.splice(i, 1);
-           this.producstNotAvailables +=', ' + this.products[inx].Name;
-        }  
-      }               
-    }  
-    if(order.Products.length === 0)
-    {
-       return this.alertNotProductForReoder();
-    }
+    async reOrder(order){
+      
+      for(var i=0; i< order.Products.length; i++){
+        order.Products[i].State = 0;
+        const inx = this.products.findIndex(pr => pr._id === order.Products[i].ProductId);      
+        if(inx !== -1){
+          if(this.products[inx].Available === false){         
+            order.Products.splice(i, 1);
+            this.producstNotAvailables +=', ' + this.products[inx].Name;
+          }  
+        }               
+      }  
+      if(order.Products.length === 0)
+        return this.alertNotProductForReoder();      
     else{
+      if(order.OrderType !== 'Delivery') delete order.OrderType;
+      if(order.Discount ) delete order.Discount;
+      if(order.isTicket ) delete order.isTicket;
+       delete order._id;
 
-      let thisOrder = {           
-            'ClientId' : order.ClientId
-            }
+       this.$store.commit('setOrder', order);
+       this.$store.commit('setCart', order.Products);
 
-      if(order.OrderForCatering) {
-        if(order.CateringEvent)
-            thisOrder.CateringEvent = order.CateringEvent;
-        if(order.NumberOfGuess)
-            thisOrder.NumberOfGuess = order.NumberOfGuess;
-        if(order.EventName)
-          thisOrder.EventName = order.EventName;
-      }
+       if(order.OrderForCatering)
+        return this.$router.push({ name: 'Home', params: {isCatering: true} })
+      return this.$router.push({ name: 'Home' })
+    }
+    },
 
-      if(!this.homeOrder.OrderType){
-        if(order.OrderType === 'Delivery' ){
-            thisOrder.OrderType = order.OrderType;
-            thisOrder.AddressToDeliver = order.AddressToDeliver || ''; 
-            thisOrder.addres1 = order.addres1 || '';
-            thisOrder.addres2 = order.addres2 || '';
-            thisOrder.zipCode = order.zipCode || '';   
-        
-           this.$store.commit('setOrder', thisOrder);
-        }
-
-        if(order.OrderType === 'PickUp'){  
-            this.$store.commit('setOrder', thisOrder);
-        }
-
-        if(order.OrderType === 'On Table') { 
-            this.$store.commit('setOrder', thisOrder);
-        }
-      }
-
-        
-        this.$store.commit('setCart', order.Products );
-
-        if(this.producstNotAvailables != '')
-          this.openToastProducstNotAvailable(this.producstNotAvailables)
-        this.producstNotAvailables = '';
-
-        
-        if(order.OrderForCatering)
-           this.$router.push({ name: 'OrderCatering', params: {backButton: true, url: this.restaurantActive.restaurantUrl} }) ;
-        else  
-           this.$router.push({ name: 'OrderFront', params: {backButton: true, url: this.restaurantActive.restaurantUrl} }) ;
-
-      }
-   },
+  
 
   async openToast(message) {
     return this.$ionic.toastController

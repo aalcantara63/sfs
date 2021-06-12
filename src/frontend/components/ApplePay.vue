@@ -44,8 +44,6 @@ export default {
     },
     mounted: async function () {   
 
-        console.log('window.ApplePaySession: '+ window.ApplePaySession)
-        // this.parent.mssApplePay = ('window.ApplePaySession: '+ window.ApplePaySession);
         if (window.ApplePaySession) {
             await this.getWalletInformation();
             this.isReadyToPay = true // solo temporalmente.
@@ -106,7 +104,6 @@ export default {
                 .then(success => {
                   if (success) {
                     // Open payment setup successful
-                    console.log('Open payment setup successful')
                     this.consoleMsj += ' '+ 'Open payment setup successful' + ' ';
                   } else {
                     // Open payment setup failed
@@ -124,7 +121,6 @@ export default {
         })
     },
     onClick () {
-      console.log('ApplePayButton.onClick')   
       this.consoleMsj += ' '+ 'ApplePayButton.onClick' + ' ';  
         if (parseFloat(this.Total) > 0) {
           let request = {
@@ -153,7 +149,6 @@ export default {
       
     },
     onValidateMerchant (event) {
-      console.log('ApplePayButton.onValidateMerchant', event)
       this.consoleMsj += ' '+ ' function onValidateMerchant ' + event+ ' '; 
       // 1. You call your server, passing it the URL from the event’s validationURL property.
       // 2. Your server uses the validation URL to request a session from the Apple Pay server,
@@ -165,7 +160,6 @@ export default {
       //    It expires five minutes after it is created.     
     },
     onPaymentAuthorized (event) {
-        console.log('ApplePayButton.onPaymentAuthorized', event)
         this.consoleMsj += ' '+ ' function onPaymentAuthorized ' + event+ ' '; 
         // The onpaymentauthorized function must complete the payment
         // and respond by calling completePayment before the 30 second timeout,
@@ -173,7 +167,6 @@ export default {
         const paymentData = event.payment
         const paymentToken = paymentData.token
      
-        console.log(' paymentData.token', paymentToken)    
          this.consoleMsj += ' '+ ' paymentData.token ' + paymentToken+ ' '; 
 
         const response = JSON.parse(JSON.stringify(paymentToken))  
@@ -181,7 +174,7 @@ export default {
           this.parent.responseApplePay(response);  
     },
     onCancel (event) {
-      console.log('ApplePayButton.onCancel', event)
+      console.log(event);
       this.consoleMsj += ' '+ ' onCancel ' + ' '; 
       this.session.abort()
     },

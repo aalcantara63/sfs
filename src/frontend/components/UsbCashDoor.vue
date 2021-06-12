@@ -7,9 +7,9 @@
 
             <div style="padding: 20px 15px; text-align: center">
 
-                <ion-button   fill="outline" @click="cancel">{{Cancel}}</ion-button>
+                <ion-button   fill="outline" @click="cancel">{{i18n.t('frontend.home.cancel')}}</ion-button>
                 <ion-button fill="outline" 
-                 @click="senPayment">{{Acept}}</ion-button>
+                 @click="senPayment">{{i18n.t('frontend.home.acept')}}</ion-button>
 
                 <div v-if="spinner1" style="margin: 10px">
                     <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
@@ -26,14 +26,16 @@
 </template>
 
 <script>
+import {i18n} from '@/plugins/i18n'
 
 export default {
     name: 'UsbCashDoor',
     created: async function(){        
-       
+       this.i18n = i18n; 
     },  
     data() {
-        return {     
+        return { 
+            i18n: {},     
             interval: 2000,  
             spinner1: false,
             canPay: true, 
@@ -46,10 +48,7 @@ export default {
         }
     }, 
     props:{
-        parent: {type: Object, default: ()=> {}} ,
-        Acept:  {type: String, default:"" } ,
-        Cancel:  {type: String, default:"" } ,
-      
+        parent: {type: Object, default: ()=> {}} , 
     },   
     
     methods:{

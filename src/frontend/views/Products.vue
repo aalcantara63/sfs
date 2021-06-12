@@ -139,13 +139,9 @@ import {
 export default {
  name: "Products",
   props: {
-    restaurantSelectedId:  {type: String, default: "" }, 
-    restaurantName:  {type: String, default: "" }, 
-    currency:  {type: String, default: "" },     
-    prod: {type: Array, default: () => [] },
-    products: {type: Array, default: () => [] },
-    variants: {type: Array, default: () => [] },
+  
     categories: {type: Array, default:() => [] }, 
+    prod: {type: Array, default: () => [] },
     categoryId: {type: String, default: "" } , 
     category: {type: String, default: "" }, 
     categoryDescription: {type: String, default: "" }, 
@@ -155,18 +151,26 @@ export default {
   },
  data () {
     return { 
-          staticUrl:`https://imenuapps.net/?rid=${this.restaurantSelectedId}&share=`, 
-          // staticUrl:`http://localhost:8080?rid=${this.restaurantSelectedId}&share=`, 
-          logoFacebook, 
-          logoInstagram,
-          filterProduct: [],
-          cart: []
+      products: [],
+      variants: [],
+      currency: '',
+      staticUrl:`https://imenuapps.net/?rid=${this.$store.state.restaurantActive.restaurantId}&share=`, 
+      // staticUrl:`http://localhost:8080?rid=${this.$store.state.restaurantActive.restaurantId}&share=`, 
+      logoFacebook, 
+      logoInstagram,
+      filterProduct: [],
+      cart: [],
+          
     }
   },    
    components:{
     VBreakpoint: VBreakpoint, 
   },
   created: function(){    
+
+    this.products = this.$store.state.products|| [];
+    this.variants = this.$store.state.variants|| [];
+    this.currency = this.$store.state.restaurantActive.currency,
 
     this.cart = this.$store.state.cart;
 
@@ -407,10 +411,10 @@ export default {
     async share(name, url){
       try {
           await Share.share({
-          title: name +' / '+ this.restaurantName,
-          // text: name +' / '+ this.restaurantName,
+          title: name +' / '+ this.$store.state.restaurantActive.restaurantName,
+          // text: name +' / '+ this.$store.state.restaurantActive.restaurantName,
           url: url,
-          dialogTitle: `Share product ${name} from ${this.restaurantName}`
+          dialogTitle: `Share product ${name} from ${this.$store.state.restaurantActive.restaurantName}`
         });
         
       } catch (error) {

@@ -20,7 +20,7 @@
             <div v-if="moto">
 
                 <ion-item >                     
-                  <ion-label position="floating">{{addressLine1}} <strong style="color: red">*</strong></ion-label>                                                                      
+                  <ion-label position="floating">{{i18n.t('frontend.order.addressLine1')}} <strong style="color: red">*</strong></ion-label>                                                                      
                   <ion-input type="text" required=true  
                   class="menu-col-8" 
                   :value="address" @input="address = $event.target.value"
@@ -28,7 +28,7 @@
                  </ion-item>   
 
               <ion-item >                  
-                  <ion-label position="floating">{{postalCode}} <strong style="color: red">*</strong></ion-label>                                                                                                    
+                  <ion-label position="floating">{{i18n.t('frontend.order.postalCode')}} <strong style="color: red">*</strong></ion-label>                                                                                                    
                   <ion-input type="tel" required=true  :key="key"
                   class="menu-col-8" 
                   :value="zipCode" @change="zipCode=ValidateCodeInModal( $event.target.value)"
@@ -36,7 +36,7 @@
               </ion-item>  
 
                <ion-item >                 
-                  <ion-label position="floating">{{ccode}} <strong style="color: red">*</strong></ion-label>                               
+                  <ion-label position="floating">{{i18n.t('frontend.order.ccode')}} <strong style="color: red">*</strong></ion-label>                               
                   <ion-input type="tel" required=true  
                   class="menu-col-8"
                   :value="cardCode" @input="cardCode = $event.target.value"
@@ -49,10 +49,10 @@
 
             <div style="padding: 20px 15px; text-align: center">
 
-                <ion-button :disabled="spinner1? true: false"  fill="outline" @click="cancel">{{Cancel}}</ion-button>
+                <ion-button :disabled="spinner1? true: false"  fill="outline" @click="cancel">{{i18n.t('frontend.home.cancel')}}</ion-button>
                 <ion-button :disabled="spinner1 || !canPay? true: false"
                 fill="outline" 
-                 @click="senPayment">{{Acept}}</ion-button>
+                 @click="senPayment">{{i18n.t('frontend.home.acept')}}</ion-button>
 
                 <div v-if="spinner1" style="margin: 10px">
                     <ion-progress-bar  color="primary" type="indeterminate" reversed="true"></ion-progress-bar>
@@ -70,15 +70,19 @@
 
 <script>
 import LibCodes from 'zipcodes'
+import {i18n} from '@/plugins/i18n'
 
 export default {
     name: 'UsbCardReader',
+
     created: async function(){ 
+        this.i18n = i18n;  
         this.callFunction()
         
     },  
     data() {
-        return {     
+        return {  
+            i18n: {},    
             interval: 2000,  
             spinner1: false,
             canPay: false, 
@@ -92,16 +96,7 @@ export default {
         }
     }, 
     props:{
-        parent: {type: Object, default: ()=> {}} ,
-        Acept:  {type: String, default:"" } ,
-        Cancel:  {type: String, default:"" } ,
-        ccode:  {type: String, default:"" } ,
-        postalCode:  {type: String, default:"" } ,
-        addressLine1:  {type: String, default:"" } ,
-        codeNotValid:  {type: String, default:"" } ,
-        cityText:  {type: String, default:"" } ,
-        stateText:  {type: String, default:"" } ,
-        dataRequired:  {type: String, default:"" } ,
+        parent: {type: Object, default: ()=> {}} ,        
     },   
     
     methods:{
@@ -209,10 +204,10 @@ export default {
             .create({
                 cssClass: 'my-custom-class',
                 header: 'Error',
-                message: this.codeNotValid ,
+                message: this.i18n.t('frontend.home.zipCodeNotValid') ,
                 buttons: [                   
                 {
-                    text: this.Acept,
+                    text: this.i18n.t('frontend.home.acept'),
                     handler: () => {  },
                 },
                 ],
@@ -225,7 +220,7 @@ export default {
       return this.$ionic.toastController
       
         .create({
-          message: `${this.cityText}: ${this.city} | ${this.stateText}: ${this.state}`,
+          message: `${this.i18n.t('frontend.home.city')}: ${this.city} | ${this.i18n.t('frontend.home.state')}: ${this.state}`,
           duration: 2000,
           position: 'top',
           color:'success'
@@ -238,10 +233,10 @@ export default {
       .create({
           cssClass: 'my-custom-class',
           header: 'Error',
-          message: this.dataRequired,
+          message: this.i18n.t('frontend.home.errorRequired'),
           buttons: [                   
           {
-              text: this.Acept,
+              text: this.i18n.t('frontend.home.acept'),
               handler: () => {                                 
                             
               },

@@ -2,6 +2,7 @@
     <div >         
 
         <div v-if="prod.length > 0">
+          
 
          <h3 style="text-align: center;">{{category}}: {{categoryDescription}}</h3>                                     
            
@@ -12,49 +13,73 @@
                 :placeholder="$t('frontend.home.search')">           
             </ion-searchbar>
 
-          <v-breakpoint>
-            <div slot-scope="scope">
-              <span  v-if="!scope.isSmall && !scope.noMatch"> 
+          <v-breakpoint>                        
+                <div v-if="menuactive!=='list'">
+
                   <div  v-for="pr in filterProduct" :key="pr._id" 
-                   :class="scope.isMedium? 'menu-col-6 card-category': 'menu-col-3 card-category'">
-                                    
-                     <ion-card color="primary"> 
-                          <ion-avatar style="margin-inline: auto; margin-top: 25px;"  v-if="menuactive==='gridPicture'">
-                            <img :src="pr.ImageUrl">
-                          </ion-avatar>  
-                          <h1 v-if="menuactive==='gridPicture'" class="elipsy-center" v-tooltip="pr.Name" style="margin: 5px;">{{pr.Name}}</h1>                       
-                          <ion-label v-else class="ion-text-wrap menu-col-6" >
-                            <h1 class="elipsy-center" v-tooltip="pr.Name">{{pr.Name}}</h1>
-                          </ion-label>
-                           <ion-label style="font-size: 12pt;font-weight: bold;text-align: center;">
-                             <h2>{{ getPrice(pr.SalePrice, pr.VariantGroupId || '') }} </h2>
-                          </ion-label> 
-                          <ion-item color="primary">
-                           <div style="width: 30%;float: left; text-align: center;    margin: 2px;">
-                              <ion-button color="light" style="padding:0"  @click.stop=" productDetail(pr)" >
-                               <span class="iconify" data-icon="ant-design:eye-filled" data-inline="false"  style="  width: 20px; height: 20px; margin: 0;"></span>
-                             </ion-button>
-                           </div>
-                           <div style="width: 30%;float: left; text-align: center;    margin: 2px;">
-                             <ion-button color="light" style="padding:0" @click.stop="share(pr.Name, staticUrl+pr._id)">
-                                <span class="iconify" data-icon="fe:share" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
-                             </ion-button>
-                           </div>
-                            <div style="width: 30%;float: left; text-align: center;    margin: 2px;">
-                             <ion-button color="light" style="padding:0" @click.stop="addToCart(pr.ImageUrl, pr._id, pr.Name, pr.SalePrice, pr.count || 1 , pr.Note ||'', [], pr.AggregateCant)">
-                                <span class="iconify" data-icon="carbon:add" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
-                             </ion-button>
-                           </div>
-                              
-                          </ion-item>
+                  :class="scopeM.isMedium || scopeM.isSmall || scopeM.noMatch? 'menu-col-6 card-category': 'menu-col-3 card-category'">
+                                  
+                    <ion-card color="primary" @click.stop=" productDetail(pr)"> 
+                        <ion-avatar style="margin-inline: auto; margin-top: 25px;"  v-if="menuactive==='gridPicture'">
+                          <img :src="pr.ImageUrl">
+                        </ion-avatar>  
+                        <h1 v-if="menuactive==='gridPicture'" class="elipsy-center" v-tooltip="pr.Name" style="margin: 5px;">{{pr.Name}}</h1>                       
+                        <ion-label v-else class="ion-text-wrap menu-col-6" >
+                          <h1 class="elipsy-center" v-tooltip="pr.Name">{{pr.Name}}</h1>
+                        </ion-label>
+                          <ion-label style="font-size: 12pt;font-weight: bold;text-align: center;">
+                            <h2>{{ getPrice(pr.SalePrice, pr.VariantGroupId || '') }} </h2>
+                        </ion-label> 
+                        <div color="primary" class="item-native" style=" display: flex; justify-content: center;">
+                          <div >                            
+                          </div>
+                          <div >
+                            <ion-button color="light" style="padding:0" @click.stop="share(pr.Name, staticUrl+pr._id)">
+                              <span class="iconify" data-icon="fe:share" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
+                            </ion-button>
+                          </div>
+                          <div >
+                            <ion-button color="light" style="padding:0" @click.stop="linkToCart(pr.ImageUrl, pr._id, pr.Name, pr.SalePrice, pr.count || 1 , pr.Note ||'', [], pr.AggregateCant)">
+                              <span class="iconify" data-icon="carbon:add" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
+                            </ion-button>
+                          </div>
+                            
+                        </div>
 
-                      </ion-card>
+                    </ion-card>
 
-                  </div>                
-              </span>
+                </div> 
+                  
+                </div> 
+                <div v-else>
 
-              
-            </div>
+                  <div  v-for="pr in filterProduct" :key="pr._id" 
+                    >                                    
+                    <ion-item color="primary" class="menu-col-12 card-category" @click=" productDetail(pr)"> 
+                        <ion-thumbnail style="margin-top: 25px;" class="menu-col-2 " >
+                          <img :src="pr.ImageUrl">
+                        </ion-thumbnail>  
+                       <div class="menu-col-7 ">
+                          <h4  v-tooltip="pr.Name" style="margin: 5px;">{{pr.Name}} <br>
+                          {{ getPrice(pr.SalePrice, pr.VariantGroupId || '') }} </h4>                                                 
+                        </div>                       
+                        <div color="primary" class="menu-col-3" :style="scopeM.isMedium || scopeM.isSmall || scopeM.noMatch? 'display: display: flex;flex-direction: column; flex-wrap: wrap;align-content: flex-end;': 'display: flex; justify-content: center;'">
+                           
+                            <ion-button color="light" style="padding:0" @click.stop="share(pr.Name, staticUrl+pr._id)">
+                              <span class="iconify" data-icon="fe:share" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
+                            </ion-button>                         
+                            <ion-button color="light" style="padding:0" @click.stop="linkToCart(pr.ImageUrl, pr._id, pr.Name, pr.SalePrice, pr.count || 1 , pr.Note ||'', [], pr.AggregateCant)">
+                              <span class="iconify" data-icon="carbon:add" data-inline="false" style="  width: 20px; height: 20px; margin: 0;"></span>
+                            </ion-button>
+                         
+                            
+                        </div>
+
+                    </ion-item>
+
+                </div> 
+                  
+                </div>             
           </v-breakpoint>
 
        
@@ -90,12 +115,8 @@ import {
 export default {
  name: "Products",
   props: {
-    restaurantSelectedId:  {type: String, default: "" }, 
-    restaurantName:  {type: String, default: "" }, 
-    currency:  {type: String, default: "" },     
-    prod: {type: Array, default: () => [] },
-    products: {type: Array, default: () => [] },
-    variants: {type: Array, default: () => [] },
+
+    prod: {type: Array, default: () => [] },    
     categories: {type: Array, default:() => [] }, 
     categoryId: {type: String, default: "" } , 
     category: {type: String, default: "" }, 
@@ -104,11 +125,15 @@ export default {
     orderFromCatering: {type: Boolean, default: false},
     isService: {type: Boolean, default: false},
     menuactive: {type: String, default: "grid" },
+    scopeM: {type: Object, default: () => {} },
   },
  data () {
     return { 
-          staticUrl:`https://imenuapps.net/?rid=${this.restaurantSelectedId}&share=`, 
-          // staticUrl:`http://localhost:8080?rid=${this.restaurantSelectedId}&share=`, 
+        products: [],
+        variants: [],
+        currency: '',
+          staticUrl:`https://imenuapps.net/?rid=${this.$store.state.restaurantActive.restaurantId}&share=`, 
+          // staticUrl:`http://localhost:8080?rid=${this.$store.state.restaurantActive.restaurantId}&share=`, 
           logoFacebook, 
           logoInstagram,
           filterProduct: [],
@@ -120,6 +145,9 @@ export default {
   },
   created: function(){    
 
+    this.products = this.$store.state.products|| [];
+    this.variants = this.$store.state.variants|| [];
+    this.currency = this.$store.state.restaurantActive.currency;
     this.cart = this.$store.state.cart;
 
     this.prod.forEach(p => {p.show = false})
@@ -195,11 +223,62 @@ export default {
       return ''  
     },
 
+    alertMissingProduct(ImageUrl, id, name, price, count, note, aggregates, aggregateCant){
+      let mssg = ''
+      if(this.orderFromCatering)
+        mssg = this.$t('frontend.order.warningProductsTheCateringToOrder');
+      else
+        mssg = this.$t('frontend.order.warningProductsTheOrderToCatering');
+
+        
+      return  this.$ionic.alertController
+      .create({
+          cssClass: 'my-custom-class',
+          header: 'Warning',
+          message: mssg,
+          buttons: [                   
+          {
+            text: this.$t('frontend.home.cancel'),
+            handler: () => {   
+              this.dismissQr(); 
+            },
+          },
+            {
+            text: this.$t('frontend.home.acept'),
+            handler: () => {      
+               this.cart = [];
+                const order = this.$store.state.order
+               if(order.OrderType)
+                  delete order.OrderType 
+               this.$store.commit('setCart', this.cart); 
+               this.$store.commit('setOrder', order); 
+               EventBus.$emit('updateCart', true); 
+              this.addToCart(ImageUrl, id, name, price, count, note, aggregates, aggregateCant);
+            }
+            },       
+          ],
+      })
+      .then(a => a.present())                  
+    },
+
+    linkToCart: function(ImageUrl, id, name, price, count, note, aggregates, aggregateCant){
+
+      if(this.cart.length > 0){       
+        if( this.cart[0].fromCatering !== this.orderFromCatering )
+          return this.alertMissingProduct(ImageUrl, id, name, price, count, note, aggregates, aggregateCant);
+        else 
+         return this.addToCart(ImageUrl, id, name, price, count, note, aggregates, aggregateCant);       
+      }
+      else
+       return this.addToCart(ImageUrl, id, name, price, count, note, aggregates, aggregateCant);
+    },
+
     addToCart: function(ImageUrl, id, name, price, count, note, aggregates, aggregateCant){
+
+      this.cart = this.$store.state.cart;
      
         if(count <1)
           return this.cantNoValida();
-
          let p = {
            "ImageUrl": ImageUrl,
             "ProductId": id,
@@ -214,12 +293,12 @@ export default {
             "State": 0,
          }
      
-        const index = this.cart.findIndex(pr => pr.ProductId === id && pr.Price === price );
+        const index = this.cart.findIndex(pr => pr.ProductId === id && pr.Price === price && pr.State === 0);
       
         if (index !== -1) {
           this.cart[index].Cant = parseInt(this.cart[index].Cant)  + parseInt(count);          
           this.cart[index].Note += note;  
-          aggregates.forEach(a => this.cart[index].Aggregates.push(a) )        
+          // aggregates.forEach(a => this.cart[index].Aggregates.push(a) )        
         }
          else{
             this.cart.push(p);
@@ -266,7 +345,8 @@ export default {
             Note: pr.Note,
             productVariant: productVariant,
             aggregateCant: pr.AggregateCant || 0,
-            Aggregates: pr.Aggregates || [],
+            // Aggregates: pr.Aggregates || [],
+            // Aggregates: [],
             products: this.products,           
             orderType: this.orderType,            
             Ingredients: pr.Ingredients || [],          
@@ -359,10 +439,10 @@ export default {
     async share(name, url){
       try {
           await Share.share({
-          title: name +' / '+ this.restaurantName,
-          // text: name +' / '+ this.restaurantName,
+          title: name +' / '+ this.$store.state.restaurantActive.restaurantName,
+          // text: name +' / '+ this.$store.state.restaurantActive.restaurantName,
           url: url,
-          dialogTitle: `Share product ${name} from ${this.restaurantName}`
+          dialogTitle: `Share product ${name} from ${this.$store.state.restaurantActive.restaurantName}`
         });
         
       } catch (error) {
@@ -407,6 +487,14 @@ export default {
         max-width: calc(calc(6 / var(--ion-grid-columns, 12)) * 100%);
         padding: 0 5px;
     }
+
+    .menu-col-7{
+        flex: 0 0 calc(calc(7 / var(--ion-grid-columns, 12)) * 100%);
+        width: calc(calc(7 / var(--ion-grid-columns, 12)) * 100%);
+        max-width: calc(calc(7 / var(--ion-grid-columns, 12)) * 100%);
+        padding: 0 5px;
+    }
+ 
     .menu-col-4{
     flex: 0 0 calc(calc(4 / var(--ion-grid-columns, 12)) * 100%);
     width: calc(calc(4 / var(--ion-grid-columns, 12)) * 100%);
@@ -414,10 +502,10 @@ export default {
     padding: 0 5px;
     }
     .menu-col-3{
-    flex: 0 0 calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);
-    width: calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);
-    max-width: calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);
-    padding: 0 5px;
+      flex: 0 0 calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);
+      width: calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);
+      max-width: calc(calc(3 / var(--ion-grid-columns, 12)) * 100%);
+      padding: 0 5px;
     }
     .menu-col-12{
         flex: 0 0 calc(calc(12 / var(--ion-grid-columns, 12)) * 100%);
@@ -430,6 +518,9 @@ export default {
       margin: 0;
       padding: 10px 2px;
     }
+  .swiper-slide img {
+    height: 64px;
+}
   .whatsapp__design__flat {
     background-color: transparent !important;
     color: #12ad10 !important;
