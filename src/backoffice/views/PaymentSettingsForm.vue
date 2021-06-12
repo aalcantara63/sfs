@@ -136,7 +136,7 @@ export default {
                     setTimeout(() => {  // Some AJAX call occurs
                             Api.fetchById(this.modelName, this.id)
                             .then(res => {
-                                console.log(res.data)
+                                //console.log(res.data)
                                 this.payMethod = res.data.PayMethod
                                 this.paymentMethods = res.data.PaymentMethods
                                 if (this.testActiveMethods(this.payMethod) && this.payMethod)
@@ -209,7 +209,7 @@ export default {
                     setTimeout(() => {  // Some AJAX call occurs
                         payAuthorizeNet.activatePaymentMethod(items)
                         .then(res => {
-                            console.log(res)
+                            //console.log(res)
                             if (res.status == 200 && res.statusText === 'OK')
                             {
                                 if (res.data.msg != "error")
@@ -240,7 +240,7 @@ export default {
                             }
                             else{
                                 this.showToastMessage(this.$t('backoffice.form.messages.activationMethodError'), 'danger')
-                                console.log(res)
+                                //console.log(res)
                                 loading.dismiss()
                             } 
                         })
@@ -288,7 +288,7 @@ export default {
         save(){
             if (this.payShift4 || this.payAuth)
             {
-                console.log(this.payMethod)
+                //console.log(this.payMethod)
                 const item = {
                     "_id": this.id,
                     "PayMethod": this.payMethod

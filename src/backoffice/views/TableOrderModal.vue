@@ -148,21 +148,21 @@ export default {
 
     async changeOrderState(order, index, state){
         const orderUpd = order;
-        console.log('state: '+ state);
-        console.log('order');
-        console.log(order.State);
+        //console.log('state: '+ state);
+        //console.log('order');
+        //console.log(order.State);
 
         orderUpd.State = state;
         this.spinner = true;
 
-        console.log('orderUpd');
-        console.log(orderUpd.State);
+        //console.log('orderUpd');
+        //console.log(orderUpd.State);
 
         const response = await Api.putIn('Order', orderUpd);
         if(response.status === 200){
              this.spinner = false;
-            console.log('update order')
-            console.log(response.data)
+            //console.log('update order')
+            //console.log(response.data)
             if(state === 5){
                 this.content.splice(index, 1);
             }else{
@@ -174,10 +174,10 @@ export default {
     },
 
     async setProductReady(order, index, product, indexP){
-        console.log(order)
-        console.log(index)
-        console.log(product)
-        console.log(indexP)
+        //console.log(order)
+        //console.log(index)
+        //console.log(product)
+        //console.log(indexP)
 
         this.key ++;
         const orderUpd = order;
@@ -185,8 +185,8 @@ export default {
 
         this.spinner = true;
 
-        console.log('orderUpd');
-        console.log(orderUpd.State);
+        //console.log('orderUpd');
+        //console.log(orderUpd.State);
 
         const response = await Api.putIn('Order', orderUpd);
         if(response.status === 200){

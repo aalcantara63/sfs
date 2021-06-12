@@ -244,7 +244,7 @@ export default {
         // Moment.tz(this.reservation.Date, Moment.tz.guess()).format('YYYY-MM-DD');
         this.reservationHour =  this.reservation.Hour;
 
-        console.log(JSON.stringify(this.reservation));
+        //console.log(JSON.stringify(this.reservation));
            
         
 
@@ -290,7 +290,7 @@ export default {
             };
             Api.sendEmail(email)
             .then(() => {
-                console.log(email)
+                //console.log(email)
             })
             .catch(e => {
                 console.log(e);
@@ -304,7 +304,7 @@ export default {
             };
             Api.sendSms(text)
             .then(() => {
-                console.log(text)
+                //console.log(text)
             })
             .catch(e => {
                 console.log(e);
@@ -383,7 +383,7 @@ export default {
                     this.$t('frontend.reservation.state6')]
 
             this.spinner = true;
-            console.log(this.reservation._id)
+            //console.log(this.reservation._id)
             Api.fetchById('Reservation', this.reservation._id).then(response => {
                 if(response.status === 200){ 
                     this.key++;          

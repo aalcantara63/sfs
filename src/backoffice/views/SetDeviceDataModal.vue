@@ -1,34 +1,16 @@
 <template>
-    <div>
-        <ion-header>
+    <div class="modal">
+        <!-- <ion-header>
             <ion-toolbar>
                 <ion-title>Set Device Data</ion-title>
             </ion-toolbar>
-        </ion-header>
+        </ion-header> -->
         <div class="ion-padding">
-                <!-- <ion-item>
-                    <ion-label position="floating"><span style="color: red">*</span>Ip</ion-label>
-                    <ion-input type="text" name="name"
-                    @input="ip = $event.target.value" 
-                    v-bind:value="ip">
-                    </ion-input>
-                </ion-item>
-                <br/>
-                <ion-item>
-                    <ion-label position="floating"><span style="color: red">*</span>Port</ion-label>
-                    <ion-input type="text" name="name"
-                    @input="port = $event.target.value" 
-                    v-bind:value="port">
-                    </ion-input>
-                </ion-item>
-                <br/>
-                <ion-item>
-                    <ion-label position="floating">DeviceSN</ion-label>
-                    <ion-input type="text" name="name"
-                    @input="sn = $event.target.value" 
-                    v-bind:value="sn">
-                    </ion-input>
-                </ion-item> -->
+                <div style="width: 150px; display:inline-block; ">
+                    <ion-card>
+                        <ion-img :src="require('../assets/a930.jpg')"></ion-img>
+                    </ion-card>
+                </div>    
 
                 <ion-item>
                     <ion-label>Server device</ion-label>
@@ -83,7 +65,7 @@
                     this.devices = settings[settings.length -1].Devices;
                     const dev = this.parent.$store.state.device
                     this.device = dev.name
-                    console.log(this.devices);
+                    //console.log(this.devices);
                 }
             })
             .catch(e => {
@@ -96,9 +78,9 @@
         async save(){
 
             const dev = this.findDevice(this.device);
-            console.log(this.device);
-            console.log("DISPOSITIVO")
-            console.log(dev);
+            //console.log(this.device);
+            //console.log("DISPOSITIVO")
+            //console.log(dev);
             const obj = {
                 'name': dev.Name,
                 'company': dev.Company,
@@ -106,7 +88,7 @@
                 'port': dev.Port,
             }
             this.parent.$store.commit("setDevice", obj);
-            console.log(obj)
+            //console.log(obj)
             this.$ionic.modalController.dismiss(null);
             this.showToastMessage('The device is setting successfully.', 'success');
 

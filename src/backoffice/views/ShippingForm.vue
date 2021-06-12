@@ -108,7 +108,7 @@ export default {
                   })
               })  
         }
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
         },
         ifErrorOccured(action){
           return this.$ionic.alertController.create({

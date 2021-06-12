@@ -53,24 +53,28 @@
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
                  
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewUser')" @click="$router.push('/user')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.staff')" v-if="hasPermission('canViewUser')" @click="$router.push('/user')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                               <span class="iconify"  color="primary" data-icon="simple-icons:codechef" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageUsers') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewOccupation')" @click="$router.push( '/occupation')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.occupations')" v-if="hasPermission('canViewOccupation')" @click="$router.push( '/occupation')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="tabler:tools-kitchen" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageOccupation') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewRole')"  @click="$router.push('/role')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.roles')" v-if="hasPermission('canViewRole')"  @click="$router.push('/role')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="ls:cookpad" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageRoles') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewCustomer')"  @click="$router.push('/customer')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.customers')" v-if="hasPermission('canViewCustomer')"  @click="$router.push('/customer')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="raphael:people" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageCustomers') }}</ion-label>   
+                            </ion-chip>
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.driver')" v-if="hasPermission('canViewDriver')"  @click="manageDriver()" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                    <span class="iconify" data-icon="mdi:car-child-seat" data-inline="false"></span>
+                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageDriver') }}</ion-label>   
                             </ion-chip>
                         
                         </div>
@@ -78,46 +82,50 @@
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
                  
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewCategory')"  @click="$router.push('/category')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.categories')" v-if="hasPermission('canViewCategory')"  @click="$router.push('/category')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="carbon:category-new-each" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageCategories') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'"  v-if="hasPermission('canViewProduct')" @click="$router.push('/product')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.menuItems')"  v-if="hasPermission('canViewProduct')" @click="$router.push('/product')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="dashicons:products" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageProducts') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewProduct')" @click="$router.push('/product/service')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.services')" v-if="hasPermission('canViewProduct')" @click="$router.push('/product/service')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="dashicons:businessman" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageServices') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewMenu')" @click="$router.push('/menu')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.menus')" v-if="hasPermission('canViewMenu')" @click="$router.push('/menu')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="bx:bx-food-menu" color="primary" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageMenus') }}</ion-label>   
                                 </ion-chip>
                                 <br>
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.reservations')" v-if="hasPermission('canViewReservation')" @click="$router.push('/reservationbackoffice')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                    <span class="iconify" data-icon="ic:baseline-access-time" data-inline="false"></span>
+                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageReservation') }}</ion-label>   
+                                </ion-chip>
                         </div>
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
                         
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewOrder')" @click="$router.push( '/order')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.orders')" v-if="hasPermission('canViewOrder')" @click="$router.push( '/order')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="mdi:order-bool-descending" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.viewOrders') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewOrder')" @click="$router.push( '/cateringOrder')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.cateringOrders')" v-if="hasPermission('canViewOrder')" @click="$router.push( '/cateringOrder')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="mdi:order-bool-descending" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.viewCateringOrders') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewOrderForDelivery')" @click="$router.push('/orderForDelivered')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.orderForDelivery')" v-if="hasPermission('canViewOrderForDelivery')" @click="$router.push('/orderForDelivered')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="mdi:truck-delivery-outline" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.titles.ordersForDelivery') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewOrder')" @click="$router.push('/ticket')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.tickets')" v-if="hasPermission('canViewOrder')" @click="$router.push('/ticket')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="ph:ticket-duotone" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.titles.tickets') }}</ion-label>   
                                 </ion-chip>
@@ -125,68 +133,64 @@
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
                             
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewOtherCharge')"  @click="$router.push('/otherCharge')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.otherCharges')" v-if="hasPermission('canViewOtherCharge')"  @click="$router.push('/otherCharge')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="si-glyph:money-bag" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageOtherCharges') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewTax')" @click="$router.push( '/tax')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.taxes')" v-if="hasPermission('canViewTax')" @click="$router.push( '/tax')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="heroicons-outline:receipt-tax" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageTaxes') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewShipping')"  @click="$router.push('/shipping')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.deliveries')" v-if="hasPermission('canViewShipping')"  @click="$router.push('/shipping')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="la:truck-pickup-solid" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageShippings') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewReservation')" @click="$router.push('/reservationbackoffice')" color="secondary" style=" width: 70%;border: 1px solid grey;">
-                                <span class="iconify" data-icon="ic:baseline-access-time" data-inline="false"></span>
-                                <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageReservation') }}</ion-label>   
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.payments')" v-if="hasPermission('canChangeSetting')" @click="$router.push('/payment')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <span class="iconify" data-icon="ic:twotone-attach-money" data-inline="false"></span>
+                                <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePyments') }}</ion-label>
                             </ion-chip>
                         </div>
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
 
                                 <!-- Aquí iba el menú -->
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canViewTable')" @click="$router.push('/table')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.tables')" v-if="hasPermission('canViewTable')" @click="$router.push('/table')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="vs:table-o" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageTables') }}</ion-label>   
                                  </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')"  @click="$router.push('/aboutDataSettings')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.aboutSettings')" v-if="hasPermission('canChangeSetting')"  @click="$router.push('/aboutDataSettings')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="grommet-icons:restaurant" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageAboutSettings') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')" @click="managePaymentSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.paymentSettings')" v-if="hasPermission('canChangeSetting')" @click="managePaymentSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePaymentSettings') }}</ion-label>
                                 </ion-chip>
-                                  <ion-chip v-tooltip="'Payments.'" v-if="hasPermission('canChangeSetting')" @click="$router.push('/payment')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
-                                    <span class="iconify" data-icon="ic:twotone-attach-money" data-inline="false"></span>
-                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePyments') }}</ion-label>
+                                <br>
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.funtionalitiesSettings')" v-if="hasPermission('canChangeSetting')"  @click="manageFunSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                    <span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>
+                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageFunSettings') }}</ion-label>   
                                 </ion-chip>
                         </div>
 
                         <div :class="scope.isSmall || scope.noMatch ? ' menu-col-12 card-category' : ' menu-col-6 card-category'" style="padding: 20px;">
                         
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')"  @click="manageBasicSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.basicSettings')" v-if="hasPermission('canChangeSetting')"  @click="manageBasicSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="clarity:settings-line" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageBasicSettings') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')"  @click="manageFunSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
-                                <span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>
-                                <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageFunSettings') }}</ion-label>   
-                            </ion-chip>
-                            <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')" @click="manageColourSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.colorSettings')" v-if="hasPermission('canChangeSetting')" @click="manageColourSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="vaadin:palete" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageColourSettings') }}</ion-label>   
                             </ion-chip>
                             <br>
-                            <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canChangeSetting')"   @click="manageKeySettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                            <ion-chip v-tooltip="$t('backoffice.controlPanel.systemSettings')"  v-if="hasPermission('canChangeSetting')"   @click="manageKeySettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                 <span class="iconify" data-icon="clarity:network-settings-solid" data-inline="false"></span>
                                 <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageKeySettings') }}</ion-label>   
                             </ion-chip>
@@ -325,9 +329,7 @@ export default {
                 component: Modal,
                 cssClass: 'my-custom-class',
                 componentProps: {
-                    data: {
-                        
-                    },
+                    data: { },
                     propsData: {
                         parent: this
                     },
@@ -353,8 +355,8 @@ export default {
 
             this.initData()
             this.fetchAllRestaurant()
-            console.log("RESTAURANTES")
-            console.log(this.$store.state.user.RestaurantId)
+            //console.log("RESTAURANTES")
+            //console.log(this.$store.state.user.RestaurantId)
             if(this.$store.state.user.RestaurantId){
                 this.restaurantId = this.$store.state.user.RestaurantId
                 let oneStart = 0;              
@@ -380,7 +382,7 @@ export default {
               });
 
                 Api.fetchById("Restaurant",  this.restaurantId).then(response => {
-                    console.log(0)                        
+                    //console.log(0)                        
                     if(response.status === 200){ 
                         const rating =  response.data.rating 
                         this.online = response.data.Online; 
@@ -390,7 +392,7 @@ export default {
                             rating.forEach(r =>{
                                 this.options.xAxis.data.push(Moment(r.date).format('YYYY-MM-DD')),
                                 this.options.series[0].data.push(r.rating) ;
-                                console.log(r.rating >=4 && r.rating <=5)
+                                //console.log(r.rating >=4 && r.rating <=5)
                                 if( r.rating >=1 && r.rating <=1.9) oneStart++;
                                 if(r.rating >=2 && r.rating <=2.9) twoStart++;
                                 if(r.rating >=3 && r.rating <=3.9) threeStart++;
@@ -405,7 +407,9 @@ export default {
                         this.options2.series[0].data['4'].value = fiveStart
 
                         //Load modal set device
-                        this.showSetDeviceModal();
+                        //console.log("PASA")
+                        if (this.$route.params.firstLogin)
+                            this.showSetDeviceModal();
 
                         this.spinner = false;   
                                 
@@ -493,8 +497,8 @@ export default {
                             this.allRestaurant.push(restaurant)
                     });
 
-                    console.log("AllRestaurant")
-                    console.log(this.allRestaurant)
+                    //console.log("AllRestaurant")
+                    //console.log(this.allRestaurant)
                 }
             })
             .catch(e => {
@@ -607,6 +611,9 @@ export default {
                         case 'canSuperUser':
                             res = this.$store.state.user.IsSupport;
                             break;
+                        case 'canViewDriver':
+                            res = roles[index].canViewDriver;
+                            break;
                         default:
                             break;
                     }
@@ -704,6 +711,14 @@ export default {
         manageSupportSettings(){
             this.$router.push({
                 name: 'Support',
+            });
+        },
+        manageDriver(){
+            this.$router.push({
+                name: 'Driver',
+                params: {
+                    isForDriversSupervisor: true,
+                },
             });
         },
         manageKeySettings(){

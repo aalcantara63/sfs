@@ -131,7 +131,7 @@ export default {
               })
           })   
         }
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -242,11 +242,11 @@ export default {
               "EmailAddress": this.emailAddress,
             };
 
-            console.log(this.mcemail);
-            console.log(this.mcphone);
+            //console.log(this.mcemail);
+            //console.log(this.mcphone);
             if (this.mcemail  || this.mcphone)
             {
-                console.log("Entro")
+                //console.log("Entro")
                 let MarketingConsent = {
                         "Email": this.mcemail,
                         "Phone": this.mcphone

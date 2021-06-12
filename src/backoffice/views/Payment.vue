@@ -11,6 +11,22 @@
               <h1>{{$t('backoffice.options.managePyments')}}</h1>        
             </ion-label>
 
+              <div style="display: flex;justify-content: center;align-items: center"> 
+                  <ion-button @click="menuactive='list'" :style="menuactive==='list'? 'opacity: 1;;border: outset;' : 'opacity: 0.65;border: none;' ">
+                    <span class="iconify" data-icon="foundation:list-bullet" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+                  </ion-button>  
+                  <ion-button    @click="menuactive='grid'" :style="menuactive==='grid'? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;' ">
+                    <span class="iconify" data-icon="clarity:grid-chart-solid" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+                  </ion-button> 
+                  <div v-tooltip="$t('frontend.tooltips.deliveryPayment')" :style="showDeliveryPayment? 'opacity: 1;border: outset;display: flex' : 'opacity: 0.65;border: outset;display: flex' "
+                    @click="showDeliveryPayment = !showDeliveryPayment , deliveryPayments()">
+                    <span class="iconify" data-icon="emojione-monotone:delivery-truck" data-inline="false" style="margin: 0;"></span>
+                  </div> 
+                  <div style="border: outset; display: flex" @click="reverseOrders()">
+                    <span class="iconify" data-icon="fluent:chevron-up-down-20-filled" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+                  </div>                    
+              </div> 
+
             <ion-item> 
                 <ion-datetime 
                     class="menu-col-5 elipsis-menu" 
@@ -29,9 +45,6 @@
                      <span class="iconify" data-icon="fa-solid:search-dollar" data-inline="false" style="color: grey;margin:0;border: outset;padding: 1px !important;" ></span>
                     </div>                 
             </ion-item>
-
-           
-
            
           </ion-toolbar>
 
@@ -57,7 +70,7 @@
     
     <div v-else >    
 
-        <div  >
+        <div  v-if="menuactive==='list'">
           <paginate
             :key="key"  
             name="languages"
@@ -65,15 +78,20 @@
             :per="8"                     
           >
             <ion-item-sliding  v-for="order in paginated('languages')" v-bind:key="order._id">
-              <ion-item @click="viewOrder(order)">
+              <ion-item 
+              :color="order.Void > 0 ? 'warning' : order.Refund > 0 ? 'danger' : 'light'"
+              @click="viewOrder(order)">
                 <ion-label class="menu-col-3 ">                   
                     {{ order.ModelFrom }} <br>  {{ getFormatedDate(order.Date) }}
                                 
                 </ion-label>
-                <ion-label class="menu-col-3 elipsis-menu"> 
-                  {{ order.InvoiceNumber}}
+                <ion-label class="menu-col-4 elipsis-menu"> 
+                  {{ order.InvoiceNumber}} <br>
+                  <div v-if="order.DeliveryPayment "   v-tooltip="$t('frontend.tooltips.deliveryPayment')" >
+                    <span class="iconify" data-icon="emojione-monotone:delivery-truck" data-inline="false" style="margin: 0;"></span>
+                  </div>   
                 </ion-label>
-                <ion-label class="menu-col-3 elipsis-menu">                   
+                <ion-label class="menu-col-2 elipsis-menu">                   
                     <h6>{{ order.Method }}</h6>                   
                 </ion-label>  
                 <ion-label class="menu-col-3 elipsis-menu">                   
@@ -105,6 +123,86 @@
           ></paginate-links>
         </div>
 
+        <div v-if="menuactive==='grid'">
+          <v-breakpoint>
+                    <div slot-scope="scope" > 
+
+                      <div style="display: flex;flex-wrap: wrap;flex-direction: row;align-items: flex-start;">    
+
+                        <ion-chip color="primary"
+                          @click="scrollToTop()"
+                        outline style="position: fixed; right: 0;top: 50%;padding: 0; z-index: 20;">
+                          <span class="iconify" data-icon="ant-design:caret-up-filled" data-inline="false" style="margin: 0"></span>
+                        </ion-chip>
+
+                        <div  v-for="order in filterOrders" v-bind:key="order._id" 
+                            style="text-align: right;"             
+                            :class="scope.isLarge || scope.isXlarge ? 'menu-col-3 card-categories' : scope.isMedium? 'menu-col-4 card-categories' : scope.isSmall || scope.noMatch ?'menu-col-12 card-categories': 'menu-col-3 card-categories'">
+                                
+                              <ion-chip style="margin: 0;bottom: -10px; font-weight: bold;" outline
+                                :color="order.Void > 0 ? 'warning' : order.Refund > 0 ? 'danger' : 'secondary'">
+                                {{getFormateHour(order.Date)}}
+                              </ion-chip>
+                            <ion-card style="text-align: left;"   
+                            :color="order.Void > 0 ? 'warning' : order.Refund > 0 ? 'danger' : 'secondary'">
+                                <ion-card-header style="margin: 10px 5px 2px; padding: 10px;background:white;color: black;">
+                                  <ion-card-title  style="color: black;"> 
+                                    <a v-if="order.ModelFrom && order.ModelId"><strong style="text-decoration: underline" @click="viewOrderFrom(order.ModelFrom, order.ModelId)">{{ order.ModelFrom }} </strong></a> 
+                                  <span v-if="order.InvoiceNumber" style="text-transform: uppercase;"> {{order.InvoiceNumber.slice(-4)}} </span>   
+                                  <div v-if="order.DeliveryPayment "   v-tooltip="$t('frontend.tooltips.deliveryPayment')" style="float: right;">
+                                    <span class="iconify" data-icon="emojione-monotone:delivery-truck" data-inline="false" style="margin: 0;"></span>
+                                  </div>                           
+                                  </ion-card-title>
+                                  
+                              
+                                  <ion-card-subtitle v-if="order.StaffName"
+                                    style="color: black; display: flex;justify-content: space-between;">
+                                    <div style="text-align: center;"> 
+                                      <span class="iconify" data-icon="grommet-icons:restaurant"
+                                      style="color: #808080a6; width: 20px;  height: 20px; margin: 0;" data-inline="false"></span>
+                                    </div>
+                                    <span style="text-align: right;"  > {{ order.StaffName }}</span>
+                                  </ion-card-subtitle>
+                                    
+                                  </ion-card-header>
+
+                                  <ion-card-content style="margin: 1px 5px; padding: 5px;background:white;color: black;" >
+                                     
+                                     <p > <ion-label class="ion-text-wrap" >
+                                        
+                                        Pagado: <strong> {{getFormatPrice(order.Payment)}} </strong> 
+                                    </ion-label></p>
+
+                                      <p > <ion-label class="ion-text-wrap" >
+                                          
+                                          Void: <strong>{{getFormatPrice(order.Void)}} </strong>
+                                      </ion-label></p>
+
+                                      <p > <ion-label class="ion-text-wrap" >
+                                         
+                                          Refund: <strong> {{getFormatPrice(order.Refund)}} </strong> 
+                                      </ion-label></p>
+
+                                      
+                                  </ion-card-content>
+                                  
+                                
+                              <div style="display: flex;justify-content: space-between;align-items: center;"> 
+                                <div  >
+                                </div>
+                                  <h3 style="text-align: center;">{{ getFormatPrice(parseFloat(order.Payment) - order.Refund - order.Void) }}</h3>
+                                  <div v-tooltip="$t('frontend.tooltips.editTicket')" @click="viewOrder(order)">
+                                    <span   class="iconify" data-icon="el:file-edit-alt" data-inline="false" style="width: 20px;height: 20px;"></span>
+                                  </div>
+                              </div>                
+                            </ion-card>
+                        </div>
+
+                      </div>
+                    </div>
+                  </v-breakpoint>   
+        </div>
+
     </div>
   </div>
 </template>
@@ -114,10 +212,7 @@
 import { Api } from '../api/api.js';
 import { Utils } from '../utils/utils.js';
 import moment from 'moment-timezone';
-// import { payAuthorizeNet } from '../api/payments.js';
-// import { EventBus } from '../../frontend/event-bus';
-// import { parsePhoneNumber  } from 'libphonenumber-js'
-// import { Twilio } from '../api/twilio.js';
+import { VBreakpoint } from 'vue-breakpoint-component'
 
 export default {
 
@@ -132,6 +227,9 @@ export default {
       if (this.update != null){
           clearInterval(this.update);
       }
+  },
+  components:{   
+    VBreakpoint: VBreakpoint,  
   },
   data () {
     return {
@@ -151,7 +249,10 @@ export default {
       dateFrom: '',
       dateTo: '',
       key: 0,
+
       currency: 'USD',
+      menuactive:'list',
+      showDeliveryPayment: false,
     }
   }, 
   methods: {
@@ -197,11 +298,16 @@ export default {
     }, 
     
     handleInput(value){
+     
       const query = value.toLowerCase();
-      requestAnimationFrame(() => {       
-        let cat2 = this.orders.filter(p => p.Method.toLowerCase().indexOf(query) > -1
+      requestAnimationFrame(() => {   
+        const orderFiltered = this.orders.filter(p =>
+                                        p.Method && p.ModelFrom && p.InvoiceNumber && p.Date && p.Payment);
+        let cat2 = orderFiltered.filter(p =>
+                                        p.Method.toLowerCase().indexOf(query) > -1
                                     ||  p.ModelFrom.toLowerCase().indexOf(query) > -1
                                     ||  p.InvoiceNumber.toLowerCase().indexOf(query) > -1                                 
+                                    ||  p.Payment.toString().toLowerCase().indexOf(query) > -1                                 
                                     ||  p.Date.toLowerCase().indexOf(query) > -1)
         if(cat2.length> 0)
           this.filterOrders = cat2
@@ -211,7 +317,7 @@ export default {
     },
 
     viewOrder: function(paymentD){
-        console.log('Open Payment con ID '+ paymentD);
+        //console.log('Open Payment con ID '+ paymentD);
         this.$router.push({
         name: 'PaymentDetail', 
         params: { payment: paymentD ,
@@ -261,8 +367,8 @@ export default {
         Api.findCustomerByEmail(this.resConf.Email)
         .then(response => { 
             this.restaurantCustomer = response.data
-            console.log("RESTAURANT CUSTOMER")
-            console.log(this.restaurantCustomer)
+            //console.log("RESTAURANT CUSTOMER")
+            //console.log(this.restaurantCustomer)
         })
     },
     getRestaurantConfig: function(){
@@ -311,9 +417,7 @@ export default {
     },
 
      getFormatPrice(price){
-       let result = price
-       console.log('this.resConf')
-       console.log(this.resConf);      
+       let result = price           
           if (this.currency)
             result = new Intl.NumberFormat('en', {style: "currency", currency: this.currency} ).format(price)      
       
@@ -323,7 +427,9 @@ export default {
     getSumatory(){
         let count = 0;
         for (const pay of this.filterOrders) {
-            count += parseFloat(pay.Payment) - pay.Refund - pay.Void;            
+           if(pay.Payment >= 0){
+             count += parseFloat(pay.Payment) - parseFloat(pay.Refund) - parseFloat(pay.Void); 
+           }                      
         }
         return this.getFormatPrice(count);
     },
@@ -368,7 +474,7 @@ export default {
         else if(this.dateFrom !== ''){
             
             this.dateFrom = moment(this.dateFrom).format('YYYY-MM-DD');
-            console.log('date from ' + this.dateFrom)   ;  
+            //console.log('date from ' + this.dateFrom)   ;  
               this.$ionic.loadingController
             .create({
                 cssClass: 'my-custom-class',
@@ -413,7 +519,52 @@ export default {
         })
       .then(a => a.present())
     },
-   
+
+     reverseOrders(){
+      this.filterOrders.reverse();
+    },
+
+    scrollToTop() {
+      document.querySelector('ion-card-content').scrollToTop(500);
+    },
+
+    getFormateHour: function(date){
+        return Utils.getFormatHourDate(date);         
+    },
+
+   viewOrderFrom: async function(from, id){
+    if(from ==='Order' || from ==='Catering'){
+        this.$router.push({
+        name: 'OrderDetails', 
+        params: { orderId: id }
+        });
+    }
+    else if(from=='Reservation'){
+      try {
+          this.spinner1 = true;
+        const reservation = await Api.fetchById('Reservation', id);
+          this.spinner1 = false;
+        if(reservation)
+        this.$router.push({
+            name: 'ReservationDetails',
+            params: {reservation: reservation.data }
+            }) 
+        
+      } catch (error) {
+          this.spinner1 = false;
+          console.log(error);
+          
+      }                 
+    }  
+   },
+
+   deliveryPayments(){
+     if(this.showDeliveryPayment)
+      this.filterOrders = this.filterOrders.filter(p => p.DeliveryPayment);
+      else
+       this.filterOrders = this.orders 
+   },
+
      
     
   },

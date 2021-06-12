@@ -190,7 +190,7 @@ export default {
             loading.present()
             setTimeout(() => {  // Some AJAX call occurs
                 Api.fetchAll(this.modelName).then(response => {
-                  console.log(response.data)
+                  //console.log(response.data)
                   this.allCustomers = response.data
                   
                   this.fetchOrders(loading)

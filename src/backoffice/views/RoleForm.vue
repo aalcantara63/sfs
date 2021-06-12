@@ -21,10 +21,10 @@
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
     <div v-else>
-        <ion-item>
+        <ion-item v-if="canEdit">
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.name')}}</ion-label>
           <ion-input type="text" name="name"
-          @input="name = $event.target.value" 
+          @input="name = $event.target.value"
           v-bind:value="name">
           </ion-input>
         </ion-item>
@@ -306,6 +306,24 @@
             </ion-item>
         </ion-list>
 
+        <ion-item>
+            <p>{{$t('backoffice.form.permissionsGroup.permissionDriver')}}</p>
+            <ion-chip slot="end" :color="driver_color" @click="selectDeselectDriver()">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <ion-label>{{driver_title}}</ion-label>
+            </ion-chip>
+        </ion-item>
+        <ion-list>
+            <ion-item v-for="permission in driverPermissions" v-bind:key="permission.val">
+            <ion-label>{{permission.val}}</ion-label>
+            <ion-checkbox
+                slot="end"
+                @ionChange="permission.isChecked=$event.target.checked"
+                :checked="permission.isChecked">
+            </ion-checkbox>
+            </ion-item>
+        </ion-list>
+
         <!-- <ion-item>
             <p>{{$t('backoffice.form.permissionsGroup.permissionOccupation')}}</p>
             <ion-checkbox color="success" slot="end" @ionChange="selectDeselectOccupation($event.target.checked)"
@@ -404,6 +422,25 @@
             </ion-item>
         </ion-list>
 
+        <ion-item>
+            <p>{{$t('backoffice.form.permissionsGroup.permissionPayment')}}</p>
+            <ion-chip slot="end" :color="payment_color" @click="selectDeselectPayment()">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <ion-label>{{payment_title}}</ion-label>
+            </ion-chip>
+        </ion-item>
+        <ion-list>
+            <ion-item v-for="permission in paymentPermissions" v-bind:key="permission.val">
+            <ion-label>{{permission.val}}</ion-label>
+            <ion-checkbox
+                slot="end"
+                @ionChange="permission.isChecked=$event.target.checked"
+                :checked="permission.isChecked"
+                >
+            </ion-checkbox>
+            </ion-item>
+        </ion-list>
+
       <br/>
       <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveRole()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
     </div>
@@ -425,6 +462,7 @@ export default {
       id: null,
       name: '',
       description: '',
+      canEdit: false,
 
       menuPermissions: [
         { id: 'canViewMenu', val: this.$t('backoffice.form.permissionsGroup.canViewMenu'), isChecked: false },
@@ -480,6 +518,12 @@ export default {
         { id: 'canEditUser', val: this.$t('backoffice.form.permissionsGroup.canEditUser'), isChecked: false },
         { id: 'canDeleteUser', val: this.$t('backoffice.form.permissionsGroup.canDeleteUser'), isChecked: false },
       ],
+      driverPermissions: [
+        { id: 'canViewDriver', val: this.$t('backoffice.form.permissionsGroup.canViewDriver'), isChecked: false },
+        { id: 'canCreateDriver', val: this.$t('backoffice.form.permissionsGroup.canCreateDriver'), isChecked: false },
+        { id: 'canEditDriver', val: this.$t('backoffice.form.permissionsGroup.canEditDriver'), isChecked: false },
+        { id: 'canDeleteDriver', val: this.$t('backoffice.form.permissionsGroup.canDeleteDriver'), isChecked: false },
+      ],
       occupationPermissions: [
         { id: 'canViewOccupation', val: this.$t('backoffice.form.permissionsGroup.canViewOccupation'), isChecked: false },
         { id: 'canCreateOccupation', val: this.$t('backoffice.form.permissionsGroup.canCreateOccupation'), isChecked: false },
@@ -513,6 +557,9 @@ export default {
       settingPermissions: [
         { id: 'canChangeSetting', val: this.$t('backoffice.form.permissionsGroup.canChangeSetting'), isChecked: false },  
       ],
+      paymentPermissions: [
+        { id: 'canViewPayments', val: this.$t('backoffice.form.permissionsGroup.canViewPayment'), isChecked: false },  
+      ],
 
       isBackdrop: false,
 
@@ -526,6 +573,10 @@ export default {
         setting: false,
         setting_color: 'success',
         setting_title: 'Select all',
+
+        payment: false,
+        payment_color: 'success',
+        payment_title: 'Select all',
 
         order: false,
         order_color: 'success',
@@ -542,6 +593,10 @@ export default {
         user: false,
         user_color: 'success',
         user_title: 'Select all',
+
+        driver: false,
+        driver_color: 'success',
+        driver_title: 'Select all',
 
         otherCharge: false,
         otherCharge_color: 'success',
@@ -716,8 +771,8 @@ export default {
   methods: {
     init(){
         this.id = this.$route.params.roleId;
-        console.log("Role id");
-        console.log(this.id);
+        //console.log("Role id");
+        //console.log(this.id);
         if (this.id){
             this.$ionic.loadingController
                 .create({
@@ -730,9 +785,10 @@ export default {
                     setTimeout(() => {  // Some AJAX call occurs
                         Api.fetchById(this.modelName, this.id)
                             .then(response => {
-                                console.log(response.data);
+                                //console.log(response.data);
                             this.name = response.data.Name;
                             this.description = response.data.Description;
+                            this.canEdit = response.data.CanEdit;
 
                             this.menuPermissions[0].isChecked = response.data.canViewMenu;
                             this.menuPermissions[1].isChecked = response.data.canCreateMenu;
@@ -807,7 +863,14 @@ export default {
 
                             this.settingPermissions[0].isChecked = response.data.canChangeSetting;
 
-                            console.log(response.data);
+                            this.paymentPermissions[0].isChecked = response.data.canViewPayments;
+
+                            this.driverPermissions[0].isChecked = response.data.canViewDriver;
+                            this.driverPermissions[1].isChecked = response.data.canEditDriver;
+                            this.driverPermissions[2].isChecked = response.data.canCreateDriver;
+                            this.driverPermissions[3].isChecked = response.data.canDeleteDriver;
+
+                            //console.log(response.data);
                             loading.dismiss();
                             })
                             .catch(e => {
@@ -819,7 +882,7 @@ export default {
                 })  
         }
 
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -977,7 +1040,7 @@ export default {
             else
                 permission.isChecked = false;
         });
-        console.log(this.tablePermissions);
+        //console.log(this.tablePermissions);
     },
     selectDeselectTax(){
         this.tax = !this.tax;
@@ -1050,6 +1113,25 @@ export default {
 
         this.userPermissions.forEach(permission => {
             if (this.user)
+                permission.isChecked = true;
+            else
+                permission.isChecked = false;
+        });
+    },
+    selectDeselectDriver(){
+        this.driver = !this.driver;
+        if (this.driver_color == 'success')
+        {
+            this.driver_color = 'danger'
+            this.driver_title = 'Deselect all'
+        }  
+        else{
+            this.driver_color = 'success'
+            this.driver_title = 'Select All'
+        }
+
+        this.driverPermissions.forEach(permission => {
+            if (this.driver)
                 permission.isChecked = true;
             else
                 permission.isChecked = false;
@@ -1150,6 +1232,25 @@ export default {
                 permission.isChecked = false;
         });
     },
+    selectDeselectPayment(){
+        this.payment = !this.payment;
+        if (this.payment_color == 'success')
+        {
+            this.payment_color = 'danger'
+            this.payment_title = 'Deselect all'
+        }  
+        else{
+            this.payment_color = 'success'
+            this.payment_title = 'Select All'
+        }
+
+        this.paymentPermissions.forEach(permission => {
+            if (this.payment)
+                permission.isChecked = true;
+            else
+                permission.isChecked = false;
+        });
+    },
     selectDeselectAll(){
         this.all = !this.all;
         if (this.all_color == 'success')
@@ -1177,6 +1278,8 @@ export default {
         this.selectDeselectReservation(this.all);
         this.selectDeselectOrder(this.all);
         this.selectDeselectSetting(this.all);
+        this.selectDeselectPayment(this.all);
+        this.selectDeselectDriver(this.all);
     },
     isValidForm(){
         // let errors = [];
@@ -1270,6 +1373,11 @@ export default {
                 "canCreateOrder": this.orderPermissions[2].isChecked,
                 "canViewOrderForDelivery": this.orderPermissions[3].isChecked,
                 "canChangeSetting": this.settingPermissions[0].isChecked,
+                "canViewPayments": this.paymentPermissions[0].isChecked,
+                "canViewDriver": this.driverPermissions[0].isChecked,
+                "canCreateDriver": this.driverPermissions[1].isChecked,
+                "canEditDriver": this.driverPermissions[2].isChecked,
+                "canDeleteDriver": this.driverPermissions[3].isChecked,
             }
             //If I am editing
             if (this.id){

@@ -354,7 +354,7 @@
                       </ion-item>
                       <ion-list>
                           <ion-item v-for="ingredient in ingredients" v-bind:key="ingredients.indexOf(ingredient)">
-                            <ion-label>{{ ingredient }}</ion-label>
+                            <ion-label>{{ ingredient.name }}</ion-label>
                             <ion-button color="danger" @click="removeIngredient(ingredients.indexOf(ingredient))"><ion-icon slot="icon-only" name="remove"></ion-icon></ion-button>
                           </ion-item>
                       </ion-list>
@@ -452,6 +452,9 @@ export default {
       vf_qr: '',
       variantGroupId: null,
       variantList: [],
+
+      //Current list page
+      currentPageOrder: 1
       
     }
   },
@@ -471,7 +474,7 @@ export default {
   },
   methods: {
     segmentChanged(value){            
-        console.log(value)
+        //console.log(value)
         if(value === 'general'){
             this.general = true
             this.variants = false
@@ -638,12 +641,13 @@ export default {
         this.vf_qr = ''
     },
     init(){
+        this.currentPageOrder = this.$route.params.currentPageOrder;
         this.screenWidth = screen.width;
         this.id = this.$route.params.productId;
         this.sourceCategoryId = this.$route.params.categoryId;
         this.sourceMenuId = this.$route.params.menuId;
         this.cType = this.$route.params.type || 'product';
-        console.log(this.cType);
+        //console.log(this.cType);
 
         this.fetchCategories();
         // this.fetchVariantGroups();
@@ -672,7 +676,7 @@ export default {
                         if (response.data.VariantGroupId)
                         {
                             this.variantGroupId = response.data.VariantGroupId;
-                            console.log(this.variantGroupId)
+                            //console.log(this.variantGroupId)
                             Api.fetchById('VariantGroup', this.variantGroupId)
                             .then(response => {
                                 this.variantList = response.data.Variants
@@ -686,6 +690,7 @@ export default {
                         if (this.cType == 'service')
                             this.showServicePrice = response.data.ShowServicePrice;
                         this.ingredients = response.data.Ingredients;
+                        //console.log(this.ingredients)
                         if (this.ingredients.length > 0)
                             this.addIngredients = true;
                         this.aggregatesCant = response.data.AggregateCant;
@@ -707,7 +712,7 @@ export default {
             })  
         }
 
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     goToBack(){
         if (this.sourceMenuId != null)
@@ -724,7 +729,8 @@ export default {
             this.$router.push({ 
                 name: 'Product',
                 params: {
-                    type: this.cType
+                    type: this.cType,
+                    currentPageOrder: this.currentPageOrder,
                 }
             })
         }
@@ -812,13 +818,14 @@ export default {
         // }
     },
     addIngredient(){
-        if (this.textIngredient != "" && this.ingredients.indexOf(this.textIngredient) == -1)
+        if (this.textIngredient != "" && 
+                !this.ingredients.find(i => i.name == this.textIngredient))
         {
-            this.ingredients.push(this.textIngredient)
+            this.ingredients.push({ 'name': this.textIngredient, 'selected': 1})
             this.textIngredient = ""
         }
         else{
-          this.ShowMessage('Error', 'Error', 'Error')
+          this.ShowMessage(this.$t('backoffice.form.validate.validate'), '', this.$t('backoffice.form.validate.ingredient'))
         }      
     },
     removeIngredient(index){
@@ -830,7 +837,7 @@ export default {
         this.spinner = true
         Api.getProductsByCategory(this.aggregateCategoryId)
         .then(response => {
-            console.log(response.data)
+            //console.log(response.data)
             this.productByCategory = response.data
             this.updateSelectedProduct()
             this.spinner = false
@@ -841,7 +848,7 @@ export default {
         })  
     },
     fetchAggregatesObj(aggregateIds){
-      console.log(aggregateIds);
+      //console.log(aggregateIds);
         Api.fetchAll(this.modelName)
           .then(response => { 
               let productAggregates = response.data
@@ -852,7 +859,7 @@ export default {
                     this.aggregates.push(a)
                  })
               })
-              console.log(this.aggregates)
+              //console.log(this.aggregates)
           })
           .catch(e => {
               console.log(e)
@@ -923,7 +930,7 @@ export default {
 
         reader.onload = (e) => {
             this.file = e.target.result;
-            console.log(this.file);
+            //console.log(this.file);
         };
         reader.readAsDataURL(fileObject);
     },
@@ -942,7 +949,7 @@ export default {
 
         reader.onload = (e) => {
             this.vf_file = e.target.result;
-            console.log(this.vf_file);
+            //console.log(this.vf_file);
         };
         reader.readAsDataURL(fileObject);
     },
@@ -976,7 +983,8 @@ export default {
     saveProduct: async function(){
 
         // this.spinner = true
-        console.log('CategoryId: '+ this.categoryId)
+        // console.log('CategoryId: '+ this.categoryId)
+        //console.log(this.ingredients)
 
         if (this.isValidForm())
         {
@@ -1030,10 +1038,10 @@ export default {
                   item["EposId"] = this.epos;
               }
               this.spinner = true;
-              console.log(Api.token);
+              //console.log(Api.token);
 
               //VariantGroup
-              console.log("Variant group: " + this.variantGroupId)
+              //console.log("Variant group: " + this.variantGroupId)
               if (this.variantList.length > 0)
               {
                   let itemVG = {
@@ -1045,8 +1053,8 @@ export default {
                   {
                       itemVG["_id"] = this.variantGroupId
                       const v = await Api.putIn('VariantGroup', itemVG)
-                      console.log("Es esta")
-                      console.log(v)
+                      //console.log("Es esta")
+                      //console.log(v)
                       if (v.status == 200 && v.statusText === "OK")
                       {
                           item["VariantGroupId"] = this.variantGroupId
@@ -1096,11 +1104,11 @@ export default {
                   else{
                       Api.postIn('variantGroup', itemVG)
                       .then(response => {
-                          console.log('AQUIII')
+                          //console.log('AQUIII')
                           item["VariantGroupId"] = response.data._id
                         //   console.log("ID")
                         //   console.log(item.VariantGroupId)
-                          console.log(response)
+                          //console.log(response)
                           this.postInProduct(item)
                       })
                   }

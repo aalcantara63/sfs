@@ -25,7 +25,7 @@
             <ion-row class="left">
                 <ion-col>
                     <div v-if="customer"><span class="title">{{$t('backoffice.form.titles.customer')}}:</span> {{customer.Name}}</div>
-                    <div v-else><span class="title">{{$t('backoffice.form.titles.customer')}}:</span> {{order.CustomerName}}</div>
+                    <div v-if="order.CustomerName"><span class="title">{{$t('backoffice.form.titles.customer')}}:</span> {{order.CustomerName }}</div>
                 </ion-col>
             </ion-row>
             <ion-row class="left">
@@ -461,12 +461,12 @@ export default {
   },
   mounted: function(){
     EventBus.$on('ProductsSelected', (productsSelected) => {
-      console.log(productsSelected)
+      //console.log(productsSelected)
       productsSelected.forEach(prod => {
           prod.State = 0
           this.products.push(prod)
-          console.log("El Product")
-          console.log(prod)
+          //console.log("El Product")
+          //console.log(prod)
       })
       this.calcTotal()
     });
@@ -478,7 +478,7 @@ export default {
     // });
   },
   created: async function(){
-    console.log(this.order)
+    //console.log(this.order)
     await this.init();
     this.screenWidth = screen.width;
   },
@@ -508,8 +508,8 @@ export default {
                 this.currency = response.data.Currency
                 this.restaurantActive = response.data
                 //Restaurant Active.
-                console.log("RESTAURANT ACTIVE")
-                console.log(this.restaurantActive)
+                //console.log("RESTAURANT ACTIVE")
+                //console.log(this.restaurantActive)
             }).catch(e => {
                 console.log(e)
             })
@@ -519,9 +519,9 @@ export default {
       Api.getAvailbleTax().then(response => {
           this.taxName = response.data.Name
           //TaxName
-          console.log("TAXNAME")
-          console.log(response.data)
-          console.log(this.taxName)
+          //console.log("TAXNAME")
+          //console.log(response.data)
+          //console.log(this.taxName)
       })
       .catch(e => {
           console.log("ERROR TAXNAME: " + e)
@@ -566,11 +566,11 @@ export default {
         partialSubtotal -= this.discountAmount
 
         this.subtotal = partialSubtotal.toString()
-        console.log("SUBTOTAL")
-        console.log(this.subtotal)
+        //console.log("SUBTOTAL")
+        //console.log(this.subtotal)
     },
     calcTotal(){
-        console.log("HELLO")
+        //console.log("HELLO")
         let partialTotal = 0
         
         this.calcSubtotal()
@@ -579,8 +579,8 @@ export default {
         partialTotal +=  parseFloat(this.calcTax)
         partialTotal += parseFloat(this.calcTip)    
         this.total = partialTotal.toFixed(2)
-        console.log("TOTAL")
-        console.log(this.total)
+        //console.log("TOTAL")
+        //console.log(this.total)
     },
     pendingPay(){
         this.calcTotal()
@@ -600,8 +600,8 @@ export default {
                 setTimeout(() => {  // Some AJAX call occurs    
                     Api.fetchById(this.modelName, this.id)
                     .then(response => {
-                        console.log("ORDER");
-                        console.log(response.data);
+                        //console.log("ORDER");
+                        //console.log(response.data);
                         this.order = response.data;
                         this.date = this.order.Date;
                         this.orderType = this.order.OrderType;
@@ -643,8 +643,8 @@ export default {
               {
                 text: this.$t('backoffice.form.messages.buttons.ok'),
                 handler: () => {
-                    console.log("Change State")
-                    console.log(this.products[this.products.indexOf(product)])
+                    //console.log("Change State")
+                    //console.log(this.products[this.products.indexOf(product)])
                     this.products[this.products.indexOf(product)].State = 1         
                 }
               }
@@ -874,7 +874,7 @@ export default {
         }
     },
     async cancelTicket(){
-            console.log('IN cancel Ticket');
+            //console.log('IN cancel Ticket');
 
         if(this.order.AuthorizationPayment){
     
@@ -884,11 +884,12 @@ export default {
                     const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
                     const  restaurantId = this.restaurantActive._id;
                     const payMethod = this.restaurantActive.PayMethod;
+                     const isDelivery = this.order.AuthorizationPayment[0].paymentInfo.isDelivery || false;
 
                     this.spinner = true; 
-                    const resVoid = await payAuthorizeNet.void(transId, moto, restaurantId, payMethod)
-                    console.log("Response Void")
-                    console.log(resVoid)
+                    const resVoid = await payAuthorizeNet.void(transId, moto, restaurantId, payMethod, isDelivery)
+                    //console.log("Response Void")
+                    //console.log(resVoid)
                     if(resVoid){
                         this.order.State = 6;
                         await  Api.putIn('order', this.order);
@@ -918,11 +919,11 @@ export default {
                 tip: this.calcTip.toFixed(2),
                 taxName: this.taxName, //?        
                 products: this.products,  
-                firstName : this.order.CustomerName        
+                firstName : this.order.CustomerName || ''      
         }
 
-        console.log("AddToTicket")
-        console.log(data)
+        //console.log("AddToTicket")
+        //console.log(data)
 
         if(this.order.AuthorizationPayment){
         
@@ -936,15 +937,15 @@ export default {
                 if(this.order.AuthorizationPayment[0].paymentInfo.accountNumber)
                     data.cardNumber = this.order.AuthorizationPayment[0].paymentInfo.accountNumber;
 
-                console.log('data');
-                console.log(data);
-                console.log("1");
+                //console.log('data');
+                //console.log(data);
+                //console.log("1");
                 const response = await payAuthorizeNet.firstAuthorizeOrder(data, moto);
-                console.log("2");
-                console.log(response)
+                //console.log("2");
+                //console.log(response)
                 if(response){
-                    console.log('response');
-                    console.log(response);
+                    //console.log('response');
+                    //console.log(response);
                     this.order.AuthorizationPayment = [{
                         state: 1,
                         total: response.total,
@@ -972,7 +973,7 @@ export default {
 
             }
             else{
-                console.log('No tiene transId');
+                //console.log('No tiene transId');
                 this.showToastMessage('TransId not found', 'danger')
                 return false;
             }
@@ -988,18 +989,18 @@ export default {
              if(this.order.AuthorizationPayment){
                 this.spinner = true;
                 let autho = true;
-                console.log('Payment Method  '+ this.restaurantActive.PayMethod )
+                //console.log('Payment Method  '+ this.restaurantActive.PayMethod )
                 if(this.restaurantActive.PayMethod !== 'TSYS')                
                      autho =  await this.addToTicket();
-                console.log('autho in TICKET FORM: ' + autho)
+                //console.log('autho in TICKET FORM: ' + autho)
                 if(autho)
                 {
                     const invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
                     const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
-                    console.log('Capture del Authorization '  + invoiceNumber + ' '+ moto , ' '+ this.restaurantActive.PayMethod);
+                    //console.log('Capture del Authorization '  + invoiceNumber + ' '+ moto , ' '+ this.restaurantActive.PayMethod);
                     const response = await payAuthorizeNet.captureOrder(invoiceNumber, moto,  this.restaurantActive._id, this.restaurantActive.PayMethod);      
-                    console.log('RESPONSE CAPTURE');
-                    console.log(response);
+                    //console.log('RESPONSE CAPTURE');
+                    //console.log(response);
                     delete this.order.AuthorizationPayment;
                     this.recivePayment(response);
                     this.showToastMessage('The payment was complete successfully', 'success')
@@ -1052,8 +1053,8 @@ export default {
                             isTicket: true,
                         }
 
-                    console.log("PROPS DATA")
-                    console.log(modalProps)
+                    //console.log("PROPS DATA")
+                    //console.log(modalProps)
 
                  return this.$ionic.modalController
                     .create({

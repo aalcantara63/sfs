@@ -9,23 +9,35 @@
             <ion-buttons slot="start">
               <ion-back-button default-href="/controlPanel" @click="$router.push({ name: 'ControlPanel'})"></ion-back-button>
             </ion-buttons>
-            <ion-label style="padding: 20px 100px;">
+            <ion-label v-if="!isForDriversSupervisor" style="padding: 20px 100px;">
               <h1>{{$t('backoffice.titles.users')}}</h1>            
             </ion-label>
-
-            <ion-label slot="end">
-            <router-link to="/user-form">
-                <ion-chip style="font-size: 30px" outline color="primary" v-if="hasPermission('canCreateUser')">
-                    <ion-label><ion-icon name="add"></ion-icon></ion-label>
-                </ion-chip>
-            </router-link>
+            <ion-label v-if="isForDriversSupervisor" style="padding: 20px 100px;">
+              <h1>{{$t('backoffice.form.titles.drivers')}}</h1>            
             </ion-label>
+
+            <ion-label v-if="!isForDriversSupervisor" slot="end">
+              <router-link to="/user-form">
+                  <ion-chip style="font-size: 30px" outline color="primary" v-if="hasPermission('canCreateUser')">
+                      <ion-label><ion-icon name="add"></ion-icon></ion-label>
+                  </ion-chip>
+              </router-link>
+            </ion-label>
+
+            <ion-label v-if="isForDriversSupervisor" slot="end">
+              <div @click="goToSupervisorForm()">
+                  <ion-chip style="font-size: 30px" outline color="primary" v-if="hasPermission('canCreateDriver')">
+                      <ion-label><ion-icon name="add"></ion-icon></ion-label>
+                  </ion-chip>
+              </div>
+            </ion-label>
+
           </ion-toolbar>
 
           <ion-searchbar  
                 @input="handleInput($event.target.value)" @ionClear="filterUsers = users"
-                :placeholder="$t('frontend.home.search')">           
-            </ion-searchbar>
+                :placeholder="$t('frontend.home.search')">       
+          </ion-searchbar>
     </ion-header>
 
     <div v-if="spinner">
@@ -42,7 +54,8 @@
               <ion-item-sliding v-for="user in paginated('languages')" v-bind:key="user._id">
                 <ion-item>
                   <ion-thumbnail slot="start">
-                      <ion-img :src="user.ImageUrl"></ion-img>
+                      <ion-img v-if="user.ImageUrl  != ''" :src="user.ImageUrl"></ion-img>
+                      <ion-img v-else :src="require('../assets/user.png')"></ion-img>
                   </ion-thumbnail>
                   <ion-label>
                       <h2>{{ user.FirstName }} {{user.LastName}}</h2>
@@ -50,11 +63,19 @@
                   </ion-label>
                   <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
                 </ion-item>
-                <ion-item-options side="end">
+                <ion-item-options v-if="!isForDriversSupervisor" side="end">
                   <ion-item-option v-if="hasPermission('canEditUser')" color="primary" @click="editUser(user._id)">
                     <ion-icon slot="icon-only" name="create"></ion-icon>
                   </ion-item-option>
                   <ion-item-option v-if="hasPermission('canDeleteUser')" color="danger" @click="deleteUser(user._id)">
+                    <ion-icon slot="icon-only" name="trash"></ion-icon>
+                  </ion-item-option>
+                </ion-item-options>
+                <ion-item-options v-else side="end">
+                  <ion-item-option v-if="hasPermission('canEditDriver')" color="primary" @click="editUser(user._id)">
+                    <ion-icon slot="icon-only" name="create"></ion-icon>
+                  </ion-item-option>
+                  <ion-item-option v-if="hasPermission('canDeleteDriver')" color="danger" @click="deleteUser(user._id)">
                     <ion-icon slot="icon-only" name="trash"></ion-icon>
                   </ion-item-option>
                 </ion-item-options>
@@ -78,17 +99,26 @@
             <ion-list>
               <ion-item v-for="user in paginated('languages')" v-bind:key="user._id">
                   <ion-thumbnail slot="start">
-                      <ion-img :src="user.ImageUrl"></ion-img>
+                      <ion-img v-if="user.ImageUrl  != ''" :src="user.ImageUrl"></ion-img>
+                      <ion-img v-else :src="require('../assets/user.png')"></ion-img>
                   </ion-thumbnail>
                   <ion-label>
                       <h2>{{ user.FirstName }} {{user.LastName}}</h2>
                       <h3>{{ user.Email }}</h3>
                   </ion-label>
-                <ion-item-group side="end">
+                <ion-item-group v-if="!isForDriversSupervisor" side="end">
                   <ion-button v-if="hasPermission('canEditUser')" color="primary" @click="editUser(user._id)">
                     <ion-icon slot="icon-only" name="create"></ion-icon>
                   </ion-button>
                   <ion-button v-if="hasPermission('canDeleteUser')" color="danger" @click="deleteUser(user._id)">
+                    <ion-icon slot="icon-only" name="trash"></ion-icon>
+                  </ion-button>
+                </ion-item-group>
+                <ion-item-group v-else side="end">
+                  <ion-button v-if="hasPermission('canEditDriver')" color="primary" @click="editUser(user._id)">
+                    <ion-icon slot="icon-only" name="create"></ion-icon>
+                  </ion-button>
+                  <ion-button v-if="hasPermission('canDeleteDriver')" color="danger" @click="deleteUser(user._id)">
                     <ion-icon slot="icon-only" name="trash"></ion-icon>
                   </ion-button>
                 </ion-item-group>
@@ -116,13 +146,18 @@ export default {
 
   name: 'staff',
   created: function(){
-    console.log(screen.width)
+    this.isForDriversSupervisor = this.$route.params.isForDriversSupervisor || false
+
+    //console.log("IS SUPERVISOR")
+    //console.log(this.isForDriversSupervisor);
+
+    //console.log(screen.width)
     this.screenWidth = screen.width;
     this.fetchUsers();
 
     window.onresize = function() {
       this.screenWidth = screen.width
-      console.log(this.screenWidth)
+      //console.log(this.screenWidth)
     }
   },
   data () {
@@ -138,6 +173,8 @@ export default {
 
       spinner: false,
       screenWidth: 0,
+
+      isForDriversSupervisor: false,
     }
   }, 
   methods: {
@@ -151,6 +188,14 @@ export default {
     //     })
     //     .then(a => a.present())
     // },
+    goToSupervisorForm(){
+        this.$router.push({
+            name: 'UserForm',
+            params: {
+                isForDriversSupervisor: this.isForDriversSupervisor,
+            }
+        })
+    },
     ifErrorOccured(action){
 
       return this.$ionic.alertController.create({
@@ -204,6 +249,15 @@ export default {
                       case 'canDeleteUser':
                           res = roles[index].canDeleteUser;
                           break;
+                      case 'canCreateDriver':
+                          res = roles[index].canCreateDriver;
+                          break;
+                      case 'canEditDriver':
+                          res = roles[index].canEditDriver;
+                          break;
+                      case 'canDeleteDriver':
+                          res = roles[index].canDeleteDriver;
+                          break;
                       default:
                           break;
                 }
@@ -251,6 +305,10 @@ export default {
                   // console.log(response.data)
                   this.users = response.data
                   this.users = this.users.filter(usr => usr.IsSupport == false || !usr.IsSupport)
+                  if (this.isForDriversSupervisor)
+                      this.users = this.users.filter(usr => usr.IsDriver && usr.IsExternalDriver)
+                  else
+                      this.users = this.users.filter(usr => !usr.IsExternalDriver)
                   this.filterUsers = this.users
                   loading.dismiss()
                 })
@@ -264,9 +322,12 @@ export default {
     },
     editUser: function(id){
         this.$router.push({
-        name: 'UserForm', 
-        params: { userId: id }
-      });
+          name: 'UserForm', 
+          params: { 
+            userId: id ,
+            isForDriversSupervisor: this.isForDriversSupervisor
+          }
+        });
     },
     deleteUser: function(id){
 

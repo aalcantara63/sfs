@@ -159,8 +159,8 @@ export default {
   methods: {
       init(){
             this.id = this.$route.params.settingId;
-            console.log("SETTING_ID")
-            console.log(this.id)
+            //console.log("SETTING_ID")
+            //console.log(this.id)
             if (this.id){
                 this.$ionic.loadingController
             .create({
@@ -186,7 +186,7 @@ export default {
             })  
             }
 
-            console.log(this.$route.params);
+            //console.log(this.$route.params);
       },
     //   setColorPreview(){
     //       let allStyles = ":root { -ion-color-primary: #0ff; " +
@@ -342,7 +342,7 @@ export default {
                 }
       },
       getToolbarStyles(){
-          console.log(this.primaryBackground);
+          //console.log(this.primaryBackground);
           return {
                     'color': this.primaryContrast.hex,
                     'background-color': this.primaryBackground.hex,
@@ -354,7 +354,7 @@ export default {
                 }
       },
       getPrimaryStyles(){
-          console.log(this.primaryBackground);
+          //console.log(this.primaryBackground);
           return {
                     'color': this.primaryContrast.hex,
                     'background-color': this.primaryBackground.hex,

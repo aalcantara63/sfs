@@ -103,7 +103,7 @@
 
         //loading device
         const device = this.grandfather.$store.state.device
-        console.log(device)
+        //console.log(device)
         this.ip = device.ip
         this.port = device.port
         this.sn = device.sn
@@ -124,7 +124,7 @@
         //     });   
         // },
         changeModeId(val){
-            console.log(val)
+            //console.log(val)
             this.modeId = val
         },
         async getDeviceInfoBySerialNo(number){
@@ -133,7 +133,7 @@
             if (res.data){
                 if (window.DOMParser)
                 {
-                    console.log("Caso1");
+                    //console.log("Caso1");
                     let parser = new DOMParser();
                     let xmlDoc = parser.parseFromString(res.data, "text/xml");
                     const code = xmlDoc.getElementsByTagName("ResultCode")[0].childNodes[0].nodeValue
@@ -151,7 +151,7 @@
                 }
                 else // Internet Explorer
                 {
-                    console.log("Caso2");
+                    //console.log("Caso2");
                     let xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
                     xmlDoc.async = false;
                     xmlDoc.loadXML(res.data);
@@ -176,8 +176,8 @@
             }
         },
         callback(res){
-            console.log("SUCCESSFULLY---RESPONSE:")
-            console.log(res)
+            //console.log("SUCCESSFULLY---RESPONSE:")
+            //console.log(res)
             if (res[4] == '000000')
             {
                 const resData = {
@@ -197,13 +197,13 @@
                 //     'expirationCard': res[9][2],
                 //     'accountType': res[9][7],
                 // }
-                console.log('TRANS-ID')
-                console.log("res[5][3]" + res[5][3])
-                console.log("res[6][3]" + res[6][3])
-                console.log("res[4][3]" + res[4][3])
-                console.log("res[5][4]" + res[5][4])
-                console.log('RES DATA')
-                console.log(resData)
+                //('TRANS-ID')
+                //console.log("res[5][3]" + res[5][3])
+                //console.log("res[6][3]" + res[6][3])
+                //console.log("res[4][3]" + res[4][3])
+                //console.log("res[5][4]" + res[5][4])
+                //console.log('RES DATA')
+                //console.log(resData)
                 this.parent.responseDevicePay(resData)
                 this.showToastMessage('El pago se realizó exitosamente', 'success')
                 this.spinner = false
@@ -236,7 +236,7 @@
             }
         },
         async doCredit(){
-            console.log(this.grandfather.$store.state.user.ServerId.toString())
+            //console.log(this.grandfather.$store.state.user.ServerId.toString())
 
             if (this.modeId == 'serial'){
 
@@ -246,15 +246,15 @@
                     const val = await this.getDeviceInfoBySerialNo(this.sn) 
 
                     if (val){
-                        console.log("VAL1")
-                        console.log(val)
-                        console.log("IP address: " + this.ip)
-                        console.log("Port: " + this.port)
+                        //console.log("VAL1")
+                        //console.log(val)
+                        //console.log("IP address: " + this.ip)
+                        //console.log("Port: " + this.port)
                         try{
                             
                             this.spinner = true
-                            const anw = await Devices.a930.DoCredit(this.ip, this.port, this.ssl, this.datas, this.callback);
-                            console.log(anw)
+                            await Devices.a930.DoCredit(this.ip, this.port, this.ssl, this.datas, this.callback);
+                            //console.log(anw)
                         }
                         catch(e){
                             console.log(e)
@@ -263,16 +263,16 @@
                         }
                     }
                     else{
-                        console.log("VAL0")
+                        //console.log("VAL0")
                         this.showToastMessage('ERROR: There was an error get IP address and port of the device.', 'danger')
                     }
 
                 }
 
-                if (this.deviceType == 'tsys')
-                {
-                     console.log('Dailenis, tu código aquí')
-                }
+                //if (this.deviceType == 'tsys')
+                //{
+                     //console.log('Dailenis, tu código aquí')
+                //}
 
                 
             }
@@ -283,8 +283,8 @@
 
                     try{    
                         this.spinner = true
-                        const anw = await Devices.a930.DoCredit(this.ip, this.port, this.ssl, this.datas, this.callback);
-                        console.log(anw)
+                        await Devices.a930.DoCredit(this.ip, this.port, this.ssl, this.datas, this.callback);
+                        //console.log(anw)
                     }
                     catch(e){
                         console.log(e)
@@ -294,10 +294,10 @@
 
                 }
 
-                if (this.deviceType == 'tsys')
-                {
-                    console.log('Dailenis, tu código aquí')
-                }
+                //if (this.deviceType == 'tsys')
+                //{
+                    //console.log('Dailenis, tu código aquí')
+               // }
 
             }   
         },

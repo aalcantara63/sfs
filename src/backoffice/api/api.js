@@ -8,6 +8,8 @@ export var Api = {
     token: 'M3nuSucc3ssAp1987456321M3nuSucc3ssAp1741258963M3nuSucc3ssAp1963258741',      
     endPointURL: 'https://sls-eus-dev-serverless-succes-api.azurewebsites.net/api/',
 
+    defaultToken: 'M3nuSucc3ssAp1987456321M3nuSucc3ssAp1741258963M3nuSucc3ssAp1963258741',
+
     //  token: 'eposMiddl34PI',
     // endPointURL: 'https://8akf11lds3.execute-api.us-east-1.amazonaws.com/',
 
@@ -29,8 +31,7 @@ export var Api = {
         }
         else
             this.restaurant = null
-        console.log("ESTE RES")
-        console.log(this.restaurant)
+      
     },
 
     getRestaurant: function(){
@@ -273,8 +274,8 @@ export var Api = {
         return await axios.post(this.endPointURL + 'payment?activateshift4=1', item, {headers: {'Authorization':this.token, 'restaurantid': this.restaurantId}})
     },
 
-    payShift4: async function(item, restaurantId, ipClient){
-        return await axios.post(this.endPointURL + 'payment?payshift4=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId, 'ipClient': ipClient}})
+    payShift4: async function(item, restaurantId, ipClient, isDelivery){
+        return await axios.post(this.endPointURL + 'payment?payshift4=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId, 'ipClient': ipClient, 'isDelivery': isDelivery}})
     },
 
     authorizeShift4: async function(item, moto, restaurantId, ipClient){
@@ -285,17 +286,16 @@ export var Api = {
         return await axios.get(this.endPointURL + 'payment?captureshift4=' + invoice + '&moto=' + moto,  {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
-    refoundShift4: async function(item, moto,  restaurantId){
-        console.log("REFUND")
-        return await axios.post(this.endPointURL + 'payment?refoundshift4='+moto, item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    refoundShift4: async function(item, moto,  restaurantId, isDelivery){       
+        return await axios.post(this.endPointURL + 'payment?refoundshift4='+moto, item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId, 'isDelivery': isDelivery}})
     },
 
-    invoiceInformationShift4: async function(invoice, moto, restaurantId){
-        return await axios.get(this.endPointURL + 'payment?invoice=' + invoice +'&moto='+ moto, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    invoiceInformationShift4: async function(invoice, moto, restaurantId, isDelivery){
+        return await axios.get(this.endPointURL + 'payment?invoice=' + invoice +'&moto='+ moto, {headers: {'Authorization':this.token, 'restaurantid': restaurantId, 'isDelivery': isDelivery}})
     },
 
-    voidShift4: async function(invoice, moto, restaurantId){
-        return await axios.delete(this.endPointURL + 'payment?invoice=' + invoice +'&moto='+ moto, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    voidShift4: async function(invoice, moto, restaurantId, isDelivery){
+        return await axios.delete(this.endPointURL + 'payment?invoice=' + invoice +'&moto='+ moto, {headers: {'Authorization':this.token, 'restaurantid': restaurantId, 'isDelivery': isDelivery}})
     },
 
     getInvoiceSequence: async function(restaurantId){
@@ -414,5 +414,16 @@ export var Api = {
     getPaymentByDateToFrom: async function(datefrom, dateto, restaurantId,){
         return await axios.get(this.endPointURL + 'allpayments?rangedatefrom='+ datefrom +'&rangedateto='+dateto, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
+
+    newRestaurant: async function(data){       
+        return await axios.post(this.endPointURL + 'imenusupport?newRestaurant=1', data, {headers: {'Authorization':this.defaultToken}})
+    },
+
+    deleteRestaurant: async function(id){       
+        return await axios.delete(this.endPointURL + 'imenusupport?deleteRestaurant='+id, {headers: {'Authorization':this.defaultToken}})
+    },
+
+
+
 
 }

@@ -24,6 +24,18 @@
 
           </ion-toolbar>
 
+          <div > 
+              <ion-button @click="menuactive='list'" :style="menuactive==='list'? 'opacity: 1;;border: outset;' : 'opacity: 0.65;border: none;' ">
+                <span class="iconify" data-icon="foundation:list-bullet" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+              </ion-button>  
+              <ion-button    @click="menuactive='grid'" :style="menuactive==='grid'? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;' ">
+                <span class="iconify" data-icon="clarity:grid-chart-solid" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+              </ion-button>  
+              <ion-button style="border: outset;" @click="reverseOrders()">
+                <span class="iconify" data-icon="fluent:chevron-up-down-20-filled" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
+              </ion-button>
+          </div> 
+
           <ion-searchbar  
               @input="handleInput($event.target.value)" @ionClear="filterOrders = orders"
                 :placeholder="$t('frontend.home.search')">           
@@ -50,90 +62,158 @@
         <ion-spinner name="lines" class="spinner"></ion-spinner>
     </div>
     <div v-else>
-        <div v-if="screenWidth < 600">
-          <paginate v-if="filterOrders.length > 0"
+      
+        <div >
+          <paginate v-if="filterOrders.length > 0 && menuactive==='list'"
             name="languages"
             :list="filterOrders"
             :per="8"
           >
             <ion-list>
-              <ion-item-sliding v-for="order in paginated('languages')" v-bind:key="order._id">
-                <ion-item :color="order.State == 5 ? 'success' : 'light'">
-                  <ion-label>
-                      <h2 v-if="order.ClientId">{{ getCustomerById(order.ClientId).Name }}</h2>
-                      <h2 v-else>{{ order.CustomerName }}</h2>
-                      <h2>{{ getFormatedDate(order.Date) }}</h2>
+              <ion-item-sliding v-for="order in paginated('languages')" v-bind:key="order._id"
+                :color="order.State == 5 ? 'success' : 'light'">
+
+                <ion-item :color="order.State == 5 ? 'success' : 'light'">                  
+                  <ion-label class="menu-col-4 elipsis-menu">
+                      <h6 v-if="order.ClientId">{{ getCustomerById(order.ClientId).Name }}</h6>
+                      <h6 v-if="order.CustomerName">{{ order.CustomerName}}</h6>
+                      <h6>{{ order.StaffName }}</h6>
                   </ion-label>
-                  <ion-label position="fixed">
-                      <h3>{{ order.OrderType }}</h3>
-                      <h3 v-if="order.State != 0">{{ $t('frontend.order.closed') }}</h3>
-                      <h3 v-else>{{$t('frontend.reservation.open')}}</h3> 
+                  <ion-label class="menu-col-4 elipsis-menu">
+                    <h6>{{ getFormatedDate(order.Date) }}</h6>
                   </ion-label>
-                  <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
+                  <ion-label class="menu-col-4 elipsis-menu">
+                      <h6>{{ order.OrderType }}</h6>
+                      <h6 v-if="order.State != 0">{{$t('frontend.order.closed')}}</h6>
+                      <h6 v-else>{{$t('frontend.reservation.open')}}</h6>
+                  </ion-label>
+                  <ion-label class="menu-col-4 elipsis-menu">
+                      <h6>{{ getFormatPrice(order.Total) }}</h6>   
+                      <div style="position: absolute;right: 0;top: 30%;">
+                          <span class="iconify" data-icon="mdi:backburger" style="color: grey;margin:0;width: 20px; height: 20px;" data-inline="false"></span>
+                      </div>                 
+                  </ion-label>
                 </ion-item>
+
                 <ion-item-options side="end">
-                  <ion-item-option color="primary" @click="viewOrder(order)">
-                    <ion-icon slot="icon-only" name="list"></ion-icon>
-                  </ion-item-option>
-                  <!-- <ion-item-option v-if="order.State != 0 && order.State != 6 && order.State != 5" color="danger" @click="cancelOrder(order, getCustomerById(order.ClientId))">
-                    <ion-icon slot="icon-only" name="close"></ion-icon>
-                  </ion-item-option> -->
+                   <ion-item-option color="primary"  @click="viewOrder(order)">
+                       <ion-icon slot="icon-only" name="list"></ion-icon>
+                    </ion-item-option>
                 </ion-item-options>
-               
               </ion-item-sliding>
           </ion-list>
 
           </paginate>
 
-          <div v-if="filterOrders.length > 0">
+          <div v-if="filterOrders.length > 0 && menuactive==='list'">
               <paginate-links for="languages" color="primary" 
                 :simple="{
                   next:'»' ,
                   prev: '« ' }"
               ></paginate-links>
           </div>
-          <div class="emptyResult" v-else>
-              {{$t('backoffice.titles.emptyResult')}}
-          </div>
-        </div>
 
-        <div v-if="screenWidth >= 600">
-          <paginate v-if="filterOrders.length > 0"
-            name="languages"
-            :list="filterOrders"
-            :per="8"
-          >
-            <ion-list>
-              <ion-item v-for="order in paginated('languages')" v-bind:key="order._id"
-                :color="order.State == 5 ? 'success' : 'light'">
-                <ion-label>
-                    <h2 v-if="order.ClientId">{{ getCustomerById(order.ClientId).Name }}</h2>
-                    <h2 v-else>{{ order.CustomerName }}</h2>
-                    <h2>{{ getFormatedDate(order.Date) }}</h2>
-                </ion-label>
-                <ion-label position="fixed">
-                    <h3>{{ order.OrderType }}</h3>
-                    <h3 v-if="order.State != 0">{{$t('frontend.order.closed')}}</h3>
-                    <h3 v-else>{{$t('frontend.reservation.open')}}</h3>
-                </ion-label>
-                <ion-item-group side="end">
-                  <ion-button color="primary" @click="viewOrder(order)">
-                    <ion-icon slot="icon-only" name="list"></ion-icon>
-                  </ion-button>
-                </ion-item-group>
-              </ion-item>
-          </ion-list>
+          <div v-if="menuactive==='grid'"  id="gridView">
+                  <v-breakpoint>
+                    <div slot-scope="scope" > 
 
-          </paginate>
+                      <div style="display: flex;flex-wrap: wrap;flex-direction: row;align-items: flex-start;">    
 
-          <div v-if="filterOrders.length > 0">
-              <paginate-links for="languages" color="primary" 
-                :simple="{
-                  next:'»' ,
-                  prev: '« ' }"
-              ></paginate-links>
-          </div>
-          <div class="emptyResult" v-else>
+                        <ion-chip color="primary"
+                          @click="scrollToTop()"
+                        outline style="position: fixed; right: 0;top: 50%;padding: 0; z-index: 20;">
+                          <span class="iconify" data-icon="ant-design:caret-up-filled" data-inline="false" style="margin: 0"></span>
+                        </ion-chip>
+
+                        <div  v-for="order in filterOrders" v-bind:key="order._id" 
+                            style="text-align: right;"             
+                            :class="scope.isLarge || scope.isXlarge ? 'menu-col-3 card-categories' : scope.isMedium? 'menu-col-4 card-categories' : scope.isSmall || scope.noMatch ?'menu-col-12 card-categories': 'menu-col-3 card-categories'">
+                                
+                              <ion-chip style="margin: 0;bottom: -10px; font-weight: bold;" outline
+                                :color="order.State == 5 ? 'success' : order.State == 6 ? 'danger' : order.State == 0 ? 'warning' : order.State == 4 ? 'primary' : 'secondary'">
+                                {{getFormateHour(order.Date)}}
+                              </ion-chip>
+                            <ion-card style="text-align: left;"   
+                            :color="order.State == 5 ? 'success' : order.State == 6 ? 'danger' : order.State == 0 ? 'warning' : order.State == 4 ? 'primary' : 'secondary'">
+                                <ion-card-header style="margin: 10px 5px 2px; padding: 10px;background:white;color: black;">
+                                  <ion-card-title  style="color: black;">{{ order.tableService }} <br> 
+                                  <span style="text-transform: uppercase;"> {{order._id.slice(-4)}} </span>                                  
+                                  </ion-card-title>
+                                  
+                                  <ion-card-subtitle v-if="order.CustomerName"
+                                    style="color: black; display: flex;justify-content: space-between;">
+                                    <div style="text-align: center;"> 
+                                      <span class="iconify" data-icon="bx:bxs-user-circle" data-inline="false" 
+                                      style="color: #808080a6;width: 20px;  height: 20px; margin: 0;"></span>
+                                    </div>
+                                    <div style="text-align: right;"  >{{ order.CustomerName }}</div>
+                                  </ion-card-subtitle>
+
+                                  <ion-card-subtitle v-if="order.StaffName"
+                                    style="color: black; display: flex;justify-content: space-between;">
+                                    <div style="text-align: center;"> 
+                                      <span class="iconify" data-icon="grommet-icons:restaurant"
+                                      style="color: #808080a6; width: 20px;  height: 20px; margin: 0;" data-inline="false"></span>
+                                    </div>
+                                    <span style="text-align: right;"  > {{ order.StaffName }}</span>
+                                  </ion-card-subtitle>
+                                    
+                                  </ion-card-header>
+
+                                  <ion-card-content style="margin: 1px 5px; padding: 5px;background:white;color: black;" :key="cartKey + 'C'">
+                                    <div v-for="(prod, index) in order.Products" :key="index" >
+                                          <div style="display: flex;justify-content: space-between; padding: 2px;margin:5px 0">
+                                            <span :style="prod.State===1? 'text-decoration: line-through;':'text-decoration: none'">{{prod.Cant}} X {{prod.Name}} </span> 
+                                            <ion-checkbox v-if="prod.State === 0" color="secondary" @click="changeProductState(order, index)"></ion-checkbox>
+                                            <ion-checkbox v-if="prod.State ===1"  checked disabled color="secondary"></ion-checkbox>
+                                          </div>
+
+                                          <div v-if="prod.Aggregates.length > 0" style="padding-left: 5px;">
+                                            <div v-for="(agg, index1) in prod.Aggregates" :key="index1"  style="padding-left: 2px; display: list-item; list-style: inside" >                                                          
+                                            {{agg.Cant}} X {{agg.Name}} 
+                                            </div>
+                                          </div>
+                                          <div v-if="prod.Note" style="padding-left: 15px;">                                                                                          
+                                              <span style="background: #ffff0047;" >{{$t('frontend.order.notes')}}: {{prod.Note}}</span>                                 
+                                          </div>                              
+                                    </div>
+                                    <div v-if="order.OtherCharges.length > 0">
+                                        <ion-label class="ion-text-wrap" >
+                                            <strong class="titles-order" >
+                                              {{$t('frontend.order.otherCharges')}}
+                                            </strong> 
+                                        </ion-label>
+                                                        
+                                      <div v-for="charge in order.OtherCharges" v-bind:key="charge.Id">                              
+                                          <div style="padding-left: 2px; display: list-item; list-style: inside;">
+                                              {{ charge.Name }}
+                                          </div>                                
+                                      </div>
+
+                                  </div>
+                                  </ion-card-content>                                  
+                                  
+                              <div style="display: flex;justify-content: space-between;align-items: center;"> 
+                                <div v-tooltip="$t('frontend.order.notes')" @click="showOrderNote(order)" >
+                                  <span  class="iconify" data-icon="bi:info-circle-fill" data-inline="false" style="width: 20px;height: 20px;"></span>
+                                </div>
+                                  <h3 style="text-align: center;">{{ getFormatPrice(order.Total) }}</h3>
+                                  <div v-tooltip="$t('frontend.tooltips.editTicket')" @click="viewOrder(order)">
+                                    <span   class="iconify" data-icon="el:file-edit-alt" data-inline="false" style="width: 20px;height: 20px;"></span>
+                                  </div>
+                              </div>                
+                            </ion-card>
+                        </div>
+
+                      </div>
+                    </div>
+                  </v-breakpoint>
+
+
+                
+              </div>
+
+          <div class="emptyResult" v-if="filterOrders.length === 0">
               {{$t('backoffice.titles.emptyResult')}}
           </div>
         </div>
@@ -146,11 +226,7 @@
 
 import { Api } from '../api/api.js';
 import { Utils } from '../utils/utils.js';
-// import { payAuthorizeNet } from '../api/payments.js';
-// import Modal from './cancelOrderModal.vue';
-import { EventBus } from '../../frontend/event-bus';
-// import { parsePhoneNumber  } from 'libphonenumber-js'
-// import { Twilio } from '../api/twilio.js';
+import { VBreakpoint } from 'vue-breakpoint-component'
 
 export default {
 
@@ -163,13 +239,16 @@ export default {
    this.update = setInterval(() => {
       this.initialize();
    }, 30000);
-  //  this.getRestaurantCustomer();
+   this.getRestaurantCustomer();
   },
   destroyed: function(){
       if (this.update != null){
           clearInterval(this.update);
       }
   },
+  components:{   
+    VBreakpoint: VBreakpoint,  
+  },  
   data () {
     return {
       modelName: 'order',
@@ -198,17 +277,19 @@ export default {
       tertiaryColor: "",
 
       filterStatus: "open",
+      menuactive: 'list',
+      cartKey: 0,
     }
   }, 
   methods: {
     initialize(){
         this.fetchOrders();
         this.fetchCustomers();
-        console.log("Update ticket");
+        //console.log("Update ticket");
     },
     changeFilterStatus(value){
 
-        console.log(value)
+        //console.log(value)
         this.filterStatus = value
         let status = -1
         this.allReservations = this.reservations
@@ -333,15 +414,17 @@ export default {
       });
     },
     getOrdersByCustomerName(name){
-        let ordersList = []
+        let ordersList = [];               
         this.orders.forEach(order => {
             if (order.ClientId){
               if ((this.getCustomerById(order.ClientId).Name).toLowerCase() == name)
                   ordersList.push(order);
             }
             else{
-               if (order.CustomerName.toLowerCase() == name)
+                if(order.CustomerName){
+                  if (order.CustomerName.toLowerCase() == name)
                   ordersList.push(order);
+                }
             }
         })
         return ordersList
@@ -352,14 +435,14 @@ export default {
         {
             // if(this.restaurantCustomer)
             // {
-                console.log("Restaurant Customer")
-                console.log(this.restaurantCustomer._id)
-                console.log(this.orders)
+                //console.log("Restaurant Customer")
+                //console.log(this.restaurantCustomer._id)
+                //console.log(this.orders)
                 // let cat2 = this.orders.filter(item => 
                 //                               item.ClientId.indexOf(this.restaurantCustomer._id) > -1)
                 let cat2 = this.orders.filter(item => item.StaffName &&
                                                     item.StaffName != '')
-                console.log(cat2)
+                //console.log(cat2)
                 if(cat2.length > 0)
                 {
                     this.filterOrders = cat2
@@ -446,8 +529,8 @@ export default {
         Api.findCustomerByEmail(this.resConf.Email)
         .then(response => { 
             this.restaurantCustomer = response.data
-            console.log("RESTAURANT CUSTOMER")
-            console.log(this.restaurantCustomer)
+            //console.log("RESTAURANT CUSTOMER")
+            //console.log(this.restaurantCustomer)
         })
     },
     getRestaurantConfig: function(){
@@ -460,6 +543,9 @@ export default {
       });
     },
     createOrder: function(){
+      if(this.$store.state.restaurantActive.restaurantUrl){
+        return this.$router.push({ name: 'Home', params: {url: this.$store.state.restaurantActive.restaurantUrl}  })
+      } 
 
     //    if (this.restaurantCustomer == null)
     //    {
@@ -473,16 +559,16 @@ export default {
     //    }
     //    else
     //    {
-        EventBus.$emit('clientHasId', this.restaurantCustomer._id);
-        EventBus.$emit('clientHasName', this.restaurantCustomer.Name);
-        EventBus.$emit('clientHasPhone', this.restaurantCustomer.Phone);
-        EventBus.$emit('clientHasEmail', this.restaurantCustomer.EmailAddress);  
-        EventBus.$emit('updateRestaurantSelectedId', this.$store.state.user.RestaurantId);
-        EventBus.$emit('staffName', this.$store.state.user.FirstName + ' ' + this.$store.state.user.LastName);
-        // EventBus.$emit('staffId', '');
-        this.$router.push({
-            path: '/home', 
-        });         
+        // EventBus.$emit('clientHasId', this.restaurantCustomer._id);
+        // EventBus.$emit('clientHasName', this.restaurantCustomer.Name);
+        // EventBus.$emit('clientHasPhone', this.restaurantCustomer.Phone);
+        // EventBus.$emit('clientHasEmail', this.restaurantCustomer.EmailAddress);  
+        // EventBus.$emit('updateRestaurantSelectedId', this.$store.state.user.RestaurantId);
+        // EventBus.$emit('staffName', this.$store.state.user.FirstName + ' ' + this.$store.state.user.LastName);
+        // // EventBus.$emit('staffId', '');
+        //  if(this.$store.state.restaurantActive.restaurantUrl){
+        //       return this.$router.push({ name: 'Home', params: {url: this.$store.state.restaurantActive.restaurantUrl}  })
+        //     }         
     //    }
     },
     hasPermission(permission){
@@ -583,6 +669,59 @@ export default {
     //         }
     //     });
     //   },
+
+
+     reverseOrders(){
+      this.filterOrders.reverse();
+    },
+
+     getFormatPrice: function(price){
+        return Utils.getFormatPrice(price);         
+    },
+
+    getFormateHour: function(date){
+        return Utils.getFormatHour(date);         
+    },
+
+     scrollToTop() {
+      document.querySelector('ion-card-content').scrollToTop(500);
+    },
+
+    async changeProductState(order, index){
+      order.Products[index].State = 1;
+      await Api.putIn('Order', order);
+      this.cartKey ++;
+    },
+
+     async showOrderNote(order){
+      const alert = await this.$ionic.alertController
+      .create({
+        cssClass: 'my-custom-class',
+        header: this.$t('frontend.order.notes') ,
+        message: order.Note,
+        inputs: [  
+          { type:'textarea', name: 'address', placeholder: this.$t('frontend.order.add') },               
+        ],  
+        buttons: [
+          {text: this.$t('frontend.home.cancel'),role: 'cancel', cssClass: 'secondary',
+            handler: () => {                
+            },
+          },
+          {
+            text: this.$t('frontend.home.acept'),
+            handler: async (data) => {
+                if(data.address !== order.Note){
+                  const n = order.Note || ''
+                  order.Note = n + "\n" + data.address;
+                  await Api.putIn('Order', order);
+                }              
+            },
+          },
+        ],
+      })
+      // .then(a => a.present())
+      return alert.present();
+    },
   },
 
 }

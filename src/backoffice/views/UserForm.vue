@@ -81,7 +81,7 @@
             v-bind:value="serverId">
             </ion-input>
         </ion-item>
-        <ion-list>
+        <ion-list v-if="!isForDriversSupervisor">
             <ion-list-header>
                 <ion-label>
                     <span style="color: red">*</span><router-link to="/occupation">{{$t('backoffice.form.fields.occupation')}}</router-link>
@@ -97,6 +97,13 @@
             </ion-item>
 
         </ion-list>
+        <ion-item v-if="!isForDriversSupervisor">
+            <ion-label>{{$t('backoffice.form.fields.isDriver')}}</ion-label>
+            <ion-checkbox slot="end" name="isDriver" 
+                  @ionChange="isDriver=$event.target.checked" 
+                  :checked="isDriver">
+            </ion-checkbox>
+        </ion-item>
 
         <div v-if="id==null">
             <ion-item>
@@ -120,20 +127,21 @@
           </ion-item>
         </div>
 
-        <ion-item>
-            <p><router-link to="/role">{{$t('backoffice.form.fields.roles')}}</router-link></p>
-        </ion-item>
-        <ion-list>
-            <ion-item v-for="rol in allRoles" v-bind:key="rol._id">
-            <ion-label>{{rol.Name}}</ion-label>
-            <ion-checkbox
-                slot="end"
-                @ionChange="addDeleteRole($event.target.checked, rol._id)"
-                :checked="hasUserRole(rol._id)">
-            </ion-checkbox>
+        <div v-if="!isForDriversSupervisor">
+            <ion-item>
+                <p><router-link to="/role">{{$t('backoffice.form.fields.roles')}}</router-link></p>
             </ion-item>
-        </ion-list>
-
+            <ion-list>
+                <ion-item v-for="rol in allRoles" v-bind:key="rol._id">
+                <ion-label>{{rol.Name}}</ion-label>
+                <ion-checkbox
+                    slot="end"
+                    @ionChange="addDeleteRole($event.target.checked, rol._id)"
+                    :checked="hasUserRole(rol._id)">
+                </ion-checkbox>
+                </ion-item>
+            </ion-list>
+        </div>
       <br/>
       <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveUser()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
 
@@ -179,16 +187,33 @@ export default {
       spinner: false,
 
       //user support
-      isSupport: false
+      isSupport: false,
+
+      isForDriversSupervisor: false,
+      isDriver: false,
     }
   },
   created: function(){
-
+      this.isForDriversSupervisor = this.$route.params.isForDriversSupervisor || false;
       this.init();
+      //console.log("SUPERVISOR")
+      //console.log(this.isForDriversSupervisor)
   },
   computed: {
         title() {
-            return this.id ? this.$t('backoffice.form.titles.userEditTitle') :  this.$t('backoffice.form.titles.userNewTitle');
+            let title = this.$t('backoffice.form.titles.userNewTitle');
+            if (this.id){
+                title = this.$t('backoffice.form.titles.userEditTitle')
+                if (this.isForDriversSupervisor)
+                    title = this.$t('backoffice.form.titles.driversEditTitle')
+            }
+            else{
+                title = this.$t('backoffice.form.titles.userNewTitle')
+                if (this.isForDriversSupervisor)
+                    title = this.$t('backoffice.form.titles.driversNewTitle')
+            }
+
+            return title;
         }
   },
   methods: {
@@ -197,7 +222,7 @@ export default {
         this.fetchOccupations();
         this.id = this.$route.params.userId;
         this.isSupport = this.$route.params.isSupport || false;
-        console.log("Support " + this.isSupport)
+        //console.log("Support " + this.isSupport)
         if (this.id){
           this.$ionic.loadingController
           .create({
@@ -219,7 +244,8 @@ export default {
                     this.email = response.data.Email;
                     this.serverId = response.data.ServerId;
                     this.occupationId = response.data.OccupationId;
-                    console.log(this.occupationId);
+                    this.isDriver = response.data.IsDriver;
+                    //console.log(this.occupationId);
                     //  this.password = response.data.Password;
                     //  this.confirmPassword = response.data.Password;
                     this.userRoles = response.data.Roles;
@@ -237,7 +263,41 @@ export default {
           })
       
         }
-        console.log(this.$route.params);
+        else{
+            if (this.isForDriversSupervisor){
+                //Search External Driver Occupation and External Driver Role.
+                Api.fetchAll('occupation')
+                .then(response => {
+                    const ED = response.data.filter(occ => occ.Name == 'External Driver')
+                    if (ED.length > 0){
+                      this.occupationId = ED[0]._id
+                      //console.log("OCCUPATION " + this.occupationId)
+                    }
+                    else
+                       this.showToastMessage('The default occupation External Driver was deleted', 'danger')
+                })
+                .catch(e => {
+                    console.log(e)
+                    this.showToastMessage('There was a connection error. Please try reload form', 'danger')
+                })
+
+                Api.fetchAll('rol')
+                .then(response => {
+                    const ED = response.data.filter(rol => rol.Name == 'External Driver')
+                    if (ED.length > 0){
+                      this.userRoles.push(ED[0]._id)
+                      //console.log("ROL " + this.userRoles)
+                    }  
+                    else
+                       this.showToastMessage('The default rol External Driver was deleted', 'danger')
+                })
+                .catch(e => {
+                    console.log(e)
+                    this.showToastMessage('There was a connection error. Please try reload form', 'danger')
+                })
+            }
+        }
+        //console.log(this.$route.params);
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -293,8 +353,8 @@ export default {
     fetchRoles: function(){
         Api.fetchAll('Rol').then(response => {
           this.allRoles = response.data
-          console.log("Staff roles")
-          console.log(this.allRoles)
+          //console.log("Staff roles")
+          //console.log(this.allRoles)
         })
         .catch(e => {
           console.log(e)
@@ -307,7 +367,7 @@ export default {
         }
         else
           this.userRoles.splice(this.userRoles.indexOf(rol_id), 1)
-        console.log(this.userRoles)
+        //console.log(this.userRoles)
     },
     backtoList(){
         if (this.isSupport)
@@ -322,7 +382,14 @@ export default {
             )
         }
         else{
-            this.$router.push({ name: 'User'})
+            this.$router.push(
+              { 
+                  name: 'User',
+                  params:{
+                      isForDriversSupervisor: this.isForDriversSupervisor
+                  }
+              }
+            )
         }
     },
     hasUserRole(rol_id){
@@ -346,7 +413,7 @@ export default {
             // errors.push(this.$t('backoffice.form.validate.email'));
             return false
         }
-        if (this.occupationId == "")
+        if (this.occupationId == "" && !this.isForDriversSupervisor)
         {
             // errors.push(this.$t('backoffice.form.validate.occupation'));
             return false
@@ -409,7 +476,7 @@ export default {
 
         reader.onload = (e) => {
             this.file = e.target.result;
-            console.log(this.file);
+            //console.log(this.file);
         };
         reader.readAsDataURL(fileObject);
     },
@@ -419,7 +486,7 @@ export default {
         if (this.isValidForm())
         {
             this.isBackdrop = true;
-            console.log(this.occupationId);
+            //console.log(this.occupationId);
             let item = {
               "ImageUrl": "",
               "FirstName": this.firstName,
@@ -430,10 +497,17 @@ export default {
               "OccupationId": this.occupationId,
               "Password": this.password,
               "Roles": this.userRoles,
+              "IsDriver": this.isDriver,
+              "IsExternalDriver": false,
             }
             if (this.isSupport)
             {
                item["IsSupport"] = true;
+            }
+            if (this.isForDriversSupervisor){
+               item.IsDriver = true;
+               item.IsExternalDriver = true;
+               item.ParentStaffId = this.$store.state.user._id;
             }
             if (this.file != null)
             {
@@ -448,7 +522,7 @@ export default {
             if (this.id){
               item['_id'] = this.id;
               // item['Password'] = this.user.Password;
-              console.log(this.fileName);
+              //console.log(this.fileName);
               this.spinner = true;
               Api.putIn(this.modelName, item)
                   .then(response => {
@@ -456,7 +530,7 @@ export default {
                         // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
                         //      this.$t('backoffice.list.messages.messageEditSuccessUser'), 
                         //         this.$t('backoffice.list.messages.titleEditUser'));
-                        console.log(response)
+                        //console.log(response)
                         this.showToastMessage(this.$t('backoffice.list.messages.messageEditSuccessUser'), "success");
                         this.userRoles = [];
                         // this.file = null;
@@ -471,8 +545,12 @@ export default {
                             });
                         }
                         else{
+                            //console.log(response.data)
                             this.$router.push({
-                              name: 'User', 
+                              name: 'Driver',
+                              params: {
+                                  isForDriversSupervisor: this.isForDriversSupervisor
+                              }
                             });
                         }
                         return response;
@@ -507,8 +585,12 @@ export default {
                           });
                       }
                       else{
+                          //console.log(response.data)
                           this.$router.push({
-                            name: 'User', 
+                            name: 'Driver',
+                            params: {
+                                isForDriversSupervisor: this.isForDriversSupervisor
+                            }
                           });
                       }
                       return response;

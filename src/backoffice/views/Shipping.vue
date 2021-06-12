@@ -293,7 +293,7 @@ export default {
               })
     },
     editShipping: function(id){
-        console.log(id);
+        //console.log(id);
         this.$router.push({
         name: 'ShippingForm', 
         params: { shippingId: id }

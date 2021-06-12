@@ -51,7 +51,7 @@ export default {
   created: function(){
 
     this.user = this.parent.$store.state.user
-    console.log(this.user) 
+    //console.log(this.user) 
     // Api.put('staff', restaurantID)
     // .then(response => {
     //     console.log(response.data)
@@ -92,8 +92,8 @@ export default {
         let user = this.user
         user.ServerId = this.newServerId
         Api.putIn('Staff', user)
-        .then(response => {
-            console.log(response.data)
+        .then(() => {
+            //console.log(response.data)
             this.parent.$store.commit("setUser", user)
             payAuthorizeNet.setClerkId(user.ServerId)
             this.showToastMessage("The Server Id was changed successfully", "success")

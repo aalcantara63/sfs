@@ -181,7 +181,7 @@ export default {
     init(){
         this.id = this.$route.params.variantGroupId;
         if (this.id){
-            console.log(this.id)
+            //console.log(this.id)
             this.$ionic.loadingController
             .create({
               cssClass: 'my-custom-class',
@@ -196,7 +196,7 @@ export default {
                       this.name = response.data.Name;
                       this.description = response.data.Description;
                       this.variants = response.data.Variants;
-                      console.log(response.data);
+                      //console.log(response.data);
                       loading.dismiss();
                       return response;
                     })
@@ -209,7 +209,7 @@ export default {
             })  
         }
 
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -341,7 +341,7 @@ export default {
 
         reader.onload = (e) => {
             this.vf_file = e.target.result;
-            console.log(this.vf_file);
+            //console.log(this.vf_file);
         };
         reader.readAsDataURL(fileObject);
     },
@@ -405,8 +405,8 @@ export default {
     saveVariantGroup: function(){
 
         if (this.isValidForm()){
-            console.log("VARIANTES")
-            console.log(JSON.stringify(this.variants))
+            //console.log("VARIANTES")
+            //console.log(JSON.stringify(this.variants))
             this.isBackdrop = true;
             let item = {
               "Name": this.name,

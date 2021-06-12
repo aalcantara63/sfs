@@ -396,6 +396,22 @@ Vue.use(VueRouter)
     }
   },
   {
+    path: '/driver',
+    name: 'Driver',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/User.vue'),
+    beforeEnter: (to, from, next) =>{
+      if (store.state.authenticated == false)
+      {
+        next("/");
+      } else {
+        next();
+      }
+    }
+  },
+  {
     path: '/user-form/:userId?/:isSupport?',
     name: 'UserForm',
     // route level code-splitting
@@ -695,14 +711,14 @@ Vue.use(VueRouter)
   {
     // path: '/menus',    
     path: '/:url',    
-    name: 'Home',
+    name: 'HomeGrid',
     component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/Home.vue')
     
   },
   {
     // path: '/menus',    
-    path: '/:url/home',    
-    name: 'HomeGrid',
+    path: '/:url',    
+    name: 'Home',
     component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/HomeGrid.vue')
     
   },
@@ -710,7 +726,8 @@ Vue.use(VueRouter)
     // path: '//catering',
     path: '/:url', 
     name: 'Catering',
-    component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/Catering.vue')
+    component: () => import('../../frontend/views/HomeGrid.vue')
+    // component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/Catering.vue')
   },
   {
     path: '/',
@@ -743,19 +760,7 @@ Vue.use(VueRouter)
     path: '/:url',  
     name: 'OrderFront',
     component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/Order.vue')
-   },
-   {
-    // path: '/order', 
-    path: '/:url',  
-    name: 'OrderTicket',
-    component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/OrderTicket.vue')
-   },
-   {
-    // path: '/orderCatering',  
-     path: '/:url',  
-     name: 'OrderCatering',
-     component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/OrderCatering.vue')
-   },
+   },    
    {
     // path: '/orderDetail', 
      path: '/:url',   
@@ -767,13 +772,7 @@ Vue.use(VueRouter)
       path: '/:url', 
      name: 'ListOrder',
      component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/ListOrder.vue')
-   },
-   {
-    // path: '/listOrder',   
-      path: '/:url', 
-     name: 'ListTicket',
-     component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/ListTicket.vue')
-   },
+   },  
    {
     // path: '/reservation', 
      path: '/:url',   
@@ -790,6 +789,12 @@ Vue.use(VueRouter)
     path: '/:url',    
      name: 'ReservationDetail',
      component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/ReservationState.vue')
+   },
+   {
+    // path: '/reservationDetail',
+    path: '/new-restaurant',    
+    name: 'NewRestaurant',
+    component: () => import(/* webpackChunkName: "about" */ '../../frontend/views/NewRestautant.vue')
    },
 
 ]

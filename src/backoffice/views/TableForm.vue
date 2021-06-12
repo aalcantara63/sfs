@@ -223,7 +223,7 @@ export default {
                     if (funSettings.length > 0)
                     {
                         funSettings = response.data[0]
-                        console.log(funSettings)
+                        //console.log(funSettings)
                         if (funSettings.TablePrefix && funSettings.TablePrefix != '')
                         {
                             this.tablePrefix = funSettings.TablePrefix + "_" 
@@ -254,7 +254,7 @@ export default {
           })
         }
 
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -330,7 +330,7 @@ export default {
         });
     },
     changeState(state){
-        console.log(state)
+        //console.log(state)
         this.state = state
           if (this.state == "Free")
           {
@@ -340,7 +340,7 @@ export default {
         }
     },
     addSeat(){  
-        console.log(this.id + '-' + this.name + '_' + (this.seats.length + 1))
+        //console.log(this.id + '-' + this.name + '_' + (this.seats.length + 1))
         const name = this.id + '-' + this.name + '_' + (this.seats.length + 1)
         const seat = {
             'name': name,
@@ -354,7 +354,7 @@ export default {
     },
     setAvailable(seat){
         seat.available = true
-        console.log(seat.available)
+        //console.log(seat.available)
 
         let av = true
         this.seats.forEach(seat => {
@@ -367,7 +367,7 @@ export default {
     },
     setDisable(seat){
         seat.available = false
-        console.log(seat.available)
+        //console.log(seat.available)
 
         let av = false
         this.seats.forEach(seat => {
@@ -379,8 +379,8 @@ export default {
           this.state = 'Busy'
     },
     formatSeat(seat){
-       console.log("SEATs")
-       console.log(seat)
+       //console.log("SEATs")
+       //console.log(seat)
        let name = seat.name.split('-')
        return name[1] 
     },
@@ -388,15 +388,15 @@ export default {
         return seat.available ? 'Disponible' : 'No disponible'
     },
     changeType(eventVal){
-        console.log(eventVal);
+        //console.log(eventVal);
         this.type = eventVal;
         let provisionalName = this.type + this.tableNumber;
-        console.log("STEP-2")
-        console.log("Provisional number: " + provisionalName)
+        //console.log("STEP-2")
+        //console.log("Provisional number: " + provisionalName)
         if (this.validateUniqueName(provisionalName))
         {
-            console.log("STEP-3")
-            console.log("Unique name")
+            //console.log("STEP-3")
+            //console.log("Unique name")
             this.name = provisionalName;
             this.changeAllSeatName();
         }
@@ -417,11 +417,11 @@ export default {
           const name = this.id + "-" + this.name + "_" + (i + 1)
           this.seats[i].name = name
         }
-        console.log("STEP-4: Seat names")
-        console.log(this.seats)
+        //console.log("STEP-4: Seat names")
+        //console.log(this.seats)
     },
     seeQrCode(seat){
-        console.log(seat);
+        //console.log(seat);
         return this.$ionic.modalController
         .create({
           component: Modal,
@@ -441,8 +441,8 @@ export default {
     },
     changeNumber(val){
        this.tableNumber = val;
-       console.log("STEP-1")
-       console.log("Number: " + this.tableNumber)
+       //console.log("STEP-1")
+       //console.log("Number: " + this.tableNumber)
        this.changeType(this.type);
     },
     validateUniqueName(name){
@@ -522,7 +522,7 @@ export default {
                       //        this.$t('backoffice.list.messages.messageCreateSuccessTable'), 
                       //           this.$t('backoffice.list.messages.titleCreateTable'));
                         this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessTable'), "success");
-                        console.log(response)
+                        //console.log(response)
                         this.id = response.data._id
                         this.spinner = false
                         this.$router.push({

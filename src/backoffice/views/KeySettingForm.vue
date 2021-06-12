@@ -103,7 +103,7 @@
                     setTimeout(() => {  // Some AJAX call occurs
                         Api.fetchById(this.modelName, this.id)
                         .then(response => {
-                            console.log(response);
+                            //console.log(response);
                             this.endPointUrl = response.data.EndPointUrl;
                             this.apiLoginId = response.data.ApiLoginId;
                             this.transactionKey = response.data.TransactionKey;
@@ -310,7 +310,7 @@
                     //If I am editing
                     if (this.id){
                     item['_id'] = this.id;
-                    console.log(item);
+                    //console.log(item);
                     this.spinner = true;
                     Api.putIn(this.modelName, item)
                         .then(response => {

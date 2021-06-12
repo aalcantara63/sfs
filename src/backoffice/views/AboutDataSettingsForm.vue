@@ -113,7 +113,7 @@ export default {
       }) 
     }
 
-    console.log(this.$route.params);
+    //console.log(this.$route.params);
   },
   computed: {
         titleT() {
@@ -197,7 +197,7 @@ export default {
 
         reader.onload = (e) => {
             this.file = e.target.result;
-            console.log(this.file);
+            //console.log(this.file);
         };
         reader.readAsDataURL(fileObject);
     },

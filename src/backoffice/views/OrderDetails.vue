@@ -37,7 +37,7 @@
             <ion-row class="left">
                 <ion-col>
                     <div v-if="customer"><span class="title">{{$t('backoffice.form.titles.customer')}}:</span> {{customer.Name}}</div>
-                    <div v-else><span class="title">{{$t('backoffice.form.titles.customer')}}:</span> {{order.CustomerName}}</div>
+                    <div v-if="order.CustomerName && !customer"><span class="title">{{$t('backoffice.form.titles.customer')}}:</span> {{order.CustomerName}}</div>
                 </ion-col>
             </ion-row>
             <ion-row class="left">
@@ -90,7 +90,7 @@
             <div v-for="product in order.Products" :key="product._id">
                 <ion-row class="left" v-if="!product.isService">
                     <ion-col size="3">
-                        <div>{{product.Name}}</div>
+                        <div>{{product.Name}}<span v-if="product.VariantSelected"> - {{product.VariantSelected.name}}</span></div>
                     </ion-col>
                     <ion-col size="2">
                         <div>{{product.Cant}}</div>
@@ -341,7 +341,8 @@
         <ion-list v-if="order.State == 3 && order.OrderType == 'Delivery'">
             <ion-list-header>
                 <ion-label>
-                    <span style="color: red">*</span>{{$t('backoffice.form.fields.driver')}}
+                    <!-- <span style="color: red">*</span> -->
+                    {{$t('backoffice.form.fields.driver')}}
                 </ion-label>
             </ion-list-header>
 
@@ -349,7 +350,7 @@
                 <ion-label>{{$t('backoffice.form.titles.selectADriver')}}</ion-label>
                 <ion-select  :ok-text="$t('backoffice.form.messages.buttons.ok')" :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
                 @ionChange="driver = $event.target.value" v-bind:value="driver">
-                    <ion-select-option v-for="user in users" v-bind:key="user.Id" v-bind:value="user._id" >{{user.FirstName}} {{user.LastName}} - {{getOccupationName(user.OccupationId)}}</ion-select-option>
+                    <ion-select-option v-for="user in drivers" v-bind:key="user.Id" v-bind:value="user._id" >{{user.FirstName}} {{user.LastName}} - {{getOccupationName(user.OccupationId)}}</ion-select-option>
                 </ion-select>
             </ion-item>
 
@@ -404,6 +405,7 @@ export default {
       driver: '',
 
       users: [],
+      drivers: [],
       occupations: [],
       stateToChange: '',
 
@@ -496,7 +498,7 @@ export default {
             const restaurantID = this.$store.state.user.RestaurantId
             const restaurant = await Api.fetchById('restaurant', restaurantID)
 
-            console.log(pay.paymentInfo)
+            //console.log(pay.paymentInfo)
 
           if (pay.paymentInfo.method === "Cash" || pay.paymentInfo.method === "Check"){
 
@@ -507,8 +509,8 @@ export default {
                     "Payment": this.order.Payment,
                 };
                 Api.putIn('order', item)
-                .then(response => {
-                    console.log(response)
+                .then(() => {
+                    //console.log(response)
                 })
                 .catch(e => {
                     console.log(e)
@@ -516,8 +518,8 @@ export default {
 
                 const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                 if(paymeD){
-                    console.log('paymenD')
-                    console.log(paymeD.data[0])
+                    //console.log('paymenD')
+                    //console.log(paymeD.data[0])
                     const payUpd = paymeD.data[0];
                     payUpd.Refund = parseFloat(count).toFixed(2);
                     await Api.putIn('Allpayments', payUpd);
@@ -534,15 +536,15 @@ export default {
                 //Hay que obtener el token.
                 if (pay.paymentInfo){
 
-                    console.log("Invoice information")
-                    console.log(pay.paymentInfo.transId)
+                    //console.log("Invoice information")
+                    //console.log(pay.paymentInfo.transId)
                     
                     try
                     {
                         const invoiceInformation = await payAuthorizeNet.invoiceInformation(pay.paymentInfo.transId, pay.paymentInfo.moto,
                                                                                                 restaurantID, 'SHIFT4')
-                        console.log("invoiceInformation")
-                        console.log(invoiceInformation)
+                        //console.log("invoiceInformation")
+                        //console.log(invoiceInformation)
                         // return;
                         if (invoiceInformation.data.length > 0)
                         {
@@ -556,18 +558,19 @@ export default {
                                     "invoiceNumber": pay.paymentInfo.transId
                                 }
 
-                                console.log(datas)
-                            const resRefund = await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto)
+                                //console.log(datas)
+                            const isDelivery = pay.paymentInfo.isDelivery || false;
+                            await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto, isDelivery)
                             
                             const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                             if(paymeD){
-                                console.log('paymenD')
-                                console.log(paymeD.data[0])
+                                //console.log('paymenD')
+                                //console.log(paymeD.data[0])
                                 const payUpd = paymeD.data[0];
                                 payUpd.Refund = parseFloat(count).toFixed(2);
                                 await Api.putIn('Allpayments', payUpd);
                             }
-                            console.log(resRefund)
+                            //console.log(resRefund)
 
                                 this.order.Payment[key]["state"] = 2;
                                 this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
@@ -576,8 +579,8 @@ export default {
                                     "Payment": this.order.Payment,
                                 };
                                 Api.putIn('order', item)
-                                .then(response => {
-                                    console.log(response)
+                                .then(() => {
+                                    //console.log(response)
                                 })
                                 .catch(e => {
                                     console.log(e)
@@ -611,18 +614,19 @@ export default {
                                     "invoiceNumber": pay.paymentInfo.transId
                                 }
     
-                    console.log(datas)
-                    const resRefund = await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto)
+                    //console.log(datas)
+                    const isDelivery = pay.paymentInfo.isDelivery || false;
+                    await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto, isDelivery)
                     
                     const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                     if(paymeD){
-                        console.log('paymenD')
-                        console.log(paymeD.data[0])
+                        //console.log('paymenD')
+                        //console.log(paymeD.data[0])
                         const payUpd = paymeD.data[0];
                         payUpd.Refund = parseFloat(count).toFixed(2);
                         await Api.putIn('Allpayments', payUpd);
                     }
-                    console.log(resRefund)
+                    //console.log(resRefund)
 
                     this.order.Payment[key]["state"] = 2;
                     this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
@@ -631,8 +635,8 @@ export default {
                         "Payment": this.order.Payment,
                     };
                     Api.putIn('order', item)
-                    .then(response => {
-                        console.log(response)
+                    .then(() => {
+                        //console.log(response)
                     })
                     .catch(e => {
                         console.log(e)
@@ -663,8 +667,8 @@ export default {
                     "Payment": this.order.Payment,
                 };
                 Api.putIn('order', item)
-                .then(response => {
-                    console.log(response)
+                .then(() => {
+                    //console.log(response)
                 })
                 .catch(e => {
                     console.log(e)
@@ -672,8 +676,8 @@ export default {
 
                 const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                 if(paymeD){
-                    console.log('paymenD')
-                    console.log(paymeD.data[0])
+                    //console.log('paymenD')
+                    //console.log(paymeD.data[0])
                     const payUpd = paymeD.data[0];
                     payUpd.Void = pay.paymentInfo.total;
                     await Api.putIn('Allpayments', payUpd);
@@ -718,7 +722,7 @@ export default {
                     if (res.data){
                         if (window.DOMParser)
                         {
-                            console.log("Caso1");
+                            //console.log("Caso1");
                             let parser = new DOMParser();
                             let xmlDoc = parser.parseFromString(res.data, "text/xml");
                             const code = xmlDoc.getElementsByTagName("ResultCode")[0].childNodes[0].nodeValue
@@ -736,7 +740,7 @@ export default {
                         }
                         else // Internet Explorer
                         {
-                            console.log("Caso2");
+                            //console.log("Caso2");
                             let xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
                             xmlDoc.async = false;
                             xmlDoc.loadXML(res.data);
@@ -767,8 +771,8 @@ export default {
                         Devices.a930.DoCredit(ip, port, false, data, this.callbackVoid)
                         const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                         if(paymeD){
-                            console.log('paymenD')
-                            console.log(paymeD.data[0])
+                            //console.log('paymenD')
+                            //console.log(paymeD.data[0])
                             const payUpd = paymeD.data[0];
                             payUpd.Void = pay.paymentInfo.total;
                             await Api.putIn('Allpayments', payUpd);
@@ -788,13 +792,14 @@ export default {
                 
                 try
                 {
-                    const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4')
-                    console.log("Response Void")
-                    console.log(resVoid)
+                    const isDelivery = pay.paymentInfo.isDelivery || false;
+                    await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4', isDelivery)
+                    //console.log("Response Void")
+                    //console.log(resVoid)
                     const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                     if(paymeD){
-                        console.log('paymenD')
-                        console.log(paymeD.data[0])
+                        //console.log('paymenD')
+                        //console.log(paymeD.data[0])
                         const payUpd = paymeD.data[0];
                         payUpd.Void = pay.paymentInfo.total;
                         await Api.putIn('Allpayments', payUpd);
@@ -807,8 +812,8 @@ export default {
                     "Payment": this.order.Payment,
                     };
                     Api.putIn('order', item)
-                    .then(response => {
-                        console.log(response)
+                    .then(() => {
+                        //console.log(response)
                     })
                     .catch(e => {
                         console.log(e)
@@ -828,13 +833,14 @@ export default {
 
                 try
                 {
-                    const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'TSYS')
-                    console.log("Response Void")
-                    console.log(resVoid)
+                    const isDelivery = pay.paymentInfo.isDelivery || false;
+                    await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'TSYS', isDelivery)
+                    //console.log("Response Void")
+                    //console.log(resVoid)
                     const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                     if(paymeD){
-                        console.log('paymenD')
-                        console.log(paymeD.data[0])
+                        //console.log('paymenD')
+                        //console.log(paymeD.data[0])
                         const payUpd = paymeD.data[0];
                         payUpd.Void = pay.paymentInfo.total;
                         await Api.putIn('Allpayments', payUpd);
@@ -847,8 +853,8 @@ export default {
                         "Payment": this.order.Payment,
                     };
                     Api.putIn('order', item)
-                    .then(response => {
-                        console.log(response)
+                    .then(() => {
+                        //console.log(response)
                     })
                     .catch(e => {
                         console.log(e)
@@ -867,8 +873,8 @@ export default {
             }
       },
       callbackVoid(res){
-            console.log("SUCCESSFULLY---RESPONSE:")
-            console.log(res)
+            //console.log("SUCCESSFULLY---RESPONSE:")
+            //console.log(res)
             if (res[5] == 'OK')
             {
                 this.showToastMessage('La devolución se realizó exitosamente', 'success')
@@ -895,9 +901,9 @@ export default {
         
         // Devices.a930.DoCredit();
         Devices.a930.Initialize()
-        .then(response => {
-            console("SUCCESSFULLY---RESPONSE:")
-            console.log(response)
+        .then(() => {
+            //console("SUCCESSFULLY---RESPONSE:")
+            //console.log(response)
         })
         .catch(e => {
             console.log("ERROR:")
@@ -972,7 +978,7 @@ export default {
             this.fetchOccupations();
             this.fetchUsers();
             this.id = this.$route.params.orderId;
-            console.log(this.id);
+            //console.log(this.id);
             this.getOrder();
       },
       goToBack(){
@@ -1011,7 +1017,7 @@ export default {
         return worker.FirstName + ' ' + worker.LastName
       },
       fillPossibleStates: function(){
-          console.log(this.order.State)
+          //console.log(this.order.State)
           for (let i = this.order.State + 1; i < this.workflowOrderStaus.length - 1; i++) {
               const element = this.workflowOrderStaus[i];
               if (this.order.OrderType != "Delivery" && this.workflowOrderStaus[i] == "On the way")
@@ -1024,6 +1030,7 @@ export default {
       fetchUsers: function(){
         Api.fetchAll('Staff').then(response => {
           this.users = response.data
+          this.drivers = this.users.filter(urs => urs.IsDriver)
         })
         .catch(e => {
           console.log(e)
@@ -1062,9 +1069,9 @@ export default {
                             Api.fetchById(this.modelName, this.id)
                                 .then(response => {
                                     this.order = response.data;
-                                    console.log("THE ORDER:");
-                                    console.log(this.order);
-                                    console.log(this.order);
+                                    //console.log("THE ORDER:");
+                                    //console.log(this.order);
+                                    //console.log(this.order);
                                     this.fillPossibleStates();
                                     loading.dismiss();
                                     return this.getCustomer(this.order.ClientId);
@@ -1121,11 +1128,11 @@ export default {
                 this.showToastMessage(this.$t('backoffice.form.validate.cooker'), "danger");
                 return;
           }
-          if (newStatus == 4 && this.driver == '')
-          {
-                this.showToastMessage("Debe escoger un chofer para entregar la orden", "danger");
-                return;
-          }
+        //   if (newStatus == 4 && this.driver == '')
+        //   {
+        //         this.showToastMessage("Debe escoger un chofer para entregar la orden", "danger");
+        //         return;
+        //   }
           let item = {
               "_id": this.order._id,
               "State": newStatus,
@@ -1151,7 +1158,8 @@ export default {
                     if (this.customer)
                         orderInfo = this.customer.Name + this.$t('backoffice.form.marketingMessages.inKitchen')
                     else
-                         orderInfo = this.order.CustomerName + this.$t('backoffice.form.marketingMessages.inKitchen')
+                        if(this.order.CustomerName)
+                            orderInfo = this.order.CustomerName + this.$t('backoffice.form.marketingMessages.inKitchen')
                 } 
                 if (newStatus == 3) //Cocinada
                     orderInfo = this.$t('backoffice.form.marketingMessages.cooked')
@@ -1219,8 +1227,8 @@ export default {
                 .then(m => m.present())
       },
       sendEmail(email, mess){
-          console.log(email);
-          console.log(mess);
+          //console.log(email);
+          //console.log(mess);
            let items = {
               "email": email,
               "mess": mess,
@@ -1233,7 +1241,7 @@ export default {
             // };
             Api.sendEmail(items)
                 .then(() => {
-                      console.log(items)
+                      //console.log(items)
                 })
                 .catch(e => {
                     console.log(e);
@@ -1241,8 +1249,8 @@ export default {
                 })
       },
       sendSms(phone, mess){
-            console.log(phone);
-             console.log(mess);
+            //console.log(phone);
+             //console.log(mess);
             let items = {
               "phone": phone,
               "mess": mess
@@ -1253,7 +1261,7 @@ export default {
             // };
             Api.sendSms(items)
                 .then(() => {
-                    console.log(items)
+                    //console.log(items)
                 })
                 .catch(e => {
                     console.log(e);

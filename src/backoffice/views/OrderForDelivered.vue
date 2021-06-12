@@ -77,10 +77,10 @@
                     <h2>{{ getFormatedDate(order.Date) }}</h2>
                 </ion-label>
                 <ion-item-group side="end">
-                  <ion-button v-if="!order.IsAccept && notAccepted" color="success" @click="acceptOrder(order)">
+                  <ion-button v-if="IsDriver && !order.IsAccept && notAccepted" color="success" @click="acceptOrder(order)">
                     <ion-icon slot="icon-only" name="checkmark"></ion-icon>
                   </ion-button>
-                  <ion-button v-if="order.IsAccept" color="primary" @click="viewLocalizationOrder(order)">
+                  <ion-button v-if="!IsDriver() || (IsDriver() && order.IsAccept)" color="primary" @click="viewLocalizationOrder(order)">
                     <ion-icon slot="icon-only" name="list"></ion-icon>
                   </ion-button>
                   <!-- <ion-item-option color="primary" @click="viewOrder(order._id)">
@@ -161,6 +161,9 @@ export default {
     init(){
         this.fetchOrders();
         this.fetchCustomers();
+    },
+    IsDriver(){
+        return this.$store.state.user.IsDriver;
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -280,7 +283,11 @@ export default {
                 Api.fetchAll(this.modelName).then(response => {
                     const user_login = this.$store.state.user;
                     this.orders = response.data
-                    this.orders = this.orders.filter(item => item.State == 4 && item.Driver == user_login._id)
+                    //Verificar si es un usuario con el rol de driver
+                    if (user_login.IsDriver)
+                        this.orders = this.orders.filter(item => item.State == 4 && item.Driver == user_login._id)
+                    else
+                        this.orders = this.orders.filter(item => item.State == 4)
                     this.orders.reverse();
                     this.filterOrders = this.orders;
 
@@ -314,7 +321,7 @@ export default {
         .then(response => { 
             if(response.data.length != 0 ) {
                 this.restaurantCustomer = response.data[0]
-                console.log(this.restaurantCustomer)
+                //console.log(this.restaurantCustomer)
             }
         })
     },
@@ -353,8 +360,8 @@ export default {
       Api.postIn('Customer', client)
       .then(response => {
         // this.spinner = false
-        console.log("Success creted with _id" + response.data._id);
-        console.log(JSON.stringify(response.data));
+        //console.log("Success creted with _id" + response.data._id);
+        //console.log(JSON.stringify(response.data));
         client['id'] = response.data._id;
         // this.CustomerName = response.data.Name;
           EventBus.$emit('clientHasId', client.id );
@@ -364,7 +371,7 @@ export default {
           EventBus.$emit('updateRestaurantSelectedId', this.$store.state.user.RestaurantId); 
           EventBus.$emit('staffName', this.$store.state.user.FirstName + ' ' + this.$store.state.user.LastName);       
         // this.order.ClientId = this.clientId
-        console.log('' + this.order);
+        //console.log('' + this.order);
         this.$router.push({
           path: '/home', 
         }); 

@@ -89,6 +89,14 @@
                 </ion-toggle></ion-label>
             </ion-item>
             <ion-item>
+                <ion-label >Has Delivery Payment
+                <ion-toggle name="HasDeliveryPayment" style="top: 12px;" Key="other"
+                    @ionChange="HasDeliveryPayment=$event.target.checked" 
+                    :checked ="HasDeliveryPayment">
+                </ion-toggle>
+                </ion-label>
+            </ion-item>
+            <ion-item>
               <ion-label>{{$t('backoffice.form.fields.canViewGeoposition')}}</ion-label>
               <ion-checkbox slot="end" name="canViewGeoposition" 
                     @ionChange="canViewGeoposition=$event.target.checked" 
@@ -688,6 +696,9 @@ export default {
       newDevIpAddress: '127.0.0.1',
       newDevPort: '90001', 
       DeviceList: [],
+
+      //HasDeliveryPayment
+      HasDeliveryPayment: false
     }
   },
   created: function(){
@@ -700,7 +711,7 @@ export default {
   },
   methods: {
     segmentChanged(value){            
-        console.log(value)
+        //console.log(value)
         if(value === 'general'){
             this.general = true
             this.catering = false
@@ -808,6 +819,7 @@ export default {
                     this.tipRequire = response.data.TipRequire;
                     this.DeviceList = response.data.Devices || [];
                     this.tips = response.data.Tips;
+                    this.HasDeliveryPayment = response.data.HasDeliveryPayment;
                     this.tips.sort();
 
                     //Catering
@@ -846,7 +858,7 @@ export default {
               })
           })   
         }
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     setReservationDateAndTime(data){
         data.forEach(element => {
@@ -894,8 +906,8 @@ export default {
             }
         });
         this.reservationDaysAndTime = data
-        console.log("RESERVATION DAYS")
-        console.log(data)
+        //console.log("RESERVATION DAYS")
+        //console.log(data)
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -975,7 +987,7 @@ export default {
            this.zipCodes.push(value);
            this.newCode = 0;
         }
-        console.log(this.zipCodes);
+        //console.log(this.zipCodes);
     },
     addState(state){
         var validZip = LibCodes.lookupByState(state);
@@ -1175,10 +1187,10 @@ export default {
                 },
             ]
         }
-        console.log(this.mondayOpenHour)
-        console.log(this.mondayCloseHour)
-        console.log("The reservation")
-        console.log(reservation)
+        //console.log(this.mondayOpenHour)
+        //console.log(this.mondayCloseHour)
+        //console.log("The reservation")
+        //console.log(reservation)
         return reservation
     },
     saveSetting: function(){
@@ -1187,7 +1199,7 @@ export default {
 
           this.isBackdrop = true;
 
-            console.log(this.pickFrom);
+            //console.log(this.pickFrom);
             let item = {
               "SelectPickHour": this.selectPickHour,
               "MinTimeToCook": this.minTimeToCook,
@@ -1208,6 +1220,7 @@ export default {
               "TipRequire": this.tipRequire,
               "Devices": this.DeviceList,
               "Tips": this.tips,
+              "HasDeliveryPayment": this.HasDeliveryPayment,
             }
 
             if (this.viewCatering){
@@ -1298,7 +1311,7 @@ export default {
                 this.spinner = true
                 Api.backUpToPortal()
                 .then(response => {
-                    console.log(response.data)
+                    //console.log(response.data)
                     if (response.data.msg != "")
                         location.href = response.data.msg;
                     this.spinner = false
@@ -1369,14 +1382,14 @@ export default {
         try{
 
             const backObj = JSON.parse(this.backupFile)
-            console.log("Loading backup");
-            console.log(backObj);
+            //console.log("Loading backup");
+            //console.log(backObj);
 
             //Decripting
             const bytes  = Cripto.AES.decrypt(backObj.criptoInfo, 'M3nuSuc3ss*2020S0lut1onsF0rBackupR3st0r3');
             const decryptedData = JSON.parse(bytes.toString(Cripto.enc.Utf8));
-            console.log('decripted: ')
-            console.log(decryptedData)
+            //console.log('decripted: ')
+            //console.log(decryptedData)
 
             this.$ionic.alertController.create({
             title: "Backup",
@@ -1401,11 +1414,11 @@ export default {
                                     const restaurantID = this.$store.state.user.RestaurantId
                                     if (restaurantID === decryptedData.restaurantId)
                                     {
-                                        console.log(true)
+                                        //console.log(true)
                                         this.spinner = true
                                         const item = JSON.stringify(backObj)
-                                        console.log("OBJECT:")
-                                        console.log(item)
+                                        //console.log("OBJECT:")
+                                        //console.log(item)
                                         Api.restoreBackUpFromFile(item)
                                         .then(() => {
                                             this.spinner = false

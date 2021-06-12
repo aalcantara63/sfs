@@ -38,7 +38,7 @@
                     </ion-row>
                     <ion-row class="left" v-for="product in order.Products" :key="product._id">
                         <ion-col size="3">
-                            <div>{{product.Name}}</div>
+                            <div>{{product.Name}}<span v-if="product.VariantSelected"> - {{product.VariantSelected.name}}</span></div>
                         </ion-col>
                         <ion-col size="2">
                             <div>{{product.Cant}}</div>
@@ -100,6 +100,28 @@
                         </ion-col>
                     </ion-row>
                 </ion-grid>
+                <ion-grid v-if="!IsDriver()">
+                    <ion-list>
+                        <ion-list-header>
+                            <ion-label>
+                                <!-- <span style="color: red">*</span> -->
+                                {{$t('backoffice.form.fields.driver')}}
+                            </ion-label>
+                        </ion-list-header>
+
+                        <ion-item>
+                            <ion-label>{{$t('backoffice.form.titles.selectADriver')}}</ion-label>
+                            <ion-select :ok-text="$t('backoffice.form.messages.buttons.ok')" :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
+                            @ionChange="driver = $event.target.value" v-bind:value="driver">
+                                <ion-select-option v-for="user in drivers" v-bind:key="user.Id" v-bind:value="user._id" >{{user.FirstName}} {{user.LastName}}</ion-select-option>
+                            </ion-select>
+                        </ion-item>
+                        <ion-item>
+                            <ion-button color="primary" @click="saveDriver()">Assing driver</ion-button>
+                        </ion-item>
+                    </ion-list>
+                      
+                </ion-grid>
         </div>
         <br/>
         <ion-button v-if="fun == 'write'" expand="full" color="primary" @click="deliveredOrder()">Delivered</ion-button>
@@ -131,6 +153,9 @@ export default {
             writeInterval: null,
 
             currency: 'USD',
+
+            driver: '',
+            drivers: [],
         }
     },
 
@@ -146,6 +171,8 @@ export default {
         this.order = this.$route.params.order || this.orderProps;
         this.fun = this.$route.params.fun || this.funProps;
         console.log(this.fun)
+        this.driver = this.order.Driver;
+        this.getDrivers();
         this.getCurrency();
         this.getDriverName();
         this.getCustomer(this.order.ClientId);
@@ -186,6 +213,9 @@ export default {
             clearInterval(this.readInterval);
     },
     methods:{
+        IsDriver(){
+            return this.$store.state.user.IsDriver;
+        },
         getCurrency(){
             if (!this.orderProps && !this.funProps)
             {
@@ -198,6 +228,30 @@ export default {
                     })
                 }
             }
+        },
+        saveDriver(){
+            const item = {
+                '_id': this.order._id,
+                'Driver': this.driver,
+            }
+
+            Api.putIn('Order', item)
+            .then( () => {
+                console.log("Driver was set successfully")
+                this.showToastMessage("The order was assigned successfully", "success");
+            })
+            .catch(e => {
+                this.showToastMessage("There was an error assing the order", "success");
+                console.log(e);
+            })
+        },
+        getDrivers(){
+            Api.fetchAll('Staff').then(response => {
+                this.drivers =response.data.filter(urs => urs.IsDriver)
+            })
+            .catch(e => {
+                console.log(e)
+            });
         },
         getCustomer(id){
             Api.fetchById("customer", id)
@@ -294,6 +348,10 @@ export default {
 
             Api.putIn('Order', item)
             .then( () => {
+                //Enviarle email al merchant
+
+                //Enviarle email a el StaffPadre
+                
                 console.log("Delivered successfully")
                 this.showToastMessage("The order was delivered successfully", "success");
                 this.$router.push({

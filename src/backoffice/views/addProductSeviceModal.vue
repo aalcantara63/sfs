@@ -260,7 +260,7 @@ export default {
         }) 
     },
     changeMenu(menu){
-        console.log("MENU: " + menu)
+        //console.log("MENU: " + menu)
         this.menuSelected = menu;
 
           //Traer las todas las categorías de ese menú
@@ -334,7 +334,7 @@ export default {
         })
     },
     addProduct(product){
-        console.log(product)
+        //console.log(product)
         if (!this.productsSelected.find(prod => product._id == prod._id))
             this.productsSelected.push(product)
     },
@@ -394,8 +394,8 @@ export default {
       }).then(a => a.present())
     },
     add(){
-        console.log("Aqui")
-        console.log(this.productsSelected)
+        //console.log("Aqui")
+        //console.log(this.productsSelected)
 
         let productSel = []
         this.productsSelected.forEach(prod => {

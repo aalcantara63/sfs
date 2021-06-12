@@ -372,8 +372,8 @@ export default {
     },
     init(){
         this.allCurrencies = require('currency-codes/data');
-        console.log('All currencies');
-        console.log(this.allCurrencies);
+        //console.log('All currencies');
+        //console.log(this.allCurrencies);
         this.id = this.$route.params.settingId;
         if (this.id){
           this.$ionic.loadingController
@@ -388,8 +388,8 @@ export default {
                   
                   Api.fetchById(this.modelName, this.id)
                   .then(response => {
-                    console.log("The Zip Code");
-                    console.log(response.data.ZipCode);
+                    //console.log("The Zip Code");
+                    //console.log(response.data.ZipCode);
                     this.name = response.data.Name;
                     this.address = response.data.Address;
                     this.online = response.data.Online;
@@ -470,7 +470,7 @@ export default {
               })
           })   
         }
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -576,7 +576,7 @@ export default {
 
         reader.onload = (e) => {
             this.file = e.target.result;
-            console.log(this.file);
+            //console.log(this.file);
         };
         reader.readAsDataURL(fileObject);
     },
@@ -676,8 +676,8 @@ export default {
         }
         // console.log(this.mondayOpenHour)
         // console.log(this.mondayCloseHour)
-        console.log("The reservation")
-        console.log(reservation)
+        //console.log("The reservation")
+        //console.log(reservation)
         return reservation
     },
     saveSetting: function(){

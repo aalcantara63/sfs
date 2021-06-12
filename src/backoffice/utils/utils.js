@@ -1,4 +1,5 @@
-
+import Moment from 'moment'
+import store from '../../main'
 
 export var Utils={
 
@@ -10,8 +11,24 @@ export var Utils={
         return month + "-" + day + "-" + year;
       },
 
+      getFormatHour: function(date){
+        const hour = Moment(date).format('MM-DD | HH:mm A');
+        return hour;
+      },
+
+      getFormatHourDate: function(date){
+        const hour = Moment(date).format('MM-DD-YYYY | HH:mm A');
+        return hour;
+      },
+      
+
       getFormatNumber: function(currencyCode, number){
           new Intl.NumberFormat('en', {style: "currency", currency: currencyCode} ).format(number).toString()
+      },
+
+      getFormatPrice(price){
+        const result = new Intl.NumberFormat('en', {style: "currency", currency: store.state.restaurantActive.currency} ).format(price)
+        return result;
       },
 
       decimalAdjust: function(type, value, exp) {

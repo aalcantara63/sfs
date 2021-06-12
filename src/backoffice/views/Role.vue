@@ -49,10 +49,10 @@
                 <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
               </ion-item>
               <ion-item-options side="end">
-                <ion-item-option v-if="hasPermission('canEditRole')" color="primary" @click="editRole(role._id)">
+                <ion-item-option v-if="isSupportUserLogin() || (hasPermission('canEditRole') && role.CanEdit)" color="primary" @click="editRole(role._id)">
                   <ion-icon slot="icon-only" name="create"></ion-icon>
                 </ion-item-option>
-                <ion-item-option v-if="hasPermission('canDeleteRole')" color="danger" @click="deleteRole(role._id)">
+                <ion-item-option v-if="hasPermission('canDeleteRole') && role.CanDelete" color="danger" @click="deleteRole(role._id)">
                   <ion-icon slot="icon-only" name="trash"></ion-icon>
                 </ion-item-option>
               </ion-item-options>
@@ -82,10 +82,10 @@
                   <h3>{{ role.Description }}</h3>
               </ion-label>
               <ion-item-group side="end">
-                <ion-button v-if="hasPermission('canEditRole')" color="primary" @click="editRole(role._id)">
+                <ion-button v-if="isSupportUserLogin() || (hasPermission('canEditRole') && role.CanEdit)" color="primary" @click="editRole(role._id)">
                   <ion-icon slot="icon-only" name="create"></ion-icon>
                 </ion-button>
-                <ion-button v-if="hasPermission('canDeleteRole')" color="danger" @click="deleteRole(role._id)">
+                <ion-button v-if="hasPermission('canDeleteRole') && role.CanDelete" color="danger" @click="deleteRole(role._id)">
                   <ion-icon slot="icon-only" name="trash"></ion-icon>
                 </ion-button>
               </ion-item-group>
@@ -114,7 +114,8 @@ export default {
   name: 'role',
   created: function(){
     this.screenWidth = screen.width;
-   this.fetchRoles();
+    //console.log(this.$store.state.user.IsSupport);
+    this.fetchRoles();
   },
   data () {
     return {
@@ -139,6 +140,9 @@ export default {
     //     })
     //     .then(a => a.present())
     // },
+    isSupportUserLogin(){
+        return this.$store.state.user.IsSupport
+    },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
           title: this.$t('backoffice.list.messages.connectionError'),

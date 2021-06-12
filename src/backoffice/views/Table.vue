@@ -158,48 +158,37 @@
 
 
     <div  v-if="!spinner && orderTable">
+
+      <v-breakpoint>
+          <div slot-scope="scope" >
+              <div  v-for="(table, index) in filterTables"  
+              
+                :key="index" style="float: left; margin-top: 15px;" 
+                :class="scope.isLarge || scope.isXlarge ? 'menu-col-3' : scope.isMedium? 'menu-col-4 card-categories' : scope.isSmall || scope.noMatch ?'menu-col-12 card-categories': 'menu-col-3 card-categories'">
+                
+                  <ion-card 
+                    :color="table.State=='Free' ?'secondary': 'medium'" 
+                    style="font-size: 18px;font-weight: 600;border: 1px solid grey;"> 
+
+                
+
+
+                  <ion-badge slot="end" style="padding: 10px; margin: 10px;" @click="getOrdersDetails(table.Name)"
+                      color="light">{{getListOrder(table.Name).length}} / {{table.Seats.length}}</ion-badge> 
+                  {{table.Name}} 
+                        <br>
+                    <p style="text-align: center;">TOTAL: {{ getAmoutByTable(table.Name) }}   </p>        
+                    
+                  </ion-card>  
+              
+          
+
+              </div>
+          </div>
+      </v-breakpoint>
   
 
-        <div  v-for="(table, index) in filterTables"  
-       
-        :key="index"
-         
-        class='menu-col-3 ' style="float: left; margin-top: 15px;"  >
-       
-          <ion-card 
-            :color="table.State=='Free' ?'secondary': 'medium'" 
-            style="font-size: 18px;font-weight: 600;border: 1px solid grey;"> 
-
-                    <ion-fab horizontal="end" vertical="top" slot="fixed">
-        <ion-fab-button color="light">
-          <ion-icon md="caret-back" ios="chevron-back-circle-outline"></ion-icon>
-        </ion-fab-button>
-        <ion-fab-list side="botton">
-          <ion-fab-button color="light">
-            <ion-icon name="logo-facebook"></ion-icon>
-          </ion-fab-button>
-          <ion-fab-button color="light">
-            <ion-icon name="logo-twitter"></ion-icon>
-          </ion-fab-button>
-          <ion-fab-button color="light">
-            <ion-icon name="logo-vimeo"></ion-icon>
-          </ion-fab-button>
-        </ion-fab-list>
-      </ion-fab>
-
-
-          <ion-badge slot="end" style="padding: 10px; margin: 10px;" @click="getOrdersDetails(table.Name)"
-              color="light">{{getListOrder(table.Name).length}} / {{table.Seats.length}}</ion-badge> 
-           {{table.Name}} 
-                <br>
-             <p style="text-align: center;">TOTAL: {{ getAmoutByTable(table.Name) }}   </p>        
-            
-          </ion-card>  
-        <!-- </ion-chip> -->
-
-   
-
-      </div>
+        
     </div>
   </div>
 </template>
@@ -209,6 +198,7 @@
 import { Api } from '../api/api.js';
 import Modal from './QrModal.vue';
 import TableOrderModal from './TableOrderModal';
+ import { VBreakpoint } from 'vue-breakpoint-component'
 
 export default {
 
@@ -217,6 +207,9 @@ export default {
     this.screenWidth = screen.width;
    this.fetchTables();
   },
+   components:{   
+    VBreakpoint: VBreakpoint,  
+  }, 
   data () {
     return {
       modelName: 'Table',
@@ -244,8 +237,8 @@ export default {
                 await this.fetchOrdersTable();
                 this.table = false;
                 this.orderTable = true;
-                console.log('orders');
-                console.log(this.orders.length);
+                //console.log('orders');
+                //console.log(this.orders.length);
              }               
              this.segmentValue = value;
 
@@ -344,8 +337,8 @@ export default {
       }).then(a => a.present())
     },
     seeQrCode(seats){
-      console.log('seats')
-      console.log(seats)
+      //console.log('seats')
+      //console.log(seats)
         return this.$ionic.modalController
         .create({
           component: Modal,
@@ -484,33 +477,33 @@ export default {
             const response = await Api.fetchAll('Order');
             if(response.status === 200)            
               this.orders = response.data.filter(order => order.State < 5 && order.OrderType === 'On Table');
-            console.log('All Ordesr')
-            console.log(this.orders)
+            //console.log('All Ordesr')
+            //console.log(this.orders)
             loading.dismiss();
           })
       })    
     },
 
      getAmoutByTable(value){
-       console.log(value);
+       //console.log(value);
        const listO = this.getListOrder(value);
-       console.log('listO')
-       console.log(listO)
+       //console.log('listO')
+       //console.log(listO)
        let total = 0;
 
        listO.forEach( o => { total+= parseFloat(o.Total) })
 
-        console.log('total '+ total)
+       //console.log('total '+ total)
        return total.toFixed(2);
     },
 
     
 
      async getOrdersDetails(value){
-       console.log(value);
+       //console.log(value);
        const listO = this.getListOrder(value);
        if(listO.length > 0){
-         console.log(listO.length)
+         //console.log(listO.length)
          return this.$ionic.modalController
         .create({
           component: TableOrderModal,
@@ -539,7 +532,7 @@ export default {
            listO.push(order);
          }         
        }
-       console.log(listO)
+       //console.log(listO)
        return listO;
      },
   },

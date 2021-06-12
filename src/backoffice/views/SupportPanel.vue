@@ -32,6 +32,10 @@
                     <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
                     <span>{{$t('backoffice.form.titles.supportUsers')}}</span>
                 </ion-segment-button>
+                 <ion-segment-button value="restaurants">
+                    <!-- <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span> -->
+                    <span>{{$t('frontend.createNew.restaurants')}}</span>
+                </ion-segment-button>
             </ion-segment>
           </ion-toolbar>
     </ion-header>
@@ -219,6 +223,81 @@
                     v-bind:value="CompanyNameShift4">
                     </ion-input>
                 </ion-item>
+
+                <div style="margin-top: 20px">
+                    <!-- Aquí -->
+                    <ion-item>
+                        Tokens:
+                    </ion-item>
+                    <ion-item>
+                        <ion-label position="floating"><span style="color: red">*</span>Access Token</ion-label>
+                        <ion-input :type="showShift4AccessToken" name="Shift4AccessToken"
+                        @input="Shift4AccessToken = $event.target.value" 
+                        v-bind:value="Shift4AccessToken">
+                        </ion-input>
+                        <ion-chip slot="end" color="primary" outline="true" @click="changeShift4AccessToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label position="floating"><span style="color: red">*</span>Moto Access Token</ion-label>
+                        <ion-input :type="showShift4MotoAccessToken" name="Shift4MotoAccessToken"
+                        @input="Shift4MotoAccessToken = $event.target.value" 
+                        v-bind:value="Shift4MotoAccessToken">
+                        </ion-input>
+                        <ion-chip slot="end" color="primary" outline="true" @click="changeShift4MotoAccessToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+                    </ion-item>
+
+                    <ion-item>
+                        <ion-label position="floating"><span style="color: red">*</span>FB Access Token</ion-label>
+                        <ion-input :type="showShift4FBAccessToken" name="Shift4FBAccessToken"
+                        @input="Shift4FBAccessToken = $event.target.value" 
+                        v-bind:value="Shift4FBAccessToken">
+                        </ion-input>
+                        <ion-chip slot="end" color="primary" outline="true" @click="changeShift4FBAccessToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+                    </ion-item>
+                </div>
+
+                <div style="margin-top: 20px">
+                    <!-- Aquí -->
+                    <ion-item>
+                        <ion-label >Has Delivery Payment
+                        <ion-toggle name="HasDeliveryPayment" style="top: 12px;" Key="other"
+                            @ionChange="HasDeliveryPayment=$event.target.checked" 
+                            :checked ="HasDeliveryPayment">
+                        </ion-toggle>
+                        </ion-label>
+                    </ion-item>
+                    <div v-if="HasDeliveryPayment">
+                        <ion-item>
+                            Delivery Account Tokens:
+                        </ion-item>
+                        <ion-item>
+                            <ion-label position="floating"><span style="color: red">*</span>Delivery Access Token</ion-label>
+                            <ion-input :type="showShift4DeliveryAccessToken" name="Shift4DeliveryAccessToken"
+                            @input="Shift4DeliveryAccessToken = $event.target.value" 
+                            v-bind:value="Shift4DeliveryAccessToken">
+                            </ion-input>
+                            <ion-chip slot="end" color="primary" outline="true" @click="changeShift4DeliveryAccessToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+                        </ion-item>
+                        <ion-item>
+                            <ion-label position="floating"><span style="color: red">*</span>Delivery Moto Access Token</ion-label>
+                            <ion-input :type="showShift4DeliveryMotoAccessToken" name="Shift4DeliveryMotoAccessToken"
+                            @input="Shift4DeliveryMotoAccessToken = $event.target.value" 
+                            v-bind:value="Shift4DeliveryMotoAccessToken">
+                            </ion-input>
+                            <ion-chip slot="end" color="primary" outline="true" @click="changeShift4DeliveryMotoAccessToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+                        </ion-item>
+
+                        <ion-item>
+                            <ion-label position="floating"><span style="color: red">*</span>Delivery FB Access Token</ion-label>
+                            <ion-input :type="showShift4DeliveryFBAccessToken" name="Shift4DeliveryFBAccessToken"
+                            @input="Shift4DeliveryFBAccessToken = $event.target.value" 
+                            v-bind:value="Shift4DeliveryFBAccessToken">
+                            </ion-input>
+                            <ion-chip slot="end" color="primary" outline="true" @click="changeShift4DeliveryFBAccessToken()"><ion-icon name="eye"></ion-icon></ion-chip>
+                        </ion-item>
+                    </div>
+                </div>
+
             </div>
             <!-- Authorize.net -->
             <div v-if="auth">
@@ -280,7 +359,8 @@
                     <ion-item-sliding v-for="u in paginated('languages')" v-bind:key="u._id">
                         <ion-item>
                         <ion-thumbnail slot="start">
-                            <ion-img :src="u.ImageUrl"></ion-img>
+                            <ion-img v-if="u.ImageUrl  != ''" :src="u.ImageUrl"></ion-img>
+                            <ion-img v-else :src="require('../assets/user.png')"></ion-img>
                         </ion-thumbnail>
                         <ion-label>
                             <h2>{{ u.FirstName }} {{u.LastName}}</h2>
@@ -316,7 +396,8 @@
                     <ion-list>
                     <ion-item v-for="u in paginated('languages')" v-bind:key="u._id">
                         <ion-thumbnail slot="start">
-                            <ion-img :src="u.ImageUrl"></ion-img>
+                            <ion-img v-if="u.ImageUrl  != ''" :src="u.ImageUrl"></ion-img>
+                            <ion-img v-else :src="require('../assets/user.png')"></ion-img>
                         </ion-thumbnail>
                         <ion-label>
                             <h2>{{ u.FirstName }} {{u.LastName}}</h2>
@@ -343,6 +424,50 @@
 
             </div>
         </div>
+        <!-- Restaurants -->
+        <div v-if="segmentValue === 'restaurants'">
+            <ion-segment :value="restaurantSegmentValue" @input="value=restaurantSegmentValue">
+                <!-- <ion-segment-button value="create" @click="restaurantSegmentValue='create'">
+                    <span>Create</span>
+                </ion-segment-button> -->
+                <ion-segment-button value="deleter" @click="restaurantSegmentValue='deleter'">
+                    <span>Delete</span>
+                </ion-segment-button>
+            </ion-segment>
+            <!-- Crear -->
+            <!-- <div v-if="restaurantSegmentValue==='create'">
+                <create-resturant> </create-resturant>
+            </div> -->
+            <!-- Delete -->
+            <div v-if="restaurantSegmentValue==='deleter'" >
+                
+                
+                 <div v-if="allRestaurant.length > 0"  style="display: flex;justify-content: center;padding: 40px 0;">
+                      <ion-thumbnail >
+                            <img  :src="imgRestaurant">
+                      </ion-thumbnail> 
+                              <ion-select interface="popover" icon="add"
+                              style="padding: 10px 50px;"
+                              :ok-text="$t('backoffice.form.messages.buttons.ok')"
+                              :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
+                              :value="allRestaurant[0]._id"
+                              :placeholder="$t('frontend.menu.menu')"
+                                @ionChange="idDeleteRestaurant=$event.target.value,getRestaurantImg()" >
+                                  <ion-select-option v-for="res in allRestaurant"                    
+                                    :key="res._id" 
+                                    :value="res._id" > {{res.Name}}
+                                  </ion-select-option>                                
+                              </ion-select>
+
+                            <ion-button :disabled="idDeleteRestaurant ===''? true : false" color="light"
+                                v-if="!spinnerDelete"
+                                @click="deleteRestaurant()">
+                                <span  class="iconify" data-icon="fluent:delete-16-regular" data-inline="false" style="color: red;margin:0"></span>
+                            </ion-button>
+                            <ion-spinner v-if="spinnerDelete" color="danger"></ion-spinner>
+                    </div>
+            </div>
+        </div>
     </div>
     </div>
 </template>
@@ -350,6 +475,8 @@
 <script>
 
 import { Api } from '../api/api.js';
+
+// import CreateResturant from '../../frontend/views/NewRestautant.vue'
 
 export default {
 
@@ -415,10 +542,38 @@ export default {
       InterfaceNameShift4: '',
       CompanyNameShift4: '',
 
+      //Shift4 Access Token
+      showShift4AccessToken: "password",
+      Shift4AccessToken: '',
+
+      //Shift4 Moto Access Token
+      showShift4MotoAccessToken: "password",
+      Shift4MotoAccessToken: '',
+
+      //Shift4 FB Access Token
+      showShift4FBAccessToken: "password",
+      Shift4FBAccessToken: '',
+
+      HasDeliveryPayment: false,
+      Setting_id: null,
+
+      //Shift4 Delivery Access Token
+      showShift4DeliveryAccessToken: "password",
+      Shift4DeliveryAccessToken: '',
+
+      //Shift4 Delivery Moto Access Token
+      showShift4DeliveryMotoAccessToken: "password",
+      Shift4DeliveryMotoAccessToken: '',
+
+      //Shift4 Delivery FB Access Token
+      showShift4DeliveryFBAccessToken: "password",
+      Shift4DeliveryFBAccessToken: '',
+
       //Capcha
       capchaKey: '',
 
       id: null,
+      methodPayment_id: null,
       isBackdrop: false,
       spinner: false,
 
@@ -442,10 +597,22 @@ export default {
       paginate: ['languages'],
 
       screenWidth: 0,
+
+      restaurantSegmentValue: 'deleter',
+      allRestaurant: [],
+      idDeleteRestaurant: '',
+      imgRestaurant: '',
+      key: 0,
+      spinnerDelete: false,
     }
   },
-  created: function(){
-      this.init();
+  components:{
+    //   CreateResturant
+  },
+  created: async function(){
+      await this.getAllRestaurant();
+      this.imgRestaurant = this.allRestaurant[0].ImageUrl;
+      this.init();      
   },
   methods: {
     changeApiLoginId(){
@@ -484,6 +651,43 @@ export default {
         else
             this.showSinchToken = "password"
     },
+    changeShift4AccessToken(){
+        if (this.showShift4AccessToken == "password")
+            this.showShift4AccessToken = "text"
+        else
+            this.showShift4AccessToken = "password"
+    },
+    changeShift4MotoAccessToken(){
+        if (this.showShift4MotoAccessToken == "password")
+            this.showShift4MotoAccessToken = "text"
+        else
+            this.showShift4MotoAccessToken = "password"
+    },
+    changeShift4FBAccessToken(){
+        if (this.showShift4FBAccessToken == "password")
+            this.showShift4FBAccessToken = "text"
+        else
+            this.showShift4FBAccessToken = "password"
+    },
+
+    changeShift4DeliveryAccessToken(){
+        if (this.showShift4DeliveryAccessToken == "password")
+            this.showShift4DeliveryAccessToken = "text"
+        else
+            this.showShift4DeliveryAccessToken = "password"
+    },
+    changeShift4DeliveryMotoAccessToken(){
+        if (this.showShift4DeliveryMotoAccessToken == "password")
+            this.showShift4DeliveryMotoAccessToken = "text"
+        else
+            this.showShift4DeliveryMotoAccessToken = "password"
+    },
+    changeShift4DeliveryFBAccessToken(){
+        if (this.showShift4DeliveryFBAccessToken == "password")
+            this.showShift4DeliveryFBAccessToken = "text"
+        else
+            this.showShift4DeliveryFBAccessToken = "password"
+    },
     setActivate(val, system){
         if (system === 'twilio'){
             this.activateTwilio = val
@@ -497,7 +701,7 @@ export default {
         }
     },
     segmentChanged(value){            
-        console.log(value)
+        //console.log(value)
         if(value === 'email'){
             this.email = true
             this.sms = false
@@ -532,6 +736,13 @@ export default {
             this.payments = false
             this.capcha = false
             this.user = true
+        }
+        if(value === 'restaurants'){
+            this.email = false
+            this.sms = false
+            this.payments = false
+            this.capcha = false
+            this.user = false
         }
         this.segmentValue = value;
     },
@@ -568,7 +779,6 @@ export default {
             setTimeout(() => {
                 //llamada ajax						
                 Api.fetchAll('Staff').then(response => {
-                  // console.log(response.data)
                   this.users = response.data
                   this.users = this.users.filter(usr => usr.IsSupport == true)
                   this.filterUsers = this.users
@@ -660,11 +870,13 @@ export default {
             setTimeout(() => {  // Some AJAX call occurs
                 Api.fetchAll(this.modelName)
                 .then(response => {
-                  console.log(response)
+                  //console.log(response)
                   if (response.data.length > 0)
                   {
-                      console.log("iMenuSupport")
-                      console.log(response.data[0])
+                      //console.log("iMenuSupport")
+                      //console.log(response.data[0])
+                  if (response.data.length > 0)
+                  {
                       this.id = response.data[0]._id
                       this.SmtpHost = response.data[0].SmtpHost
                       this.EmailHost = response.data[0].EmailHost
@@ -695,14 +907,51 @@ export default {
                   
                   loading.dismiss();
                   return response;
+                }
                 })
+                // )
                 .catch(e => {
                   console.log(e);
                   loading.dismiss();
                 })
+
+                //Has Delivery Payment
+                Api.fetchAll('setting')
+                .then(response => {
+                    if (response.data.length > 0){
+                        //console.log("SETTING")
+                        //console.log(response.data)
+                        this.Setting_id = response.data[response.data.length -1]._id
+                        this.HasDeliveryPayment = response.data[response.data.length -1].HasDeliveryPayment
+                    }
+                        
+                })
+                .catch(e => {
+                    console.log(e)
+                })
+
+                //Payment Methods
+                Api.fetchAll('methodpay')
+                .then(response => {
+                    //console.log("METHODS PAY")
+                    //console.log(response.data)
+                    if (response.data.length > 0){
+                        this.methodPayment_id = response.data[0]._id
+                        this.Shift4AccessToken = response.data[0].AccessTokenShift4
+                        this.Shift4MotoAccessToken = response.data[0].MotoAccessTokenShift4
+                        this.Shift4FBAccessToken = response.data[0].FBAccessTokenShift4
+                        this.Shift4DeliveryAccessToken = response.data[0].DeliveryAccessTokenShift4
+                        this.Shift4DeliveryMotoAccessToken = response.data[0].DeliveryMotoAccessTokenShift4
+                        this.Shift4DeliveryFBAccessToken = response.data[0].DeliveryFBAccessTokenShift4
+                    }
+                })
+                .catch(e => {
+                    console.log(e)
+                })
             })
         })   
-        console.log(this.$route.params);
+        //console.log(this.$route.params);
+        
     },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
@@ -756,7 +1005,7 @@ export default {
 
           this.isBackdrop = true;
 
-            console.log(this.pickFrom);
+            //console.log(this.pickFrom);
 
             let smsSystem = ''
             if (this.activateTwilio)
@@ -786,6 +1035,19 @@ export default {
                 "CaptchaKey": this.captchaKey,
             }
 
+            let methodPaymentItem = {
+                "AccessTokenShift4": this.Shift4AccessToken,
+                "MotoAccessTokenShift4": this.Shift4MotoAccessToken,
+                "FBAccessTokenShift4": this.Shift4FBAccessToken,
+                "DeliveryAccessTokenShift4": this.Shift4DeliveryAccessToken,
+                "DeliveryMotoAccessTokenShift4": this.Shift4DeliveryMotoAccessToken,
+                "DeliveryFBAccessTokenShift4": this.Shift4DeliveryFBAccessToken
+            }
+
+            let settingItem = {
+                "HasDeliveryPayment": this.HasDeliveryPayment
+            }
+
             //If I am editing
             if (this.id){
               item['_id'] = this.id;
@@ -794,6 +1056,34 @@ export default {
                   .then(response => {
                         this.showToastMessage(this.$t('backoffice.list.messages.messageEditSuccessSetting'), "success");
                         this.spinner = false;
+                        if (this.methodPayment_id){
+                            methodPaymentItem["_id"] = this.methodPayment_id
+                            Api.putIn("methodpay", methodPaymentItem)
+                            .catch(error => {
+                                console.log(error)
+                            })
+                        }
+                        else{
+                            Api.postIn("methodpay", methodPaymentItem)
+                            .catch(error => {
+                                console.log(error)
+                            })
+                        }
+
+                        if (this.Setting_id){
+                            settingItem["_id"] = this.Setting_id
+                            Api.putIn("setting", settingItem)
+                            .catch(error => {
+                                console.log(error)
+                            })
+                        }
+                        else{
+                            Api.postIn("setting", settingItem)
+                            .catch(error => {
+                                console.log(error)
+                            })
+                        }
+                        
                         return response;
                   })
                   .catch(e => {
@@ -801,6 +1091,8 @@ export default {
                         this.spinner = false
                         this.ifErrorOccured(this.save);
                   })
+
+
             }
             else{
               //Else, I am created a new category
@@ -809,6 +1101,34 @@ export default {
                   .then(response => {
                       this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
                       this.spinner = false
+                      if (this.methodPayment_id){
+                        methodPaymentItem["_id"] = this.methodPayment_id
+                        Api.putIn("methodpay", methodPaymentItem)
+                        .catch(error => {
+                            console.log(error)
+                        })
+                      }
+                      else{
+                        Api.postIn("methodpay", methodPaymentItem)
+                        .catch(error => {
+                            console.log(error)
+                        })
+                      }
+
+                      if (this.Setting_id){
+                        settingItem["_id"] = this.Setting_id
+                        Api.putIn("setting", settingItem)
+                        .catch(error => {
+                            console.log(error)
+                        })
+                      }
+                      else{
+                        Api.postIn("setting", settingItem)
+                        .catch(error => {
+                            console.log(error)
+                        })
+                      }
+
                       return response;
                   })
                   .catch(e => {
@@ -820,6 +1140,47 @@ export default {
 
         }
     },
+    
+    async getAllRestaurant(){
+        for(var i =0; i < this.$store.state.user.AllRestaurant.length; i++){
+            const rest = await Api.fetchById('Restaurant', this.$store.state.user.AllRestaurant[i]);
+            if(rest.status === 200)
+                this.allRestaurant.push(rest.data);
+        }
+    },
+
+    async deleteRestaurant(){
+        if(this.idDeleteRestaurant !== ''){
+            this.spinnerDelete = true;
+            await Api.deleteRestaurant(this.idDeleteRestaurant);
+
+            const user = await Api.fetchById('Staff', this.$store.state.user._id)
+            if(user.status === 200){
+                 this.$store.commit("setUser", user.data);
+                 this.allRestaurant = [];
+                 this.getAllRestaurant();
+            }            
+
+            this.spinnerDelete = false;
+        }
+        
+    },
+
+    getRestaurantImg(){ 
+       //  this.key ++;      
+        const index = this.allRestaurant.findIndex(r => r._id === this.idDeleteRestaurant)
+            if(index !== -1){
+                if(this.allRestaurant[index].ImageUrl){
+                     this.imgRestaurant = this.allRestaurant[index].ImageUrl;
+                     return;
+                }
+            }
+                           
+       
+        this.imgRestaurant = '';
+    }
+         
+    
   },
 
 }

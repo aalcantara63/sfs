@@ -402,8 +402,9 @@ export var payAuthorizeNet = {
         return true;
     },
 
-    payOrder: async function(datas)
+    payOrder: async function(datas, isDelivery)
     {
+        if(!isDelivery) isDelivery = false;
         const restaurantId = datas.restaurantId
         const payMethod = datas.payMethod
 
@@ -482,7 +483,9 @@ export var payAuthorizeNet = {
                 console.log(ipClient.data.ip);
                 console.log(JSON.stringify(items));
 
-                const res = await Api.payShift4(items, restaurantId, ipClient.data.ip); 
+                console.log('Es PAGO POR DELIVERY: ' + isDelivery);
+
+                const res = await Api.payShift4(items, restaurantId, ipClient.data.ip, isDelivery); 
              
                 console.log(res);
 
@@ -500,6 +503,7 @@ export var payAuthorizeNet = {
                             "accountType": res.data[0].card.type,
                             "method": 'Card',
                             "moto": false,
+                            "isDelivery": isDelivery,
                         }
                         if(datas.googlePayToken)
                             response1.method = 'Google Pay'
@@ -815,7 +819,8 @@ export var payAuthorizeNet = {
         cardExpirationDateF2: ''
         invoiceNumber: "",
     }*/
-    refundOrder: async function(datas, moto){
+    refundOrder: async function(datas, moto, isDelivery){
+        if(!isDelivery) isDelivery = false
         console.log("REFUND en Payment")
         const restaurantId = datas.restaurantId
         const invoiceSequence = await Api.getInvoiceSequence(restaurantId)
@@ -851,7 +856,7 @@ export var payAuthorizeNet = {
             console.log('iTEM TO REFUND')
             console.log(JSON.parse(JSON.stringify(items)))
             // return;
-            return Api.refoundShift4(items, moto, restaurantId)
+            return Api.refoundShift4(items, moto, restaurantId, isDelivery)
         }
 
         if (payMethod === 'TSYS')
@@ -903,12 +908,13 @@ export var payAuthorizeNet = {
         throw new Error("Debe especificar en metodo de pago")
     },
 
-    invoiceInformation: async function(invoice, moto, restaurantId, payMethod){
+    invoiceInformation: async function(invoice, moto, restaurantId, payMethod, isDelivery){
+        if(!isDelivery) isDelivery = false
         if (payMethod === 'SHIFT4')
         {
             try {
 
-                const res = await Api.invoiceInformationShift4(invoice, moto, restaurantId);
+                const res = await Api.invoiceInformationShift4(invoice, moto, restaurantId, isDelivery);
                 return res;
                 
             } catch (error) {
@@ -920,12 +926,13 @@ export var payAuthorizeNet = {
         return false
     },
 
-    void: async function(invoice, moto, restaurantId, payMethod){        
+    void: async function(invoice, moto, restaurantId, payMethod, isDelivery){     
+        if(!isDelivery)   isDelivery = false;
         if (payMethod === 'SHIFT4')
         {
             try {
 
-                const res = await Api.voidShift4(invoice, moto, restaurantId);
+                const res = await Api.voidShift4(invoice, moto, restaurantId, isDelivery);
                 return res;
                 
             } catch (error) {

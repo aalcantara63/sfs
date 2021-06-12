@@ -175,7 +175,7 @@ export default {
     //     .then(a => a.present())
     // },
     show () {
-      console.log(this.qrMenu)
+      //console.log(this.qrMenu)
       this.$modal.show('my-first-modal');
         },
     

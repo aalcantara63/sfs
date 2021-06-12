@@ -230,7 +230,7 @@ export default {
             setTimeout(() => {
                 //llamada ajax						
                 Api.fetchAll(this.modelName).then(response => {
-                  console.log(response.data);
+                  //console.log(response.data);
                   this.variantGroups = response.data;
                   this.filterVariantGroups = this.variantGroups;
                   loading.dismiss();

@@ -422,13 +422,13 @@ export default {
   },
   mounted: function(){
     EventBus.$on('ProductsSelected', (productsSelected) => {
-      console.log(productsSelected)
+      //console.log(productsSelected)
       productsSelected.forEach(prod => {
           this.products.push(prod) 
       })    
     });
     EventBus.$on('ServicesSelected', (servicesSelected) => {
-      console.log(servicesSelected)
+      //console.log(servicesSelected)
       servicesSelected.forEach(serv => {
           this.products.push(serv) 
       })  
@@ -504,11 +504,11 @@ export default {
         partialSubtotal -= this.discountAmount
 
         this.subtotal = partialSubtotal.toString()
-        console.log("SUBTOTAL")
-        console.log(this.subtotal)
+        //console.log("SUBTOTAL")
+        //console.log(this.subtotal)
     },
     calcTotal(){
-        console.log("HELLO")
+        //console.log("HELLO")
         let partialTotal = 0
         
         this.calcSubtotal()
@@ -519,8 +519,8 @@ export default {
         partialTotal += parseFloat(this.shipping)
 
         this.total = partialTotal.toString()
-        console.log("TOTAL")
-        console.log(this.total)
+        //console.log("TOTAL")
+        //console.log(this.total)
     },
     pendingPay(){
         this.calcTotal()
@@ -540,8 +540,8 @@ export default {
                 setTimeout(() => {  // Some AJAX call occurs    
                     Api.fetchById(this.modelName, this.id)
                     .then(response => {
-                        console.log("ORDER");
-                        console.log(response.data);
+                        //console.log("ORDER");
+                        //console.log(response.data);
                         this.order = response.data;
                         this.date = this.order.Date;
                         this.orderType = this.order.OrderType;
@@ -686,7 +686,7 @@ export default {
     },
     isValidForm(){
         
-        console.log("VALID FORM")
+        //console.log("VALID FORM")
         this.deadLinePercentInc++
         if (this.products.length == 0)
         {
@@ -707,7 +707,7 @@ export default {
             
         }
 
-        console.log("TRUE EN ESTE PUNTO");
+        //console.log("TRUE EN ESTE PUNTO");
         return true;
 
     },
@@ -864,7 +864,7 @@ export default {
         }  
     },
     sendCancelEmail(email){
-          console.log(email);
+          //console.log(email);
            let items = {
               "email": email,
               "mess": this.$t('backoffice.list.messages.cateringCancel'),
@@ -872,7 +872,7 @@ export default {
             };
             Api.sendEmail(items)
             .then(() => {
-                console.log(items)
+                //console.log(items)
             })
             .catch(e => {
                 console.log(e);
@@ -880,8 +880,8 @@ export default {
             })
     },
     sendSms(phone, mess){
-        console.log(phone);
-            console.log(mess);
+        //console.log(phone);
+        //console.log(mess);
         let items = {
             "phone": phone,
             "mess": mess
@@ -892,7 +892,7 @@ export default {
         // };
         Api.sendSms(items)
             .then(() => {
-                console.log(items)
+                //console.log(items)
             })
             .catch(e => {
                 console.log(e);

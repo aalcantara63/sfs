@@ -144,8 +144,8 @@ export default {
             this.order.Deadline[this.deadline].AmountPayed  = amontToPay
             this.order.PendingPayment -= amontToPay
             
-            Api.putIn("order", this.order).then(response => {
-                console.log(response)
+            Api.putIn("order", this.order).then(() => {
+                //console.log(response)
                 this.dismissModal()
             }).catch(e => {
                 console.log(e)

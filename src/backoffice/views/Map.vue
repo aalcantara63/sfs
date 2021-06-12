@@ -62,9 +62,9 @@ export default {
         isTravel: {type: Boolean, default: false}
     },
     created(){
-        console.log(this.coordinates)
-        console.log(this.isTravel)
-        console.log(this.travel)
+        //console.log(this.coordinates)
+        //console.log(this.isTravel)
+        //console.log(this.travel)
     // Geolocation.getCurrentPosition({   
         //         timeout: 3000      
         //     }).then(response => {

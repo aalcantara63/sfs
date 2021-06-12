@@ -44,11 +44,11 @@ export default {
   created: function(){
 
     this.user = this.parent.$store.state.user
-    console.log(this.user)
+    //console.log(this.user)
     const restaurantID = this.user.RestaurantId
     Api.fetchById('restaurant', restaurantID)
     .then(response => {
-        console.log(response.data)
+        //console.log(response.data)
         this.file = response.data.ImageUrl
     })
     .catch(e => {
@@ -80,14 +80,14 @@ export default {
         .then(a => a.present());
     },
     unlock(value){
-        console.log(this.user.ServerId)
-        console.log(value)
+        //console.log(this.user.ServerId)
+        //console.log(value)
         if (this.user.ServerId == value)
             this.dismissModal()
     },
     
     closeSession: function(){
-        console.log("Close session")
+        //console.log("Close session")
         this.parent.logOut()
         this.dismissModal()
     },

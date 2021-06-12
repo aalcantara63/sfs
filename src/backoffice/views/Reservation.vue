@@ -575,7 +575,7 @@ export default {
                   if (wait.CustomerEmail != "")
                   {
                       this.spinner = true
-                      console.log("Sending email")
+                      //console.log("Sending email")
                       let email = {
                         "email": wait.CustomerEmail,
                         "mess": "Your reservation is ready. We are waiting for you. Thanks.",
@@ -584,7 +584,7 @@ export default {
                       };
                       Api.sendEmail(email)
                       .then(() => {
-                          console.log(email)
+                          //console.log(email)
                           this.spinner = false
                           this.showToastMessage('An email has been sent to the customer successfully.', 'success')
                           this.changeWaitlistFilter(this.filterWaitList)
@@ -601,14 +601,14 @@ export default {
                   if (wait.CustomerPhone != "")
                   {
                       this.spinner = true
-                      console.log("Sending sms")
+                      //console.log("Sending sms")
                       let text = {
                         "phone": wait.CustomerPhone,
                         "mess": "Your reservation is ready. We are waiting for you. Thanks."
                       };
                       Api.sendSms(text)
                       .then(() => {
-                          console.log(text)
+                          //console.log(text)
                           this.spinner = false
                           this.showToastMessage('A text has been sent to the customer successfully.', 'success')
                           this.changeWaitlistFilter(this.filterWaitList)
@@ -651,7 +651,7 @@ export default {
                   
                   this.spinner = true;
                   item.State = "Done"
-                  console.log(item)
+                  //console.log(item)
                   Api.putIn('waitlist', item)
                     .then(response => {
                       // this.showToastMessage(this.$t('backoffice.list.messages.messageDeleteSuccessCategory'), "success");
@@ -722,7 +722,7 @@ export default {
       },
       changeWaitlistFilter(value){
 
-            console.log(value)
+            //console.log(value)
             this.filterWaitList = value
             this.allWaitList = this.waitlistL
             if (value == 'allwaitlist')
@@ -749,13 +749,13 @@ export default {
                       //  console.log("NOW: " + now)
                        return storeDate == now 
                   })
-                  console.log(cat2)
+                  //console.log(cat2)
                   this.allWaitList = cat2
                 })
             }
         },
         changeFilterStatus(value){
-            console.log(value)
+            //console.log(value)
             let status = -1
             this.filterStatus = value
             this.allReservations = this.reservations
@@ -792,7 +792,7 @@ export default {
             {
                 status = 6
             }
-            console.log(status)
+            //console.log(status)
             requestAnimationFrame(() => {   
               let cat2 = this.allReservations.filter(item => item.State == status)
               this.allReservations = cat2
@@ -826,7 +826,7 @@ export default {
             };
             Api.sendEmail(email)
             .then(() => {
-                console.log(email)
+                //console.log(email)
             })
             .catch(e => {
                 console.log(e);
@@ -840,7 +840,7 @@ export default {
             };
             Api.sendSms(text)
             .then(() => {
-                console.log(text)
+                //console.log(text)
             })
             .catch(e => {
                 console.log(e);
@@ -848,7 +848,7 @@ export default {
         },
 
         getRestaurantConfig: function(){
-            console.log("Step1")
+            //console.log("Step1")
             Api.fetchById('Restaurant', this.$store.state.user.RestaurantId).then(response => {
                     this.restaurantConfig = response.data;
                     this.getRestaurantCustomer();
@@ -858,12 +858,12 @@ export default {
             });
         },
         getRestaurantCustomer: function(){
-            console.log("AQUI")
+            //console.log("AQUI")
             Api.findCustomerByEmail(this.restaurantConfig.Email)
             .then(response => { 
                 this.restaurantCustomer = response.data
-                console.log("RESTAURANT CUSTOMER")
-                console.log(this.restaurantCustomer)
+                //console.log("RESTAURANT CUSTOMER")
+                //console.log(this.restaurantCustomer)
             })
         },
          
@@ -897,7 +897,7 @@ export default {
         },
          
       segmentChanged(value){            
-             console.log(value)
+             //console.log(value)
              if(value === 'camera'){
                  this.camera = true;
                  this.bookmark = false;
@@ -931,8 +931,8 @@ export default {
           this.spinner = true
           reservation.State = 1
           Api.putIn('Reservation', reservation)
-          .then(response => {
-              console.log(response)
+          .then(() => {
+              //console.log(response)
               this.sendEmail(reservation, this.$t('backoffice.form.marketingMessages.reservationApproved'))
               this.sendSMS(reservation, this.$t('backoffice.form.marketingMessages.reservationApproved'))
               this.getReservations()
@@ -949,8 +949,8 @@ export default {
           this.spinner = true
           reservation.State = 6
           Api.putIn('Reservation', reservation)
-          .then(response => {
-              console.log(response)
+          .then(() => {
+              //console.log(response)
               // this.sendEmail(reservation, this.$t('backoffice.form.marketingMessages.reservationApproved'))
               // this.sendSMS(reservation, this.$t('backoffice.form.marketingMessages.reservationApproved'))
               this.getReservations()
@@ -985,8 +985,8 @@ export default {
                 this.allReservations.reverse()
                 this.reservations = this.allReservations
                 this.spinner = false 
-                console.log("ALL RESERVATIONS")
-                console.log(this.allReservations)
+                //console.log("ALL RESERVATIONS")
+                //console.log(this.allReservations)
             })
             .catch(e => {
                 this.spinner = false
@@ -1003,8 +1003,8 @@ export default {
                 this.allWaitList.reverse()
                 this.waitlistL = this.allWaitList
                 this.spinner = false 
-                console.log("ALL WAIT LIST")
-                console.log(this.allWaitList)
+                //console.log("ALL WAIT LIST")
+                //console.log(this.allWaitList)
                 this.changeWaitlistFilter(this.filterWaitList)
             })
             .catch(e => {
@@ -1014,7 +1014,7 @@ export default {
       },
 
       findByCode(){
-        console.log('theCode :' + this.theCode);
+        //console.log('theCode :' + this.theCode);
         if(this.theCode === '')
           return ('inserte un codigo valido')
          this.spinner = true;
@@ -1022,10 +1022,10 @@ export default {
             .then(response => {
                 this.reservationByCode = response.data  
                 this.spinner = false;
-                console.log(this.reservationByCode)       ;
+                //console.log(this.reservationByCode)       ;
             })
             .catch(e => {
-              this.spinner = false 
+                this.spinner = false 
                 console.log(e);            
             }) 
       },
@@ -1033,7 +1033,7 @@ export default {
       async createCustomer(client){
             Api.postIn('Customer', client)
             .then(response => {
-                console.log(response)
+                //console.log(response)
                 return response.data;            
             })
             .catch(e => {
@@ -1072,7 +1072,7 @@ export default {
 
         if (this.restaurantCustomer == null)
         {
-            console.log("Cliente no existe")
+            //console.log("Cliente no existe")
             let client = {
                 'Name': this.restaurantConfig.Name,
                 'EmailAddress': this.restaurantConfig.Email,
@@ -1095,12 +1095,12 @@ export default {
         "State": 0
         }
 
-        console.log(Reservation)
+        //console.log(Reservation)
 
         try {
           this.spinner = true;
           const response = await Api.postIn('Reservation', Reservation);
-          console.log(response);
+          //console.log(response);
           if(response.status === 200){
             this.dateToReserv = ''; this.hourToReserv = '' ; this.guest = 1;
             this.noteToReserv = ''; this.reasonToReser = ''; this.spinner = false;
@@ -1258,14 +1258,14 @@ export default {
             'Capacity': this.waitPeople,
             // 'Date': moment().format('YYYY/MM/DD')
         }
-        console.log(item)
+        //console.log(item)
         Api.postIn('waitlist', item)
-        .then(response => {
-            console.log(response.data)
+        .then(() => {
+            //console.log(response.data)
             this.showToastMessage('Wait list update', 'success')
             this.getWaitList()
             this.clearWaitFields()
-            console.log("Change waitlist: " + this.filterWaitList)
+            //console.log("Change waitlist: " + this.filterWaitList)
             this.changeWaitlistFilter(this.filterWaitList)
         })
         .catch(e => {
@@ -1365,7 +1365,7 @@ export default {
               text: 'Done',
               role: 'cancel',
               handler: () => {
-                console.log('Favorite clicked');
+                //console.log('Favorite clicked');
               }
             }
           ]

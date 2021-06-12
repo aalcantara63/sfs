@@ -45,10 +45,10 @@
                   <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
                 </ion-item>
                 <ion-item-options side="end">
-                  <ion-item-option v-if="hasPermission('canEditOccupation')" color="primary" @click="editOccupation(occupation._id)">
+                  <ion-item-option v-if="isSupportUserLogin() || (hasPermission('canEditOccupation') && occupation.CanEdit)" color="primary" @click="editOccupation(occupation._id)">
                     <ion-icon slot="icon-only" name="create"></ion-icon>
                   </ion-item-option>
-                  <ion-item-option v-if="hasPermission('canDeleteOccupation')" color="danger" @click="deleteOccupation(occupation._id)">
+                  <ion-item-option v-if="hasPermission('canDeleteOccupation') && occupation.CanEdit" color="danger" @click="deleteOccupation(occupation._id)">
                     <ion-icon slot="icon-only" name="trash"></ion-icon>
                   </ion-item-option>
                 </ion-item-options>
@@ -77,10 +77,10 @@
                     <h3><div style="word-wrap: break-word">{{ occupation.Description }}</div></h3>
                 </ion-label>
                 <ion-item-group side="end">
-                  <ion-button v-if="hasPermission('canEditOccupation')" color="primary" @click="editOccupation(occupation._id)">
+                  <ion-button v-if="isSupportUserLogin() || (hasPermission('canEditOccupation') && occupation.CanEdit)" color="primary" @click="editOccupation(occupation._id)">
                     <ion-icon slot="icon-only" name="create"></ion-icon>
                   </ion-button>
-                  <ion-button v-if="hasPermission('canDeleteOccupation')" color="danger" @click="deleteOccupation(occupation._id)">
+                  <ion-button v-if="hasPermission('canDeleteOccupation') && occupation.CanEdit" color="danger" @click="deleteOccupation(occupation._id)">
                     <ion-icon slot="icon-only" name="trash"></ion-icon>
                   </ion-button>
                 </ion-item-group>
@@ -133,6 +133,9 @@ export default {
     //     })
     //     .then(a => a.present())
     // },
+    isSupportUserLogin(){
+        return this.$store.state.user.IsSupport
+    },
     ifErrorOccured(action){
       return this.$ionic.alertController.create({
           title: this.$t('backoffice.list.messages.connectionError'),

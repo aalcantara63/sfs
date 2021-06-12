@@ -36,6 +36,7 @@
           <div v-if="screenWidth < 600">
             <paginate
             name="languages"
+            ref="paginator"
             :list="filterProducts"
             :per="8"
             >
@@ -48,7 +49,7 @@
                         </ion-thumbnail>
                         <ion-label class="ion-text-wrap">
                             <h2>{{ product.Name }}</h2>
-                            <!-- <h3>{{ product.BarCode }}</h3> -->
+                            <!-- <h3>{{ product.Ingredients.length }}</h3> -->
                         </ion-label>
                         <ion-label >
                             <p><router-link to="/category">{{ getCategoryNameById(product.CategoryId) }}</router-link></p>
@@ -80,6 +81,8 @@
             </paginate>
 
             <paginate-links for="languages" color="primary" 
+                @change="onLangsPageChange()"
+                :async="true"
                 :simple="{
                 next:'»' ,
                 prev: '« ' }"
@@ -90,6 +93,7 @@
           <div v-if="screenWidth >= 600">
             <paginate
             name="languages"
+            ref="paginator2"
             :list="filterProducts"
             :per="8"
             >
@@ -101,7 +105,7 @@
                     </ion-thumbnail>
                     <ion-label class="ion-text-wrap">
                         <h2>{{ product.Name }}</h2>
-                        <!-- <h3>{{ product.BarCode }}</h3> -->
+                        <!-- <h3>{{ product.Ingredients.length }}</h3> -->
                     </ion-label>
                     <ion-label >
                         <p><router-link :to="'/category-form/'+product.CategoryId">{{ getCategoryNameById(product.CategoryId) }}</router-link></p>
@@ -122,7 +126,9 @@
 
             </paginate>
 
-            <paginate-links for="languages" color="primary" 
+            <paginate-links for="languages" color="primary"
+              @change="onLangsPageChange2()"
+              :async="true"
                 :simple="{
                 next:'»' ,
                 prev: '« ' }"
@@ -151,9 +157,15 @@ import { Api } from '../api/api.js';
 export default {
    name: 'product',
    created: function(){
-       this.init();
+       this.init()
        this.screenWidth = screen.width;
    },
+  //  mounted: function(){
+  //     if(this.$route.params.currentPageOrder > 1){
+  //       this.currentPageOrder = this.$route.params.currentPageOrder; 
+  //       this.$refs.paginator.goToPage(this.currentPageOrder);
+  //     }
+  //   },
    data () {
     return {
       modelName: 'Product',
@@ -175,7 +187,9 @@ export default {
 
       currency: 'USD',
 
-      rou: '/product-form'
+      rou: '/product-form',
+
+      currentPageOrder: 1,
     }
   },
    methods: {
@@ -189,32 +203,84 @@ export default {
     //     })
     //     .then(a => a.present())
     // },
-    init(){
-      Api.fetchAll('VariantGroup')
-      .then(res => {
-         console.log('Variants: ' + res.data.length)
-      })
+    async init(){
+      // const variants = await Api.fetchAll('VariantGroup')
+      // console.log('Variants: ' + variants.data.length)
 
-       this.cType = this.$route.params.type || 'product';
-       if (this.cType != 'product')
+      const loading = await this.$ionic.loadingController
+        .create({
+          cssClass: 'my-custom-class',
+          message: this.$t('backoffice.titles.loading'),
+          backdropDismiss: true
+        })
+        loading.present()
+      
+        this.cType = this.$route.params.type || 'product';
+        if (this.cType != 'product')
           this.rou = '/product-form/service'
-       this.getCurrency();
-       this.fetchCategories();
 
-      //  this.fetchProducts();
-    },
-    getCurrency(){
-        const restaurantID = this.$store.state.user.RestaurantId
-        if (restaurantID){
-            Api.fetchById('Restaurant', restaurantID).then(response => {
-                this.currency = response.data.Currency
-            }).catch(e => {
-                console.log(e)
-            })
-        } 
+        //Currency
+          const restaurantID = this.$store.state.user.RestaurantId 
+          if (restaurantID){
+              try {
+                  const Restaurant = await Api.fetchById('Restaurant', restaurantID)
+                  this.currency = Restaurant.data.Currency
+              } catch (error) {
+                  console.log(error)
+                  loading.dismiss();
+              }
+          } 
+
+          //Category
+          try {
+              const Category = await Api.fetchAll('Category')
+              this.categories = Category.data
+
+              if (this.cType == 'product')
+              {
+                  this.categories = this.categories.filter(cat => !cat.Service || cat.Service == false)
+              }
+              else{
+                  this.categories = this.categories.filter(cat => cat.Service == true)
+              }
+              this.categories.forEach(cat => {
+                  this.categoriesIds.push(cat._id)
+              })
+              //console.log(this.categoriesIds)
+
+              //Product
+              const Product = await Api.fetchAll(this.modelName)
+              this.products = Product.data
+              this.products = this.products.filter(prod => this.categoriesIds.includes(prod.CategoryId))
+              this.filterProducts = this.products
+              
+
+          } catch (e) {
+              console.log(e);
+              loading.dismiss();
+          }
+          //console.log("--- *** *** *** ---")
+          //console.log(this.filterProducts)
+
+          //console.log("--- Ahora es que va a la paginación ---")
+          if(this.$route.params.currentPageOrder > 1){
+            this.currentPageOrder = this.$route.params.currentPageOrder; 
+            if (this.$refs.paginator)
+              this.$refs.paginator.goToPage(this.currentPageOrder);
+            if (this.$refs.paginator2)
+              this.$refs.paginator2.goToPage(this.currentPageOrder);
+          }
+
+          loading.dismiss()
     },
     getFormateNumber: function(number){
       return new Intl.NumberFormat('en', {style: "currency", currency: this.currency} ).format(number).toString()
+    },
+    onLangsPageChange () { 
+        this.currentPageOrder = this.$refs.paginator.currentPage + 1;        
+    },
+    onLangsPageChange2 () { 
+        this.currentPageOrder = this.$refs.paginator2.currentPage + 1;        
     },
     goToForm(){
         if (this.cType != 'product')
@@ -323,7 +389,7 @@ export default {
         event.target.complete();    
     },
     /****** CRUD category methods ******/
-    fetchCategories: function(){
+    fetchCategories(){
         this.$ionic.loadingController
         .create({
           cssClass: 'my-custom-class',
@@ -347,7 +413,7 @@ export default {
                   this.categories.forEach(cat => {
                       this.categoriesIds.push(cat._id)
                   })
-                  console.log(this.categoriesIds)
+                  //console.log(this.categoriesIds)
                   this.fetchProducts();
                   loading.dismiss();
                 })
@@ -411,7 +477,8 @@ export default {
             name: 'ProductForm', 
             params: { 
               productId: id,
-              type: this.cType
+              type: this.cType,
+              currentPageOrder: this.currentPageOrder
             }
           });
     },

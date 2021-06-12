@@ -440,9 +440,9 @@ export default{
         // this.$refs.active.checked = this.active;
         let categoriesIds = data.Categories;
 
-        console.log("Init selected categories")
+        //console.log("Init selected categories")
         this.selectedCategories = this.mapCategory(categoriesIds);
-        console.log("End selected categories")
+        //console.log("End selected categories")
 
         this.initAvailableCategories();
       },
@@ -464,10 +464,10 @@ export default{
 
         // console.log("SelectedCateg");
         // console.log(selCategories);
-          console.log("TODAS LAS CATEGORIAS")
-          console.log(this.categories)
-          console.log("LAS CATEGORIAS SELECCIONADAS")
-          console.log(selCategories)
+        //  console.log("TODAS LAS CATEGORIAS")
+        //  console.log(this.categories)
+        //  console.log("LAS CATEGORIAS SELECCIONADAS")
+        //  console.log(selCategories)
          return selCategories;
          
       },
@@ -481,8 +481,8 @@ export default{
                   this.selectedCategories.forEach(selectCateg => {
                     //  console.log(category);
                     //  console.log(selectCateg);
-                     console.log("Selected category: "); console.log(selectCateg)
-                     console.log("Category: "); console.log(category)
+                    // console.log("Selected category: "); console.log(selectCateg)
+                    // console.log("Category: "); console.log(category)
                      if (selectCateg != null && category != null){
                         if (selectCateg._id == category._id)
                             found = true;
@@ -597,7 +597,7 @@ export default{
         if (this.isValidForm())
         {
             this.isBackdrop = true;
-            console.log(this.active);
+            //console.log(this.active);
             let categories = this.createCategoriesObject();
             let item = {
                 "Name": this.name,

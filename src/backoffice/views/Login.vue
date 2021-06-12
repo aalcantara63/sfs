@@ -18,7 +18,7 @@
               v-bind:value="password">
               </ion-input>
             </ion-item>
-                <ion-button expand="full" color="primary" @click="login">{{$t('backoffice.form.login')}}</ion-button>
+                <ion-button expand="full" :disabled="loginButtonPush" color="primary" @click="login">{{$t('backoffice.form.login')}}</ion-button>
             <ion-item>
                 <a class="forgotPass" @click="forgotPassword()">{{$t('backoffice.options.forgotPassword')}}</a>
             </ion-item>
@@ -53,14 +53,15 @@
 import { Api } from '../api/api.js';
 import { payAuthorizeNet } from '../api/payments.js';
 import { EventBus } from '../../frontend/event-bus';
+  
 
 export default {
 
   name: 'userForm',
    
-  // props: {
-  //     RestaurantList: { type: Object, default: null },
-  // },
+  props: {
+      createdRestaurantEmail: { type: String, default: '' },
+  },
 
   data () {
     return {
@@ -77,9 +78,13 @@ export default {
       // basicSettings: null,
       spinner: false,
 
+      loginButtonPush: false, 
+
     }
   },
   created: function(){
+    if(this.createdRestaurantEmail !== '')
+      this.email = this.createdRestaurantEmail;
     //  this.getConfig();
     //  this.fetchUsers();
   },
@@ -97,8 +102,8 @@ export default {
                           userRestaurant.push(restaurant)
                   });
 
-                  console.log("Todos Restaurantes")
-                  console.log(userRestaurant)
+                  //console.log("Todos Restaurantes")
+                  //console.log(userRestaurant)
                   EventBus.$emit('userRestaurant', userRestaurant)
               }
           })
@@ -129,8 +134,8 @@ export default {
               "Email": this.forgotEmail,
           }
           Api.loginForgot(item)
-          .then(response => {
-              console.log(response)
+          .then(() => {
+              //console.log(response)
               this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'), this.$t('backoffice.list.messages.newPasswordSent'), this.$t('backoffice.options.login'))
 
               this.forgotEmail = ''
@@ -155,15 +160,18 @@ export default {
         .then(a => a.present())
       },
       login: async function(){
+          this.loginButtonPush = true
           this.spinner = true
           if (this.email == "")
           {
               this.ShowMessage(this.$t('backoffice.form.validate.validate'), this.$t('backoffice.form.validate.email'), this.$t('backoffice.options.login'));
+              this.loginButtonPush = false;
               return;
           }
           if (this.password == "")
           {
               this.ShowMessage(this.$t('backoffice.form.validate.validate'), this.$t('backoffice.form.validate.password'), this.$t('backoffice.options.login'));
+              this.loginButtonPush = false;
               return;
           }
           //Comienza el login
@@ -171,48 +179,55 @@ export default {
               "Email": this.email,
               "Password": this.password
           }
-          Api.login(item).then(response => {
+          Api.login(item).then(async response => {
+            const {Commons} = require('../../frontend/commons');
               this.userLogin = response.data
-              console.log("LOGIN");
-              console.log(this.userLogin);
+              //console.log("LOGIN");
+              //console.log(this.userLogin);
               this.$store.commit("setAuthentication", true);
               this.$store.commit("setUser", this.userLogin);
               //Set token
-              console.log("Token");
-              console.log(this.userLogin.token);
+              //console.log("Token");
+              //console.log(this.userLogin.token);
               Api.setTokenId(this.userLogin.token);
               Api.setRestaurantId(this.userLogin.RestaurantId);
-              console.log("RESTAURANT")
-              console.log(Api.getRestaurant())
-              this.getConfig();
+              //console.log("RESTAURANT")
+              //console.log(Api.getRestaurant())
+              this.$store.commit("setAuthentication", true);
+              this.$store.commit("setUser", this.userLogin);
+              //Set token
+              Api.setTokenId(this.userLogin.token);
+              Api.setRestaurantId(this.userLogin.RestaurantId);
+              this.getConfig();              
+              Commons.changeRestaurant(this.userLogin.RestaurantId);
 
               //Set ClerkId for payments.
               payAuthorizeNet.setClerkId(this.userLogin.ServerId)
 
-              console.log("roles")
-              console.log(this.userLogin.Roles);
+              //console.log("roles")
+              //console.log(this.userLogin.Roles);
               let roles = [];
               this.userLogin.Roles.forEach(rol_id => {
                   Api.fetchById("rol", rol_id).then(response => {
                       roles.push(response.data);
                   })
               });
-              console.log("Estos son los roles");
-              console.log(roles);
+              //console.log("Estos son los roles");
+              //console.log(roles);
               this.$store.commit("setRoles", roles);
               document.querySelector('ion-menu-controller').close('end')
               EventBus.$emit('blockScreen', 'true')
               EventBus.$emit('staffName', this.userLogin.FirstName + ' ' + this.userLogin.LastName)
 
+              //Get all restaurants of the user login
               this.getAllRestaurant()
-              console.log("EL STORAGE")
-              console.log(this.$store.state.user.RestaurantId)
 
               this.spinner = false
+              this.loginButtonPush = false
               if (this.userLogin.IsSupport){
                   this.$router.push({
                       name: 'Support'
-                  });
+                  }); 
               }
               else{
                   this.$router.push({
@@ -221,11 +236,12 @@ export default {
                           'firstLogin': true,
                       }
                   });
-              }
+              }             
           })
           .catch(e => {
             console.log(e)
             this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'), this.$t('backoffice.list.messages.emailOrPasswordIncorrect'), this.$t('backoffice.options.login'));
+            this.loginButtonPush = false
             this.spinner = false
           });
 

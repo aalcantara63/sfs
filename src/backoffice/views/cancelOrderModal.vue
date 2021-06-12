@@ -66,10 +66,10 @@ export default {
   },
   created: async function(){
     const restaurantID = this.parent.$store.state.user.RestaurantId
-    console.log("--------------")
+    //console.log("--------------")
     await this.getTokens(restaurantID)
-    console.log("------TOKENS--------")
-    console.log(this.tokens)
+    //console.log("------TOKENS--------")
+    //console.log(this.tokens)
     Api.fetchById('Restaurant', restaurantID)
     .then(response => {
         this.apiLoginId = response.data.ApiLoginId
@@ -151,8 +151,8 @@ export default {
             //Obtengo el restaurante
             const restaurantID = this.parent.$store.state.user.RestaurantId
             const restaurant = await Api.fetchById('restaurant', restaurantID)
-            console.log(restaurantID)
-            console.log(restaurant)
+            //console.log(restaurantID)
+            //console.log(restaurant)
             
             if (restaurant.data.PayMethod == 'AUTH')
             {
@@ -165,7 +165,7 @@ export default {
                                         expirationCardP[0][expirationCardP[0].length - 1] + 
                                           expirationCardP[1]
                 
-                console.log(expirationCard)
+                //console.log(expirationCard)
 
                 const refundDatas = {
                     "amount": this.order.Total,
@@ -174,8 +174,8 @@ export default {
                     "refTransId": this.order.PaymentTransId,
                 }
                 payAuthorizeNet.refund(refundDatas, this.payUrl, this.apiLoginId, this.transactionKey)
-                .then(response => {
-                    console.log(response);
+                .then(() => {
+                    //console.log(response);
                     this.cancelOrder();
                 })
                 .catch(e => {
@@ -219,11 +219,11 @@ export default {
           this.pushToken(pay, restaurantID)
           
       });
-      console.log(this.tokens)
+      //console.log(this.tokens)
     },
     async putRefund(pay, restaurantID, index){
 
-          console.log("PAY STATE" + pay.state , index)
+          //console.log("PAY STATE" + pay.state , index)
           if (pay.state == 1)
           { 
            
@@ -237,10 +237,11 @@ export default {
                 "token": this.tokens[index],
                 "invoiceNumber": pay.paymentInfo.transId
             }
+            const isDelivery = pay.paymentInfo.isDelivery || false;
 
-            const resRefund = await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto)
-            console.log("REFUND")
-            console.log(resRefund)
+            await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto, isDelivery)
+            //console.log("REFUND")
+            //console.log(resRefund)
             const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
             if(paymeD){                              
                 const payUpd = paymeD.data[0];
@@ -253,11 +254,11 @@ export default {
     async setRefund(restaurantID){
 
         //Recorrer todos los pagos de la orden y hacer refund
-        console.log("1 - R")
+        //console.log("1 - R")
         if (this.order.Payment && this.order.Payment.length > 0)
         {
-            console.log("2 - R")
-            console.log(this.order.Payment.length)
+            //console.log("2 - R")
+            //console.log(this.order.Payment.length)
             for (const pay of this.order.Payment) {
               await this.putRefund(pay, restaurantID, this.order.Payment.indexOf(pay))
             }
@@ -309,8 +310,8 @@ export default {
 
                             const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
                             if(paymeD){
-                                console.log('paymenD')
-                                console.log(paymeD.data[0])
+                                //console.log('paymenD')
+                                //console.log(paymeD.data[0])
                                 const payUpd = paymeD.data[0];
                                 payUpd.Void = pay.paymentInfo.total;
                                 await Api.putIn('Allpayments', payUpd);
@@ -325,8 +326,8 @@ export default {
 
                     else if(pay.paymentInfo.method === "Cash" || pay.paymentInfo.method === "Check"){
                       const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
-                        console.log('paymeD in VOID')
-                        console.log(paymeD)
+                        //console.log('paymeD in VOID')
+                        //console.log(paymeD)
                         if(paymeD){                              
                             const payUpd = paymeD.data[0];
                             payUpd.Void = pay.paymentInfo.total;
@@ -336,12 +337,13 @@ export default {
                     }
                     else
                     {
-                        const resVoid = await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4')
-                        console.log("Response Void")
-                        console.log(resVoid)
+                        const isDelivery = pay.paymentInfo.isDelivery || false;
+                        await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4', isDelivery)
+                        //console.log("Response Void")
+                        //console.log(resVoid)
                         const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
-                        console.log('paymeD in VOID')
-                        console.log(paymeD)
+                        //console.log('paymeD in VOID')
+                        //console.log(paymeD)
                         if(paymeD){                              
                             const payUpd = paymeD.data[0];
                             payUpd.Void = pay.paymentInfo.total;
@@ -397,7 +399,7 @@ export default {
                 //     this.sendEmail(this.order.CustomerEmail, this.parent.$t('backoffice.form.marketingMessages.canceled'));
                 // }
                 
-                console.log("Mostrar orders details.")
+                //console.log("Mostrar orders details.")
                 // this.parent.$router.push({
                 //   name: 'OrderDetails', 
                 //   params: { orderId: this.order._id } 
