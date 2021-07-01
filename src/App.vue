@@ -36,29 +36,37 @@
               <div class="logo" style="margin-bottom: 5px;">
                 <img  :src="$store.state.restaurantActive.restaurantLogo" >
               </div>
-              
-              <ion-item> 
-                <div style="position: absolute; bottom: 0;text-align: center;width: 100%;">
-                  <a :href="restaurantActive.restaurantFacebok" v-if="restaurantActive.restaurantFacebok != ''" target="_blanc" v-tooltip="'Facebook'">
-                    <span class="iconify" color="#3b5998"  data-icon="ion-logo-facebook" data-inline="false" ></span> 
-                  </a>
-                  <a :href="restaurantActive.restaurantTwitter" v-if="restaurantActive.restaurantTwitter != ''" target="_blanc" v-tooltip="'Twitter'">
-                    <span class="iconify" color="#1DA1F2" data-icon="ion-logo-twitter" data-inline="false"></span> 
-                  </a>
-                  <a :href="restaurantActive.restaurantInstagram" v-if="restaurantActive.restaurantInstagram != ''" target="_blanc" v-tooltip="'Instagram'">
-                    <span class="iconify" color="#8a3ab9" data-icon="ion-logo-instagram" data-inline="false"></span> 
-                  </a>
-                  <a :href="restaurantActive.restaurantYoutube" v-if="restaurantActive.restaurantYoutube != ''" target="_blanc" v-tooltip="'Toutube'">
-                    <span class="iconify" color="#FF0000" data-icon="ion-logo-youtube" data-inline="false"></span>  
-                  </a>
-                  <!-- <a :href="restaurantActive.restaurantWeb" v-if="restaurantActive.restaurantWeb != ''" target="_blanc">
-                    <span class="iconify" color="primary" data-icon="foundation:web" data-inline="false"></span>  
-                  </a> -->
-                  <a @click="shareUrlLocation()" v-if="restaurantActive.UrlLocation != ''" target="_blanc" v-tooltip="$t('frontend.tooltips.shareLocation')">
-                    <span  class="iconify" data-icon="si-glyph:pin-location-2" data-inline="false"></span> 
-                  </a>
+
+           
+            
+                <div style="display: flex;justify-content: center;">
+                  <div  v-if="$store.state.restaurantActive.restaurantFacebok">
+                    <a :href="$store.state.restaurantActive.restaurantFacebok" v-if="$store.state.restaurantActive.restaurantFacebok !==''" target="_blanc" v-tooltip="'Facebook'">
+                      <span class="iconify" color="#3b5998"  data-icon="ion-logo-facebook" data-inline="false" ></span> 
+                    </a>
+                  </div>
+                  <div  v-if="$store.state.restaurantActive.restaurantTwitter">
+                         <a :href="$store.state.restaurantActive.restaurantTwitter"  target="_blanc" v-tooltip="'Twitter'">
+                            <span class="iconify" color="#1DA1F2" data-icon="ion-logo-twitter" data-inline="false"></span> 
+                        </a>
+                  </div>
+                    <div v-if="$store.state.restaurantActive.restaurantInstagram">
+                        <a :href="$store.state.restaurantActive.restaurantInstagram" v-if="$store.state.restaurantActive.restaurantInstagram != ''" target="_blanc" v-tooltip="'Instagram'">
+                            <span class="iconify" color="#8a3ab9" data-icon="ion-logo-instagram" data-inline="false"></span> 
+                        </a>
+                  </div>
+                    <div v-if="$store.state.restaurantActive.restaurantYoutube">
+                         <a :href="$store.state.restaurantActive.restaurantYoutube" v-if="$store.state.restaurantActive.restaurantYoutube != ''" target="_blanc" v-tooltip="'Toutube'">
+                            <span class="iconify" color="#FF0000" data-icon="ion-logo-youtube" data-inline="false"></span>  
+                        </a>
+                    </div>
+                  <div v-if="$store.state.restaurantActive.UrlLocation">
+                      <a @click="shareUrlLocation()" v-if="$store.state.restaurantActive.UrlLocation != ''" target="_blanc" v-tooltip="$t('frontend.tooltips.shareLocation')">
+                          <span class="iconify" data-icon="si-glyph:pin-location-2" data-inline="false"></span> 
+                      </a>
+                  </div>
                 </div> 
-              </ion-item>     
+              
            
               <ion-item v-if="restaurantSelected"  @click="goAbout">  {{$t('frontend.menu.about')}}</ion-item>
               <ion-item v-if="restaurantSelected && hasOptionToShowMenu()"  @click="goHome"> {{$t('frontend.menu.menu')}}</ion-item>   
@@ -165,15 +173,15 @@
 
           <ion-item color='light' @click="settings = !settings" style="cursor: pointer" v-if="hasPermission('canChangeSetting') ||
                                      hasPermission('canSuperUser')">{{ $t('backoffice.menu.settings') }}</ion-item>
-              <router-link to="/aboutDataSettings" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings" @click="closeEnd()"><span class="iconify" data-icon="grommet-icons:restaurant" data-inline="false"></span>{{ $t('backoffice.options.manageAboutSettings') }}</ion-item></router-link>
-              <a @click="manageBasicSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="clarity:settings-line" data-inline="false"></span>{{ $t('backoffice.options.manageBasicSettings') }}</ion-item></a>
-              <a @click="manageFunSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>{{ $t('backoffice.options.manageFunSettings') }}</ion-item></a>
-              <a @click="manageColourSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="vaadin:palete" data-inline="false"></span>{{ $t('backoffice.options.manageColourSettings') }}</ion-item></a>
-              <a @click="manageKeySettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="clarity:network-settings-solid" data-inline="false"></span>{{ $t('backoffice.options.manageKeySettings') }}</ion-item></a>
+              <!-- <router-link to="/aboutDataSettings" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings" @click="closeEnd()"><span class="iconify" data-icon="grommet-icons:restaurant" data-inline="false"></span>{{ $t('backoffice.options.manageAboutSettings') }}</ion-item></router-link> -->
+              <!-- <a @click="manageBasicSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="clarity:settings-line" data-inline="false"></span>{{ $t('backoffice.options.manageBasicSettings') }}</ion-item></a> -->
+              <a @click="manageFunSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>{{ $t('backoffice.menu.settings') }}</ion-item></a>
+              <!-- <a @click="manageColourSettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="vaadin:palete" data-inline="false"></span>{{ $t('backoffice.options.manageColourSettings') }}</ion-item></a> -->
+              <!-- <a @click="manageKeySettings()" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canChangeSetting') && settings"><span class="iconify" data-icon="clarity:network-settings-solid" data-inline="false"></span>{{ $t('backoffice.options.manageKeySettings') }}</ion-item></a> -->
               <router-link to="/support" style="cursor: pointer; text-decoration: none; color: black;"><ion-item v-if="hasPermission('canSuperUser') && settings" @click="closeEnd()"><span class="iconify" data-icon="mdi:account-supervisor" data-inline="false"></span>{{ $t('backoffice.options.supportSettings') }}</ion-item></router-link>
           
           <!-- <ion-item v-if="hasPermission('canViewVariantGroup')" @click="closeEnd()"><router-link to="/variantGroup" style="cursor: pointer; text-decoration: none; color: black;">{{ $t('backoffice.options.manageVariantGroup') }}</router-link></ion-item> -->
-          <!-- <ion-item><router-link to="/demo" style="cursor: pointer; text-decoration: none; color: black;">Demo</router-link></ion-item> -->
+            <ion-item><router-link to="/demo" style="cursor: pointer; text-decoration: none; color: black;">Demo</router-link></ion-item>
 
         </ion-content>
       </ion-menu>
@@ -182,14 +190,18 @@
 
       <div main id="my-content" >
         <ion-header>
-          <ion-toolbar color="primary">  
-            <div  v-if="!newRestaurant">          
+          <ion-toolbar color="primary" :key="restaurantSelectedId">
+            <div  v-if="!newRestaurant" style="display:flex;justify-content: space-between;align-items: center;">          
               <ion-icon @click="openStart" name="menu" class="menu-col-2" style="float: left;font-size: 30px;"></ion-icon> 
-              <ion-title class="menu-col-6" style="float: left">{{restaurantActive.restaurantName}}</ion-title>          
+              <ion-title v-if="$store.state.restaurantActive.restaurantName && !getAuthenticated && restaurantSelectedId!==''" class="menu-col-6" style="text-align: center;"
+              >{{$store.state.restaurantActive.restaurantName}}</ion-title>     
+
             
-              <ion-icon @click="openEnd" name="settings" class="menu-col-1" style="float: right;font-size: 30px;margin: 0px 25px 0 15px;"></ion-icon>
-              <div :key="keyUserLogin" style="float: right;" v-if="!CustomerName && !getAuthenticated" @click="logIng('','')"><span class="iconify" data-icon="ph:user-circle" data-inline="false"></span></div>
-              <div :key="keyUserLogin+'L'" style="float: right;" v-if="CustomerName" @click="showEditUser=!showEditUser"><span class="iconify" data-icon="ph:user-circle-fill" data-inline="false"></span></div>
+              <div>
+                <ion-icon @click="openEnd" name="settings" class="menu-col-1" style="float: right;font-size: 30px;margin: 0px 25px 0 15px;"></ion-icon>
+                <div :key="keyUserLogin" style="float: right;" v-if="!CustomerName && !getAuthenticated" @click="logIng('','')"><span class="iconify" data-icon="ph:user-circle" data-inline="false"></span></div>
+                <div :key="keyUserLogin+'L'" style="float: right;" v-if="CustomerName" @click="showEditUser=!showEditUser"><span class="iconify" data-icon="ph:user-circle-fill" data-inline="false"></span></div>
+              </div>
             </div>  
           </ion-toolbar>
         </ion-header>
@@ -1478,10 +1490,10 @@ export default {
       try {
          
           await Share.share({
-            title: 'Location ' +' / '+ this.restaurantActive.restaurantName,
+            title: 'Location ' +' / '+ this.$store.state.restaurantActive.restaurantName,
             // text: name +' / '+ this.restaurantName,
-            url: this.restaurantActive.UrlLocation,
-            dialogTitle: `Share Location ${this.restaurantActive.restaurantName}`
+            url: this.$store.state.restaurantActive.UrlLocation,
+            dialogTitle: `Share Location ${this.$store.state.restaurantActive.restaurantName}`
           });
 
       } catch (error) {        

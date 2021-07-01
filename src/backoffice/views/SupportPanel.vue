@@ -85,6 +85,21 @@
                 v-bind:value="Password">
                 </ion-input>
             </ion-item>
+            
+            <ion-item>
+                <ion-item-group side="start">
+                    <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.email')}}</ion-label>
+                    <ion-input type="email" name="EmailTest"
+                    @input="EmailTest = $event.target.value" 
+                    v-bind:value="EmailTest">
+                    </ion-input>
+                </ion-item-group>
+                <ion-item-group side="end">
+                    <ion-button color="primary" :disabled="checkEmailTest()" @click="emailTest()">Test email <ion-spinner v-if="emailspinner" name="crescent"></ion-spinner></ion-button>
+                </ion-item-group>
+            </ion-item>
+            
+
             <br/>
             <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="save()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
@@ -504,6 +519,8 @@ export default {
         FreeTwilioMessage: { type: Number, default: 0 },
       */
       //Email
+      emailspinner: false,
+
       SmtpHost: '',
       EmailHost: '',
       Port: 0,
@@ -605,6 +622,9 @@ export default {
       imgRestaurant: '',
       key: 0,
       spinnerDelete: false,
+
+      //Email Test
+      EmailTest: '',
     }
   },
   components:{
@@ -618,15 +638,38 @@ export default {
       await this.getAllRestaurant();
       this.imgRestaurant = this.allRestaurant[0].ImageUrl;
       this.init();
-    
-
-       
-      
-    
-
-    
   },
   methods: {
+    checkEmailTest(){
+        if (this.EmailTest == '')
+            return true
+        else{
+            let emailRegex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+            if (emailRegex.test(this.EmailTest) == false){
+                return true
+            }
+        }
+        return false
+    },
+    emailTest(){
+        this.emailspinner = true
+        const test = {
+            "Email": this.EmailTest,
+            "mss": "This is a sample message. Please, dont respond this message.",
+            "subject": "iMenuApps support."
+        }
+        Api.testSupportEmail(test)
+        .then(res => {
+            console.log("Success")
+            console.log(res)
+            this.emailspinner = false
+        })
+        .catch(e => {
+            console.log("Error")
+            console.log(e)
+            this.emailspinner = false
+        })
+    },
     changeApiLoginId(){
         if (this.showApiLoginId == "password")
             this.showApiLoginId = "text"
@@ -1075,12 +1118,12 @@ export default {
                                 console.log(error)
                             })
                         }
-                        else{
-                            Api.postIn("methodpay", methodPaymentItem)
-                            .catch(error => {
-                                console.log(error)
-                            })
-                        }
+                        // else{
+                        //     Api.postIn("methodpay", methodPaymentItem)
+                        //     .catch(error => {
+                        //         console.log(error)
+                        //     })
+                        // }
 
                         if (this.Setting_id){
                             settingItem["_id"] = this.Setting_id
@@ -1089,12 +1132,12 @@ export default {
                                 console.log(error)
                             })
                         }
-                        else{
-                            Api.postIn("setting", settingItem)
-                            .catch(error => {
-                                console.log(error)
-                            })
-                        }
+                        // else{
+                        //     Api.postIn("setting", settingItem)
+                        //     .catch(error => {
+                        //         console.log(error)
+                        //     })
+                        // }
                         
                         return response;
                   })
@@ -1106,49 +1149,49 @@ export default {
 
 
             }
-            else{
-              //Else, I am created a new category
-              this.spinner = true
-              Api.postIn(this.modelName, item)
-                  .then(response => {
-                      this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
-                      this.spinner = false
-                      if (this.methodPayment_id){
-                        methodPaymentItem["_id"] = this.methodPayment_id
-                        Api.putIn("methodpay", methodPaymentItem)
-                        .catch(error => {
-                            console.log(error)
-                        })
-                      }
-                      else{
-                        Api.postIn("methodpay", methodPaymentItem)
-                        .catch(error => {
-                            console.log(error)
-                        })
-                      }
+            // else{
+            //   //Else, I am created a new category
+            //   this.spinner = true
+            //   Api.postIn(this.modelName, item)
+            //       .then(response => {
+            //           this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
+            //           this.spinner = false
+            //           if (this.methodPayment_id){
+            //             methodPaymentItem["_id"] = this.methodPayment_id
+            //             Api.putIn("methodpay", methodPaymentItem)
+            //             .catch(error => {
+            //                 console.log(error)
+            //             })
+            //           }
+            //           else{
+            //             Api.postIn("methodpay", methodPaymentItem)
+            //             .catch(error => {
+            //                 console.log(error)
+            //             })
+            //           }
 
-                      if (this.Setting_id){
-                        settingItem["_id"] = this.Setting_id
-                        Api.putIn("setting", settingItem)
-                        .catch(error => {
-                            console.log(error)
-                        })
-                      }
-                      else{
-                        Api.postIn("setting", settingItem)
-                        .catch(error => {
-                            console.log(error)
-                        })
-                      }
+            //           if (this.Setting_id){
+            //             settingItem["_id"] = this.Setting_id
+            //             Api.putIn("setting", settingItem)
+            //             .catch(error => {
+            //                 console.log(error)
+            //             })
+            //           }
+            //           else{
+            //             Api.postIn("setting", settingItem)
+            //             .catch(error => {
+            //                 console.log(error)
+            //             })
+            //           }
 
-                      return response;
-                  })
-                  .catch(e => {
-                      console.log(e);
-                      this.spinner = false
-                      this.ifErrorOccured(this.save);
-                  })
-            }
+            //           return response;
+            //       })
+            //       .catch(e => {
+            //           console.log(e);
+            //           this.spinner = false
+            //           this.ifErrorOccured(this.save);
+            //       })
+            // }
 
         }
     },

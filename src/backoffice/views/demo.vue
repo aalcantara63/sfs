@@ -2,19 +2,20 @@
 
   <div id="demo">
 
-    <!-- <div style="margin-right:33%; margin-left:33%">
+     <!-- <div style="margin-right:33%; margin-left:33%">
         <ion-button color="primary" @click="initialize()" style="float: left">Initialize</ion-button>
         <ion-button color="success" @click="doCredit()">DoCredit</ion-button>
         <ion-button color="secondary" @click="showModal()">Show Modal</ion-button>
-    </div>
+    </div> -->
 
     <div>
-      <iframe src="https://sandbox.payfabric.com/Payment/Web/Transaction/Process?key=21050600903385&token=2:4udnr0bcv47s" height="400" width="800" name="demo">
+      <!-- <iframe src="https://sandbox.payfabric.com/Payment/Web/Transaction/Process?key=21062901218440&token=2:4ue4aigcrvke" height="400" width="800" name="demo"> -->
+      <iframe src="https://sandbox.payfabric.com/Payment/Web/Transaction/ResponsiveProcess?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJQYXlGYWJyaWNfVjMiLCJpYXQiOiIxNjI0OTgxMDc0IiwiZXhwIjoiMTYyNDk4MTk3NCIsImF1ZCI6IlBheW1lbnRQYWdlIiwic3ViIjoiMjEwNjI5MDEyMTg0NDAiLCJpbnN0IjoiMjlhYjdlMDgtMjlmNy00MDNhLWEwZmYtMThmMjZiZjZjZDgxIiwiZGV2aWNlIjoiOTExMjA4NTItODkxZC00NTI2LTljZGMtNGYxYzQ3Mzg2NzA5IiwiZGNuIjoiMiIsInN1cHBvcnRlZFBheW1lbnRNZXRob2RzIjpbeyJ0eXBlIjoiQ3JlZGl0Q2FyZCIsInNyYyI6IlVSTCIsImF0dHJpYnV0ZXMiOm51bGx9XX0.3gM_h53HIGVbtON168OnT1NirCxXmHwodSNHyrhPyJY" height="400" width="800" name="demo">
               <p>Su navegador no es compatible con iframes</p>
       </iframe>
     </div>
 
-    <div style="margin-right:33%; margin-left:33%">
+    <!--<div style="margin-right:33%; margin-left:33%">
         <ion-button color="primary" @click="tokenCreate()" style="float: left">Token Create</ion-button>
         <ion-button color="success" @click="createTransaction()">Create transaction</ion-button>
     </div> -->
@@ -259,30 +260,30 @@ export default {
       
   },
   created: function(){
-      // window.addEventListener('message',function(event) {
-      // var objMsg
-      // objMsg = JSON.parse(event.data);
-      // // For best security practice, only accept event message from specified 
-      // //domain.
-      // if(event.origin !== 'https://sandbox.payfabric.com') return;
-      // // your code
-      // console.log("PayFabric Respose")
-      // console.log(objMsg)
-      // switch(objMsg.Event) {
-      //   case "OnSaveTransactionCompleted":
-      //       alert("Save transaction complete")
-      //       break
-      //   case "OnTransactionCompleted":
-      //       alert("Transaction complete")
-      //       break
-      //   case "OnWalletCreateCompleted":
-      //       alert("Wallet create complete")
-      //       break
-      //   case "OnWalletUpdateCompleted":
-      //       alert("Wallet update complete")
-      //       break
-      // }
-      // },false)
+      window.addEventListener('message',function(event) {
+      var objMsg
+      objMsg = JSON.parse(event.data);
+      // For best security practice, only accept event message from specified 
+      //domain.
+      if(event.origin !== 'https://sandbox.payfabric.com') return;
+      // your code
+      console.log("PayFabric Respose")
+      console.log(objMsg)
+      switch(objMsg.Event) {
+        case "OnSaveTransactionCompleted":
+            alert("Save transaction complete")
+            break
+        case "OnTransactionCompleted":
+            alert("Transaction complete")
+            break
+        case "OnWalletCreateCompleted":
+            alert("Wallet create complete")
+            break
+        case "OnWalletUpdateCompleted":
+            alert("Wallet update complete")
+            break
+      }
+      },false)
 
       // window.addEventListener('callback',function(event) {
       // var objMsg

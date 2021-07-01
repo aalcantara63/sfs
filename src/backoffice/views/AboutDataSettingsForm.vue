@@ -5,7 +5,7 @@
     <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
-              <ion-back-button default-href="/controlPanel" @click="$router.push({ path: '/aboutDataSettings'})"></ion-back-button>
+              <ion-back-button default-href="/controlPanel" @click="manageFunSettings()"></ion-back-button>
             </ion-buttons>
             <ion-label style="padding: 20px 100px;">
               <h1>{{ titleT }}</h1>            
@@ -121,6 +121,31 @@ export default {
         }
   },
   methods: {
+    manageFunSettings(){
+        Api.fetchAll('Setting').then(response => {
+        // console.log(response.data)
+            let funSettings = [];
+            funSettings = response.data;
+            if (funSettings.length > 0)
+            {
+                this.$router.push({
+                    name: 'FunSettingForm',
+                    params: {
+                        "settingId": funSettings[funSettings.length - 1]._id,
+                        "tab": "about"
+                    }
+                });
+            }
+            else{
+                this.$router.push({
+                    name: 'FunSettingForm',
+                });
+            }
+        })
+        .catch(e => {
+        console.log(e)
+        });
+    },
     isValidForm(){
         // let errors = [];
         if (this.title == "")
@@ -237,9 +262,10 @@ export default {
                         this.id = null;
                         this.file = null;
                         this.spinner = false;
-                        this.$router.push({
-                          name: 'About', 
-                        });
+                        // this.$router.push({
+                        //   name: 'About', 
+                        // });
+                        this.manageFunSettings();
                         return response;
                   })
                   .catch(e => {
@@ -265,9 +291,10 @@ export default {
                       this.description = '';
                       this.file = null;
                       this.spinner = false;
-                      this.$router.push({
-                        name: 'About', 
-                      });
+                      // this.$router.push({
+                      //   name: 'About', 
+                      // });
+                      this.manageFunSettings();
                       return response;
                   })
                   .catch(e => {

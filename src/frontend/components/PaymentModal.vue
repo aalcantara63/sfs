@@ -1,10 +1,7 @@
 <template>
   <keep-alive>
      <div style="overflow: overlay;padding: 0 25px 0 0; display: inherit;">
-        <ion-header >
-          
-         
-      
+        <ion-header >      
           <ion-toolbar color="primary" >
              <ion-button expand="full" style="float: right;" @click="dismissModal()">
             <span class="iconify" data-icon="ion:close"  ></span></ion-button>
@@ -90,14 +87,22 @@
 
         <div v-if="!split" >
 
-         <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner" :key="keyShare">
+         <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" :key="keyShare">
             <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
+              v-if="payMethod!=='PayFabric'"
               v-tooltip="i18n.t('frontend.payment.tjtPayment')"
               :class="cardPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>            
             </ion-button> 
 
+            <ion-button @click="changePayment(),fabricPay = true,getUrlPayFabric()" :style="fabricPay? 'float: left;border: solid' : 'float: left'" 
+              :disabled="spinner"
+              v-if="payMethod==='PayFabric'"
+              v-tooltip="i18n.t('frontend.payment.tjtPayment')"
+              :class="fabricPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
+              <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>            
+            </ion-button>  
            
             <ion-button @click="changePayment(), devicePay = true" :style="devicePay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
@@ -195,7 +200,7 @@
          </div>
         
         
-          <ion-card  v-if="cardPay && !spinner" class="scroll" style="height: auto" >  
+          <ion-card  v-if="cardPay && !spinner " class="scroll" style="height: auto" >  
 
               <ion-item :disabled="spinner? true: false">                  
                  <ion-label position="floating">{{i18n.t('frontend.order.firstName')}} <strong style="color: red">*</strong></ion-label>                               
@@ -260,7 +265,16 @@
 
               </ion-toolbar>
   
-          </ion-card>            
+          </ion-card>   
+
+          <ion-card v-if="fabricPay">   
+
+              <PayFabricPayment 
+              :urlPayFabric="urlPayFabric"
+              :parent="this"
+              :total="Total"></PayFabricPayment>
+              
+          </ion-card>         
 
             <ion-card  v-if="devicePay"  class="scroll" style="height: auto">                 
                 <device-payment
@@ -417,6 +431,7 @@ import QrModal from './QrPaymentModal'
 import PaymentSplited from './PaymentSplited'
 import GooglePay from './GooglePay'
 import ApplePay from './ApplePay'
+import PayFabricPayment from './PayFabricPayment.vue'
 import {Utils} from '../../backoffice/utils/utils'
 import { Plugins } from '@capacitor/core';
  const { Share } = Plugins;
@@ -465,6 +480,10 @@ export default {
       this.ccode = this.i18n.t('frontend.order.ccode');
 
       this.allTypeOrder = {'Delivery':this.i18n.t('frontend.app.deliver'), 'PickUp':this.i18n.t('frontend.app.pickup'), 'On Table':this.i18n.t('frontend.app.table'), 'Curbside':this.i18n.t('frontend.app.curbside'), };
+
+      if(this.payMethod === 'PayFabric'){
+        this.changePayment();       
+      }
      
    },
    props: {  
@@ -490,7 +509,8 @@ export default {
      OlapayDevice,
      UsbCardReader,
      UsbCashDoor,
-     UsbCardSwipe
+     UsbCardSwipe,
+     PayFabricPayment
   },
    data () {
     return {    
@@ -528,6 +548,7 @@ export default {
         idtechPay: false,
         cashPay: false,
         swipePay: false,
+        fabricPay: false,
         staffName: '',
         hasQrPayment: '',
         spinnerShare: false,
@@ -538,6 +559,7 @@ export default {
         readyButton: false,
         googleData: {},
         ccode: '',
+        urlPayFabric: '',
         
         deviceData: {
              'amountInformation': {
@@ -905,6 +927,35 @@ export default {
       
     },
 
+    async responsePayFabric(response){
+     
+        let mss = this.i18n.t('frontend.payment.doingPayment');
+        if(this.isTicket)
+          mss = this.i18n.t('frontend.payment.authorizingPayment');
+
+        this.$ionic.loadingController
+        .create({
+          cssClass: 'my-custom-class',
+          message: mss,
+          backdropDismiss: false
+        })
+        .then ( loading =>{
+          loading.present()
+          setTimeout( async() => {
+              try {               
+                await this.parent.recivePayment(response);
+                this.dismissModal();						
+                loading.dismiss();
+                
+              } catch (error) {
+                loading.dismiss();
+                  return this.errorPaymentDetail(error); 
+              }
+          })
+      }) 
+      
+    },
+
     async responseCashPayment(response){
       if(response){         
         this.$ionic.loadingController
@@ -1172,12 +1223,15 @@ export default {
 
     async makeSplitPayment(value, flag){    
       if(!flag) flag = false; 
+
+      console.log('in makeSplitPayment');
+      console.log(value)
      
      this.order.Payment[this.indexForPay].state = 1;
      this.order.Payment[this.indexForPay].paymentInfo = value;
      this.order.Payment[this.indexForPay].PaymentMethod =value.method + ' '+value.accountType+ ' '+ value.accountNumber;
 
-
+    console.log('is payment complete: '+ this.isPaymentComplete())
       if(this.isPaymentComplete()){        
         this.order.State = 1;
         const response = await Api.putIn('Order', this.order)      
@@ -1303,6 +1357,7 @@ export default {
       this.idtechPay = false;
       this.cashPay = false;
       this.swipePay = false;
+      this.fabricPay = false;
     },
 
     shareQrPayment: async function(){
@@ -1539,6 +1594,27 @@ export default {
 
    changeSplit(){
      this.split= !this.split;
+   },
+
+   async getUrlPayFabric(){
+      try {
+        this.spinner = true;
+        const data = {
+          "total" : this.Total,
+          "payMethod": this.payMethod,
+          "isTicket": this.isTicket,
+        }
+        const response = await payAuthorizeNet.payOrder(data); 
+        if(response)
+         this.urlPayFabric = response;
+        this.spinner = false;
+       
+        
+      } catch (error) {
+        error;
+        this.spinner = false
+        
+      }
    }
 
 }, 

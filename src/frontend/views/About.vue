@@ -167,31 +167,44 @@
                 </div>
                
             </div> -->
-
-
-         
-        <ion-item> 
-                <div style="position: absolute; bottom: 0;text-align: center;width: 100%;">
-                  <a :href="restaurantActive.restaurantFacebok" v-if="restaurantActive.restaurantFacebok != ''" target="_blanc" v-tooltip="'Facebook'">
-                    <span class="iconify" color="#3b5998"  data-icon="ion-logo-facebook" data-inline="false" ></span> 
-                  </a>
-                  <a :href="restaurantActive.restaurantTwitter" v-if="restaurantActive.restaurantTwitter != ''" target="_blanc" v-tooltip="'Twitter'">
-                    <span class="iconify" color="#1DA1F2" data-icon="ion-logo-twitter" data-inline="false"></span> 
-                  </a>
-                  <a :href="restaurantActive.restaurantInstagram" v-if="restaurantActive.restaurantInstagram != ''" target="_blanc" v-tooltip="'Instagram'">
-                    <span class="iconify" color="#8a3ab9" data-icon="ion-logo-instagram" data-inline="false"></span> 
-                  </a>
-                  <a :href="restaurantActive.restaurantYoutube" v-if="restaurantActive.restaurantYoutube != ''" target="_blanc" v-tooltip="'Toutube'">
-                    <span class="iconify" color="#FF0000" data-icon="ion-logo-youtube" data-inline="false"></span>  
-                  </a>
+        
+       
+                <div style="display: flex;justify-content: center;">
+                    <div v-if="restaurantActive.restaurantFacebok">
+                         <a :href="restaurantActive.restaurantFacebok" v-if="restaurantActive.restaurantFacebok !==''" target="_blanc" v-tooltip="'Facebook'">
+                            <span class="iconify" color="#3b5998"  data-icon="ion-logo-facebook" data-inline="false" ></span> 
+                        </a>
+                    </div>
+                    <div  v-if="restaurantActive.restaurantTwitter">
+                         <a :href="restaurantActive.restaurantTwitter" v-if="restaurantActive.restaurantTwitter != ''" target="_blanc" v-tooltip="'Twitter'">
+                            <span class="iconify" color="#1DA1F2" data-icon="ion-logo-twitter" data-inline="false"></span> 
+                        </a>
+                    </div>
+                    <div v-if="restaurantActive.restaurantInstagram">
+                        <a :href="restaurantActive.restaurantInstagram" v-if="restaurantActive.restaurantInstagram != ''" target="_blanc" v-tooltip="'Instagram'">
+                            <span class="iconify" color="#8a3ab9" data-icon="ion-logo-instagram" data-inline="false"></span> 
+                        </a>
+                    </div>
+                    <div v-if="restaurantActive.restaurantYoutube">
+                         <a :href="restaurantActive.restaurantYoutube" v-if="restaurantActive.restaurantYoutube != ''" target="_blanc" v-tooltip="'Toutube'">
+                            <span class="iconify" color="#FF0000" data-icon="ion-logo-youtube" data-inline="false"></span>  
+                        </a>
+                    </div>
+                    <div v-if="restaurantActive.UrlLocation">
+                        <a @click="shareUrlLocation()" v-if="restaurantActive.UrlLocation != ''" target="_blanc" v-tooltip="$t('frontend.tooltips.shareLocation')">
+                            <span class="iconify" data-icon="si-glyph:pin-location-2" data-inline="false"></span> 
+                        </a>
+                    </div>
+                 
+                 
+                  
+                 
                   <!-- <a :href="restaurantActive.restaurantWeb" v-if="restaurantActive.restaurantWeb != ''" target="_blanc">
                     <span class="iconify" color="primary" data-icon="foundation:web" data-inline="false"></span>  
                   </a> -->
-                  <a @click="shareUrlLocation()" v-if="restaurantActive.UrlLocation != ''" target="_blanc" v-tooltip="$t('frontend.tooltips.shareLocation')">
-                    <span class="iconify" data-icon="si-glyph:pin-location-2" data-inline="false"></span> 
-                  </a>
+                  
                 </div> 
-        </ion-item>  
+      
          
            
             

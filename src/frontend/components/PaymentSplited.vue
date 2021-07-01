@@ -14,9 +14,16 @@
       <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner">
             <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'"
              v-tooltip="i18n.t('frontend.payment.tjtPayment')"
+              v-if="payMethod!=='PayFabric'"
             :class="cardPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
             <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>
             </ion-button> 
+
+            <ion-button @click="changePayment(), fabricPay = true,getUrlPayFabric()" :style="fabricPay? 'float: left;border: solid' : 'float: left'"
+             v-tooltip="i18n.t('frontend.payment.tjtPayment')"
+            :class="fabricPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
+            <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>
+            </ion-button>
 
             <ion-button @click="changePayment(), devicePay = true" :style="devicePay? 'float: left;border: solid' : 'float: left'"
               :disabled="spinner"
@@ -149,6 +156,15 @@
 
         </ion-card>  
 
+          <ion-card v-if="fabricPay">   
+
+            <PayFabricPayment 
+            :urlPayFabric="urlPayFabric"
+            :parent="this"
+            :total="Total"></PayFabricPayment>
+            
+        </ion-card> 
+
          <ion-card v-if="sharePay"  class="scroll" style="height: auto">
             <div>   
               <h5>{{i18n.t('frontend.payment.verifyMss')}}</h5>
@@ -228,11 +244,15 @@ import { Plugins } from '@capacitor/core';
  import UsbCashDoor from './UsbCashDoor'
  import {i18n} from '@/plugins/i18n'
  import { Commons } from '../commons';
+ import PayFabricPayment from './PayFabricPayment.vue'
 
 export default {
    name: 'PaymentSplitedModal',
-   created: function(){
+   created: async function(){
     this.i18n = i18n;  
+    if(this.payMethod === 'PayFabric'){
+      this.changePayment();
+    }
    },
    props: {  
     googleData: {type: Object, default: ()=> {}} ,
@@ -257,7 +277,8 @@ export default {
    GooglePaySplit,
    DevicePayment,
    UsbCardReader,
-   UsbCashDoor
+   UsbCashDoor,
+   PayFabricPayment
   },
    data () {
     return {   
@@ -283,10 +304,12 @@ export default {
         devicePay: false, 
         idtechPay: false,
         cashPay: false,
+        fabricPay: false,
         spinnerShare: false, 
         hasQrPayment: '',
         googleKey: 0,
         keyShare: 0,
+        urlPayFabric:''
     }
   }, 
   
@@ -558,6 +581,8 @@ export default {
        
     },
 
+
+
     async responseDevicePay(response){
 
        this.$ionic.loadingController
@@ -580,6 +605,37 @@ export default {
                     }                   
                 })
             })
+    },
+
+    async responsePayFabric(response){
+     
+        let mss = this.i18n.t('frontend.payment.doingPayment');
+        if(this.isTicket)
+          mss = this.i18n.t('frontend.payment.authorizingPayment');
+
+        this.$ionic.loadingController
+        .create({
+          cssClass: 'my-custom-class',
+          message: mss,
+          backdropDismiss: false
+        })
+        .then ( loading =>{
+          loading.present()
+          setTimeout( async() => {
+              try {  
+                console.log('response responsePayFabric')             
+                console.log(response)             
+                await this.parent.makeSplitPayment(response);
+                this.dismissModal();						
+                loading.dismiss();
+                
+              } catch (error) {
+                loading.dismiss();
+                  return this.errorPaymentDetail(error); 
+              }
+          })
+      }) 
+      
     },
 
      async responseCashPayment(response){
@@ -695,6 +751,7 @@ export default {
       this.devicePay = false;
       this.idtechPay= false;
       this.cashPay = false;
+      this.fabricPay = false;
     },
 
     shareQrPayment: async function(){
@@ -850,6 +907,26 @@ export default {
           winimp.close();
 
    },
+
+    async getUrlPayFabric(){
+      try {
+        this.spinner = true;
+        const data = {
+          "total" : this.Total,
+          "payMethod": this.payMethod
+        }
+        const response = await payAuthorizeNet.payOrder(data); 
+        if(response)
+         this.urlPayFabric = response;
+        this.spinner = false;
+       
+        
+      } catch (error) {
+        error;
+        this.spinner = false
+        
+      }
+   }
 
    
 

@@ -1,8 +1,8 @@
 <template>
-    <div class="screen">
-    <ion-backdrop v-if="isBackdrop"></ion-backdrop>
+    <div>
+    <!-- <ion-backdrop v-if="isBackdrop"></ion-backdrop> -->
 
-     <ion-header>
+     <!-- <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
               <ion-back-button default-href="/controlPanel" @click="$router.push({ name: 'ControlPanel'})"></ion-back-button>
@@ -12,7 +12,7 @@
             </ion-label>
           </ion-toolbar>
     </ion-header>
-    <br/>
+    <br/> -->
 
     <!-- <ion-card> -->
     <div v-if="spinner">
@@ -49,6 +49,7 @@
           v-bind:value="address">
           </ion-textarea>
         </ion-item>
+        
         <ion-item>
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.email')}}</ion-label>
           <ion-input type="email" name="email"
@@ -56,6 +57,54 @@
           v-bind:value="email">
           </ion-input>
         </ion-item>
+        <ion-item>
+          <ion-label position="floating"><span style="color: red">*</span>Email host</ion-label>
+          <ion-input type="email" name="emailHost"
+          @input="emailHost = $event.target.value" 
+          v-bind:value="emailHost">
+          </ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.password')}}</ion-label>
+            <ion-input type="password" name="Password"
+            @input="Password = $event.target.value" 
+            v-bind:value="Password">
+            </ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.smtpHost')}}</ion-label>
+            <ion-input type="text" name="SmtpHost"
+            @input="SmtpHost = $event.target.value" 
+            v-bind:value="SmtpHost">
+            </ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.port')}}</ion-label>
+            <ion-input type="number" name="Port"
+            @input="Port = $event.target.value" 
+            v-bind:value="Port">
+            </ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>{{$t('backoffice.form.fields.secure')}}</ion-label>
+            <ion-checkbox slot="end" name="Secure" 
+                    @ionChange="Secure=$event.target.checked" 
+                    :checked="Secure">
+            </ion-checkbox>
+        </ion-item>
+        <ion-item>
+            <ion-item-group side="start">
+                <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.email')}}</ion-label>
+                <ion-input type="email" name="EmailTest"
+                @input="EmailTest = $event.target.value" 
+                v-bind:value="EmailTest">
+                </ion-input>
+            </ion-item-group>
+            <ion-item-group side="end">
+                <ion-button color="primary" :disabled="checkEmailTest()" @click="emailTest()">Test email <ion-spinner v-if="emailspinner" name="crescent"></ion-spinner></ion-button>
+            </ion-item-group>
+        </ion-item>
+
         <ion-item>
           <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.phone')}}</ion-label>
           <ion-input type="tel" name="phone"
@@ -70,6 +119,45 @@
           v-bind:value="web">
           </ion-input>
         </ion-item>
+
+        <ion-item>
+            <ion-label >Social Networks
+                <ion-toggle name="socials" style="top: 12px;"
+                @ionChange="socials=$event.target.checked" 
+                :checked ="socials">
+                </ion-toggle>
+            </ion-label>
+        </ion-item>
+        <div v-if="socials">
+          <ion-item>
+            <ion-label position="floating">Facabook</ion-label>
+            <ion-input type="text" name="facebook"
+            @input="facebook = $event.target.value" 
+            v-bind:value="facebook">
+            </ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Instagram</ion-label>
+            <ion-input type="text" name="instagram"
+            @input="instagram = $event.target.value" 
+            v-bind:value="instagram">
+            </ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Twitter</ion-label>
+            <ion-input type="text" name="twitter"
+            @input="twitter = $event.target.value" 
+            v-bind:value="twitter">
+            </ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">YouTube</ion-label>
+            <ion-input type="text" name="youtube"
+            @input="youtube = $event.target.value" 
+            v-bind:value="youtube">
+            </ion-input>
+          </ion-item>
+        </div>
 
         <ion-item>
           <ion-label position="floating">{{$t('backoffice.form.fields.urlLocation')}}</ion-label>
@@ -299,12 +387,23 @@ export default {
     return {
       modelName: 'Restaurant',
       /****** Form Data ******/
+      emailspinner: false,
+
       id: null,
       name: '',
       address: '',
       online: false,
       // showOthersRestaurant: false,
       email: '',
+      SmtpHost: '',
+      emailHost: '',
+      // EmailHost: '',
+      Port: 0,
+      Secure: false,
+      Password: '',
+      EmailTest: '',
+
+
       phone: '',
       web: '',
       urlLocation: '',
@@ -332,7 +431,7 @@ export default {
       thursdayOpenHour: '',
       thursdayCloseHour: '',
 
-      activefriday: false,
+      activeFriday: false,
       fridayOpenHour: '',
       fridayCloseHour: '',
 
@@ -356,6 +455,14 @@ export default {
       isBackdrop: false,
 
       spinner: false,
+
+      //Socials network
+      socials: false,
+      socialList: [],
+      facebook: '',
+      instagram: '',
+      twitter: '',
+      youtube: '',
     }
   },
   created: function(){
@@ -367,6 +474,37 @@ export default {
         }
   },
   methods: {
+    checkEmailTest(){
+        if (this.EmailTest == '')
+            return true
+        else{
+            let emailRegex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+            if (emailRegex.test(this.EmailTest) == false){
+                return true
+            }
+        }
+        return false
+    },
+    emailTest(){
+        this.emailspinner = true
+        const test = {
+            "Email": this.EmailTest,
+            "mss": "This is a sample message. Please, dont respond this message.",
+            "subject": "iMenuApps support."
+        }
+        console.log(this.Password)
+        Api.testRestaurantEmail(test)
+        .then(res => {
+            console.log("Success")
+            console.log(res)
+            this.emailspinner = false
+        })
+        .catch(e => {
+            console.log("Error")
+            console.log(e)
+            this.emailspinner = false
+        })
+    },
     change(){
         this.example = new Intl.NumberFormat('en', {style: "currency", currency: this.currencyCode} ).format(123456)
     },
@@ -374,7 +512,10 @@ export default {
         this.allCurrencies = require('currency-codes/data');
         //console.log('All currencies');
         //console.log(this.allCurrencies);
-        this.id = this.$route.params.settingId;
+        
+        //  if(this.$route.params.settingId)
+        //     this.id = this.$route.params.settingId;
+        this.id = this.$store.state.user.RestaurantId     
         if (this.id){
           this.$ionic.loadingController
           .create({
@@ -395,6 +536,11 @@ export default {
                     this.online = response.data.Online;
                     // this.showOthersRestaurant = response.data.ShowOtherRestaurant;
                     this.email = response.data.Email;
+                    this.SmtpHost = response.data.SmtpHost,
+                    this.emailHost = response.data.EmailHost,
+                    this.Port = response.data.Port,
+                    this.Secure = response.data.Secure,
+                    this.Password = response.data.Password,
                     this.phone = response.data.Phone;
                     this.web = response.data.Web;
                     this.urlLocation = response.data.UrlLocation;
@@ -403,6 +549,22 @@ export default {
                     this.currencyCode = response.data.Currency;
                     this.customHours = response.data.CustomHours;
                     this.customHoursText = response.data.CustomHoursText;
+
+                    //socials
+                    this.socialList = response.data.Sociasls;
+                    if (this.socialList.length > 0){
+                      this.socials = true
+                      this.socialList.forEach(s => {
+                          if (s.SocialName == 'Facebook')
+                            this.facebook = s.SocialUrl
+                          if (s.SocialName == 'Instagram')
+                            this.instagram = s.SocialUrl
+                          if (s.SocialName == 'Twitter')
+                            this.twitter = s.SocialUrl
+                          if (s.SocialName == 'Youtube')
+                            this.youtube = s.SocialUrl
+                      });
+                    }
                     this.change();
 
                     // Restaurant date and time
@@ -690,6 +852,11 @@ export default {
               "Online": this.online,
               // "ShowOtherRestaurant": this.showOthersRestaurant,
               "Email": this.email,
+              "SmtpHost": this.SmtpHost,
+              "EmailHost": this.emailHost,
+              "Port": this.Port,
+              "Secure": this.Secure,
+              "Password": this.Password,
               "Phone": this.phone,
               "Web": this.web,
               "Currency": this.currencyCode,
@@ -709,7 +876,24 @@ export default {
             if (this.urlLocation != '')
             {
                item["UrlLocation"] = this.urlLocation
-            } 
+            }
+            let listS = []
+            if (this.socials){
+               
+               console.log(this.facebook )
+               console.log(this.instagram )
+               console.log(this.twitter )
+               console.log(this.youtube )
+               if (this.facebook != '')
+                  listS.push({'SocialName': 'Facebook', 'SocialUrl': this.facebook})
+               if (this.instagram != '')
+                  listS.push({'SocialName': 'Instagram', 'SocialUrl': this.instagram})
+               if (this.twitter != '')
+                  listS.push({'SocialName': 'Twitter', 'SocialUrl': this.twitter})
+               if (this.youtube != '')
+                  listS.push({'SocialName': 'Youtube', 'SocialUrl': this.youtube})
+            }
+            item["Sociasls"] = listS
             //If I am editing
             if (this.id){
               item['_id'] = this.id;
@@ -721,15 +905,10 @@ export default {
                         //      this.$t('backoffice.list.messages.messageEditSuccessSetting'), 
                         //         this.$t('backoffice.list.messages.titleEditSetting'));
                         this.showToastMessage(this.$t('backoffice.list.messages.messageEditSuccessSetting'), "success");
-                        this.name = '';
-                        this.description = '';
-                        this.isEditing = false;
-                        this.id = null;
-                        this.file = null;
+                        // this.$router.push({
+                        //   name: 'ControlPanel', 
+                        // });
                         this.spinner = false;
-                        this.$router.push({
-                          name: 'ControlPanel', 
-                        });
                         return response;
                   })
                   .catch(e => {
@@ -739,28 +918,28 @@ export default {
                         this.ifErrorOccured(this.saveSetting);
                   })
             }
-            else{
-              //Else, I am created a new category
-              this.spinner = true;
-              Api.postIn(this.modelName, item)
-                  .then(response => {
-                      // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
-                      //        this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
-                      //           this.$t('backoffice.list.messages.titleCreateSetting'));
-                      this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
-                      this.spinner = false;
-                      this.$router.push({
-                        name: 'ControlPanel', 
-                      });
-                      return response;
-                  })
-                  .catch(e => {
-                      this.isBackdrop = false
-                      console.log(e);
-                      this.spinner = false;
-                      this.ifErrorOccured(this.saveSetting);
-                  })
-            }
+            // else{
+            //   //Else, I am created a new category
+            //   this.spinner = true;
+            //   Api.postIn(this.modelName, item)
+            //       .then(response => {
+            //           // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
+            //           //        this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
+            //           //           this.$t('backoffice.list.messages.titleCreateSetting'));
+            //           this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
+            //           this.spinner = false;
+            //           this.$router.push({
+            //             name: 'ControlPanel', 
+            //           });
+            //           return response;
+            //       })
+            //       .catch(e => {
+            //           this.isBackdrop = false
+            //           console.log(e);
+            //           this.spinner = false;
+            //           this.ifErrorOccured(this.saveSetting);
+            //       })
+            // }
 
         }
     },

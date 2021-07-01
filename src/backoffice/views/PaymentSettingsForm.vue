@@ -1,7 +1,7 @@
 <template>
-<div id="ProductForm" class="screen">
-    <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-    <ion-header>
+<div id="ProductForm">
+    <!-- <ion-backdrop v-if="isBackdrop"></ion-backdrop> -->
+    <!-- <ion-header>
             <ion-toolbar>
             <ion-item>
                 <ion-buttons slot="start">
@@ -16,7 +16,7 @@
             </ion-item>
             </ion-toolbar>
         </ion-header>
-    <br/>
+    <br/> -->
 
     <div v-if="spinner">
         <ion-spinner name="lines" class="spinner"></ion-spinner>
@@ -58,6 +58,91 @@
                 </ion-item>
             </ion-card>
         </div>
+        <!-- PayFabric -->
+        <div>
+            <ion-card>
+                <ion-item><h5 style="text-align: left">PayFabric</h5></ion-item>
+                <ion-item>
+                    <ion-label>{{$t('backoffice.form.fields.active')}} PayFabric</ion-label>
+                    <ion-toggle color="primary"
+                    @ionChange="changePayMethod($event.target.checked, 'PAYFABRIC')"
+                    :checked="payPayFabric"></ion-toggle>
+                </ion-item>
+                <ion-item v-if="payPayFabric">
+                    
+                    <ion-label position="floating">
+                        DeviceId:
+                    </ion-label>
+                    <ion-input type="text" name="DeviceIdPayFabric"
+                        @input="DeviceIdPayFabric = $event.target.value" 
+                        v-bind:value="DeviceIdPayFabric">
+                    </ion-input>
+                
+                    <ion-label position="floating">
+                        SetupId:
+                    </ion-label>
+                    <ion-input type="text" name="SetupIdIdPayFabric"
+                        @input="SetupIdIdPayFabric = $event.target.value" 
+                        v-bind:value="SetupIdIdPayFabric">
+                    </ion-input>
+                
+                    <ion-label position="floating">
+                        EndPointUrl:
+                    </ion-label>
+                    <ion-input type="text" name="EndPointUrlPayFabric"
+                        @input="EndPointUrlPayFabric = $event.target.value" 
+                        v-bind:value="EndPointUrlPayFabric">
+                    </ion-input>
+                    
+                    <ion-item>
+                        <ion-button color="primary" @click="activatePayFabric()">{{$t('backoffice.form.fields.active')}}</ion-button>
+                    </ion-item>
+                </ion-item>
+            </ion-card>
+        </div>
+        <!-- Tsys -->
+        <div>
+            <ion-card>
+                <ion-item><h5 style="text-align: left">Tsys</h5></ion-item>
+                <ion-item>
+                    <ion-label>{{$t('backoffice.form.fields.active')}} Tsys</ion-label>
+                    <ion-toggle color="primary"
+                    @ionChange="changePayMethod($event.target.checked, 'TSYS')"
+                    :checked="payTsys"></ion-toggle>
+                </ion-item>
+                <ion-item v-if="payTsys">
+                    
+                    <ion-label position="floating">
+                        DeviceID:
+                    </ion-label>
+                    <ion-input type="text" name="DeviceIDtSYS"
+                        @input="DeviceIDtSYS = $event.target.value" 
+                        v-bind:value="DeviceIDtSYS">
+                    </ion-input>
+                
+                    <ion-label position="floating">
+                        TransactionKey:
+                    </ion-label>
+                    <ion-input type="text" name="TransactionKeytSYS"
+                        @input="TransactionKeytSYS = $event.target.value" 
+                        v-bind:value="TransactionKeytSYS">
+                    </ion-input>
+                
+                    <ion-label position="floating">
+                        DeveloperID:
+                    </ion-label>
+                    <ion-input type="text" name="DeveloperIDtSYS"
+                        @input="DeveloperIDtSYS = $event.target.value" 
+                        v-bind:value="DeveloperIDtSYS">
+                    </ion-input>
+                    
+                    <ion-item>
+                        <ion-button color="primary" @click="activateTsys()">{{$t('backoffice.form.fields.active')}}</ion-button>
+                    </ion-item>
+                </ion-item>
+            </ion-card>
+        </div>
+        <!-- Authorize.net -->
         <div>
             <ion-card>
 
@@ -69,6 +154,7 @@
                     :checked="payAuth"></ion-toggle>
                 </ion-item>
                 <ion-item v-if="!testActiveMethods('AUTH')">
+                <!-- <ion-item> -->
                     <ion-button color="primary" @click="activeAuthNet()">{{$t('backoffice.form.fields.active')}}</ion-button>
                 </ion-item>
             </ion-card>
@@ -105,11 +191,29 @@ export default {
 
             payMethod: '',
             paymentMethods: [],
+
+            //PayFabric
+            payPayFabric: false,
+            DeviceIdPayFabric: '',
+            SetupIdIdPayFabric: '',
+            EndPointUrlPayFabric: '',
+
+            //Tsys
+            payTsys: false,
+            DeviceIDtSYS: '',   
+            TransactionKeytSYS: '',
+            DeveloperIDtSYS: '',
         }
     },
     created(){
+        
         this.screenWidth = screen.width;
-        this.id = this.$route.params.settingId;
+        //  if(this.$route.params.settingId)
+        //     this.id = this.$route.params.settingId;
+        this.id = this.$store.state.user.RestaurantId
+        // console.log(JSON.parse(JSON.stringify(this.$store.state.user.RestaurantId)))
+        // console.log(this.id)
+        this.getMethodPayData()
         this.getPaymentData()
     },
     computed: {
@@ -130,6 +234,21 @@ export default {
         // },
         testActiveMethods(method){
             return this.paymentMethods.includes(method)
+        },
+        async getMethodPayData(){
+            try{
+                const payMethodTable = await Api.fetchAll('methodpay');
+                // console.log(payMethodTable)
+
+                if (payMethodTable.data.length > 0){
+                    this.DeviceIdPayFabric = payMethodTable.data[0].DeviceIdPayFabric,
+                    this.SetupIdIdPayFabric = payMethodTable.data[0].SetupIdIdPayFabric,
+                    this.EndPointUrlPayFabric = payMethodTable.data[0].EndPointUrlPayFabric
+                }
+            }
+            catch(e){
+                console.log(e)
+            }
         },
         getPaymentData(){
             if (this.id){
@@ -168,6 +287,8 @@ export default {
                 if (value){
                     this.payAuth = false
                     this.payShift4 = true
+                    this.payPayFabric = false
+                    this.payTsys = false
                     this.payMethod = method
                 }
                 else
@@ -177,16 +298,40 @@ export default {
                 if (value){
                     this.payShift4 = false
                     this.payAuth = true
+                    this.payPayFabric = false
+                    this.payTsys = false
                     this.payMethod = method
                 }
                 else
                     this.payAuth = false
             }
+            if (method === 'PAYFABRIC'){
+                if (value){
+                    this.payShift4 = false
+                    this.payAuth = false
+                    this.payPayFabric = true
+                    this.payTsys = false
+                    this.payMethod = method
+                }
+                else
+                    this.payPayFabric = false
+            }
+            if (method === 'TSYS'){
+                if (value){
+                    this.payShift4 = false
+                    this.payAuth = false
+                    this.payPayFabric = false
+                    this.payTsys = true
+                    this.payMethod = method
+                }
+                else
+                    this.payTsys = false
+            }
         },
         isValidForm(){
             if (!this.id)
                 return false
-            if (!this.payShift4 && !this.payAuth)
+            if (!this.payShift4 && !this.payAuth && !this.payPayFabric)
                 return false    
             return true
         },
@@ -262,6 +407,154 @@ export default {
                 })
             // }
         },
+        async activatePayFabric(){
+            if (!this.testActiveMethods('PAYFABRIC'))
+            {
+                this.paymentMethods.push('PAYFABRIC');
+                const items = {
+                    "_id": this.id,
+                    "PaymentMethods": this.paymentMethods
+                }
+                this.$ionic.loadingController
+                .create({
+                    cssClass: 'my-custom-class',
+                    message: this.$t('backoffice.titles.loading'),
+                    backdropDismiss: true
+                })
+                .then(loading => {
+                    loading.present()
+                    setTimeout(() => {  // Some AJAX call occurs
+                        Api.putIn(this.modelName, items)
+                        .then(async () => {
+                            try{
+                                const payMethodTable = await Api.fetchAll('methodpay');
+                                // console.log(payMethodTable.data)
+                                let item = {
+                                    "DeviceIdPayFabric": this.DeviceIdPayFabric,
+                                    "SetupIdIdPayFabric":this.SetupIdIdPayFabric,
+                                    "EndPointUrlPayFabric":this.EndPointUrlPayFabric
+                                }
+                                if (payMethodTable.data.length > 0){
+                                    item._id = payMethodTable.data[0]._id
+                                    await Api.putIn('methodpay', item)
+                                }
+                                else{
+                                    await Api.postIn('methodpay', item)
+                                }
+                            }
+                            catch(e){
+                                console.log(e)
+                            }
+                            this.getPaymentData()
+                            this.showToastMessage('PayFabric ' + this.$t('backoffice.form.messages.activatePaymentMethod'), 'success')
+                            loading.dismiss()
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            this.showToastMessage(this.$t('backoffice.form.messages.unexpectedError'), 'danger')
+                            loading.dismiss()
+                        })
+                    })
+                })
+            }
+            else{
+                try{
+                        const payMethodTable = await Api.fetchAll('methodpay');
+                        // console.log(payMethodTable.data)
+                        let item = {
+                            "DeviceIdPayFabric": this.DeviceIdPayFabric,
+                            "SetupIdIdPayFabric":this.SetupIdIdPayFabric,
+                            "EndPointUrlPayFabric":this.EndPointUrlPayFabric
+                        }
+                        if (payMethodTable.data.length > 0){
+                            item._id = payMethodTable.data[0]._id
+                            await Api.putIn('methodpay', item)
+                        }
+                        else{
+                            await Api.postIn('methodpay', item)
+                        }
+                         this.getPaymentData()
+                         this.showToastMessage('PayFabric ' + this.$t('backoffice.form.messages.activatePaymentMethod'), 'success')
+                    }
+                    catch(e){
+                        console.log(e)
+                    }
+            }
+        },
+        async activateTsys(){
+            if (!this.testActiveMethods('TSYS'))
+            {
+                this.paymentMethods.push('TSYS');
+                const items = {
+                    "_id": this.id,
+                    "PaymentMethods": this.paymentMethods
+                }
+                this.$ionic.loadingController
+                .create({
+                    cssClass: 'my-custom-class',
+                    message: this.$t('backoffice.titles.loading'),
+                    backdropDismiss: true
+                })
+                .then(loading => {
+                    loading.present()
+                    setTimeout(() => {  // Some AJAX call occurs
+                        Api.putIn(this.modelName, items)
+                        .then(async () => {
+                            try{
+                                const payMethodTable = await Api.fetchAll('methodpay');
+                                // console.log(payMethodTable.data)
+                                let item = {
+                                    "DeviceIDtSYS": this.DeviceIDtSYS,
+                                    "TransactionKeytSYS":this.TransactionKeytSYS,
+                                    "DeveloperIDtSYS":this.DeveloperIDtSYS
+                                }
+                                if (payMethodTable.data.length > 0){
+                                    item._id = payMethodTable.data[0]._id
+                                    await Api.putIn('methodpay', item)
+                                }
+                                else{
+                                    await Api.postIn('methodpay', item)
+                                }
+                            }
+                            catch(e){
+                                console.log(e)
+                            }
+                            this.getPaymentData()
+                            this.showToastMessage('Tsys ' + this.$t('backoffice.form.messages.activatePaymentMethod'), 'success')
+                            loading.dismiss()
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            this.showToastMessage(this.$t('backoffice.form.messages.unexpectedError'), 'danger')
+                            loading.dismiss()
+                        })
+                    })
+                })
+            }
+            else{
+                try{
+                    const payMethodTable = await Api.fetchAll('methodpay');
+                    // console.log(payMethodTable.data)
+                    let item = {
+                        "DeviceIDtSYS": this.DeviceIDtSYS,
+                        "TransactionKeytSYS":this.TransactionKeytSYS,
+                        "DeveloperIDtSYS":this.DeveloperIDtSYS
+                    }
+                    if (payMethodTable.data.length > 0){
+                        item._id = payMethodTable.data[0]._id
+                        await Api.putIn('methodpay', item)
+                    }
+                    else{
+                        await Api.postIn('methodpay', item)
+                    }
+                    this.getPaymentData()
+                    this.showToastMessage('Tsys ' + this.$t('backoffice.form.messages.activatePaymentMethod'), 'success')
+                }
+                catch(e){
+                    console.log(e)
+                }
+            }
+        },
         activeAuthNet(){
             if (!this.testActiveMethods('AUTH'))
             {
@@ -295,7 +588,7 @@ export default {
             }
         },
         save(){
-            if (this.payShift4 || this.payAuth)
+            if (this.payShift4 || this.payAuth || this.payPayFabric)
             {
                 //console.log(this.payMethod)
                 const item = {
@@ -316,9 +609,9 @@ export default {
                         .then(() => {
                             this.showToastMessage(this.$t('backoffice.form.messages.savePaymentMethodSuccess'), "success")
                             loading.dismiss()
-                            this.$router.push({
-                                name: 'ControlPanel', 
-                            });
+                            // this.$router.push({
+                            //     name: 'ControlPanel', 
+                            // });
                         })
                         .catch(e => {
                             console.log(e)

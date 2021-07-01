@@ -41,7 +41,7 @@ export var payAuthorizeNet = {
         throw new Error("Debe especificar en método de pago")
     },
 
-    captureOrder: async function(invoice, moto, restaurantId, payMethod){
+    captureOrder: async function(invoice, moto, restaurantId, payMethod, total){
         if (payMethod === 'SHIFT4')
         {
             try {
@@ -136,6 +136,29 @@ export var payAuthorizeNet = {
                 console.log(error)
                 throw new Error("Try another payment method")  
             }
+        }
+        if(payMethod === 'PayFabric'){
+
+            const items =  {
+                "Type": "Capture",
+                "Amount": total,
+                "ReferenceKey":invoice
+              }
+            const res = await Api.processPayFabric(items);
+            console.log(res);
+            if(res.status===200 && res.data.Message === "APPROVED"){
+                const response1 = {
+                    "total": res.data.TrxAmount,
+                    "transId":res.data.TrxKey,
+                    "accountNumber": '',
+                    "expirationCard": '',
+                    "accountType": res.data.CardType,
+                    "method": 'Authorization',
+                    "moto": false,
+                } 
+                return response1;
+            }
+           
         }
 
         return false
@@ -372,7 +395,19 @@ export var payAuthorizeNet = {
            
 
              
-        }   
+        } 
+        if(payMethod === 'PayFabric'){
+            const response1 = {
+                "total": datas.total,
+                "transId": datas.invoiceNumber,
+                "accountNumber": '',
+                "expirationCard": '',
+                "accountType": '',
+                "method": 'Card',
+                "moto": moto,
+            }   
+            return response1;
+        }  
         return true;
     },
 
@@ -604,6 +639,18 @@ export var payAuthorizeNet = {
                 throw new Error("Try another payment method");
             }
         } 
+        else if(payMethod === 'PayFabric'){
+            var response;
+            const items = {
+                "Amount": datas.total
+            }
+            if(datas.isTicket)  response = await Api.authorizePayFabric(items)
+            else response = await Api.payPayFabric(items)
+            if(response.status === 200){
+                return response.data;
+            }
+            return false;
+        }
         
         return true;
     },
@@ -735,17 +782,7 @@ export var payAuthorizeNet = {
            console.log('qr payment y authorize net');
         } 
     },
-
-    /* Format Datas*{
-        token: '',
-        restaurantId: '',
-        payMethod: '',
-        total: 200,
-        cardNumber: 4568,
-        cardExpirationDateF1: '',
-        cardExpirationDateF2: ''
-        invoiceNumber: "",
-    }*/
+  
     refundOrder: async function(datas, moto, isDelivery){
         if(!isDelivery) isDelivery = false
         const restaurantId = datas.restaurantId
@@ -826,6 +863,17 @@ export var payAuthorizeNet = {
             }
         }
 
+        if(payMethod === 'PayFabric'){
+
+            const items =  {
+                "Type": "Refund",
+                "Amount": datas.total,
+                "ReferenceKey": datas.invoiceNumber
+              }
+            const res = await Api.processPayFabric(items);
+            return res;
+        }
+
         throw new Error("Debe especificar en metodo de pago")
     },
 
@@ -873,6 +921,16 @@ export var payAuthorizeNet = {
                 console.log(error)
                 throw new Error("Try another payment method")  
             }
+        }
+        if(payMethod === 'PayFabric'){
+
+           const items =  {
+                "Type": "Void",
+                "ReferenceKey": invoice
+              }
+            const res = await Api.processPayFabric(items);
+            return res;
+
         }
         
 

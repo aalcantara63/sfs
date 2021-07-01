@@ -127,7 +127,7 @@
                                         <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageOtherCharges') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="$t('backoffice.controlPanel.payments')" v-if="hasPermission('canChangeSetting')" @click="$router.push('/payment')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <ion-chip v-tooltip="$t('backoffice.controlPanel.payments')" v-if="hasPermission('canViewPayments')" @click="$router.push('/payment')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="ic:twotone-attach-money" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePyments') }}</ion-label>
                                 </ion-chip>
@@ -174,36 +174,36 @@
 
                                 <div v-if="hasPermission('canChangeSetting') ||
                                      hasPermission('canSuperUser')" style="margin-top: 40px;">{{ $t('backoffice.menu.settings') }}</div>
-                                <ion-chip v-tooltip="$t('backoffice.controlPanel.aboutSettings')" v-if="hasPermission('canChangeSetting')"  @click="$router.push('/aboutDataSettings')" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <!-- <ion-chip v-tooltip="$t('backoffice.controlPanel.aboutSettings')" v-if="hasPermission('canChangeSetting')"  @click="$router.push('/aboutDataSettings')" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="grommet-icons:restaurant" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageAboutSettings') }}</ion-label>   
                                 </ion-chip>
-                                <br>
-                                <ion-chip v-tooltip="$t('backoffice.controlPanel.basicSettings')" v-if="hasPermission('canChangeSetting')"  @click="manageBasicSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <br> -->
+                                <!-- <ion-chip v-tooltip="$t('backoffice.controlPanel.basicSettings')" v-if="hasPermission('canChangeSetting')"  @click="manageBasicSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="clarity:settings-line" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageBasicSettings') }}</ion-label>   
                                 </ion-chip>
-                                <br>
+                                <br> -->
                                 <ion-chip v-tooltip="$t('backoffice.controlPanel.funtionalitiesSettings')" v-if="hasPermission('canChangeSetting')"  @click="manageFunSettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="clarity:file-settings-line" data-inline="false"></span>
-                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageFunSettings') }}</ion-label>   
+                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.menu.settings') }}</ion-label>   
                                 </ion-chip>
                                 <br>
-                                <ion-chip v-tooltip="$t('backoffice.controlPanel.colorSettings')" v-if="hasPermission('canChangeSetting')" @click="manageColourSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <!-- <ion-chip v-tooltip="$t('backoffice.controlPanel.colorSettings')" v-if="hasPermission('canChangeSetting')" @click="manageColourSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                         <span class="iconify" data-icon="vaadin:palete" data-inline="false"></span>
                                         <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageColourSettings') }}</ion-label>   
                                 </ion-chip>
-                                <br>
-                                <ion-chip v-tooltip="$t('backoffice.controlPanel.paymentSettings')" v-if="hasPermission('canChangeSetting')" @click="managePaymentSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <br> -->
+                                <!-- <ion-chip v-tooltip="$t('backoffice.controlPanel.paymentSettings')" v-if="hasPermission('canChangeSetting')" @click="managePaymentSettings()"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="ic:twotone-payments" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.managePaymentSettings') }}</ion-label>
                                 </ion-chip>
-                                <br>
-                                <ion-chip v-tooltip="$t('backoffice.controlPanel.systemSettings')"  v-if="hasPermission('canChangeSetting')"   @click="manageKeySettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                <br> -->
+                                <!-- <ion-chip v-tooltip="$t('backoffice.controlPanel.systemSettings')"  v-if="hasPermission('canChangeSetting')"   @click="manageKeySettings()" color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="clarity:network-settings-solid" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageKeySettings') }}</ion-label>   
-                                </ion-chip>
-                                <br>
+                                </ion-chip> -->
+                                <!-- <br> -->
                                 <ion-chip v-tooltip="'Description.'" v-if="hasPermission('canSuperUser')"   @click="manageSupportSettings()" color="danger" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="mdi:account-supervisor" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.supportSettings') }}</ion-label>  
@@ -628,7 +628,10 @@ export default {
                         case 'canViewSuscriptor':
                             res = roles[index].canViewSuscriptor;
                             break;
-                        default:
+                        case 'canViewPayments':
+                            res = roles[index].canViewPayments;
+                            break;
+                        default:    
                             break;
                     }
                     if (res)

@@ -202,11 +202,12 @@
                         
           </ion-list> 
 
-          <div style="text-align: right;" v-if="cart.length > 0">        
-            <ion-button @click="showNote=!showNote" v-tooltip="i18n.t('frontend.order.notes')"> 
+          <div style="text-align: right;background: white;" v-if="cart.length > 0">        
+            <ion-button @click="showNote=!showNote" v-tooltip="i18n.t('frontend.order.notes')">
+              {{i18n.t('frontend.order.notes')}} 
               <span class="iconify" data-icon="akar-icons:comment-add" data-inline="false" ></span>  
             </ion-button> 
-            <ion-textarea v-if="showNote"
+            <ion-textarea v-if="showNote" 
             class="menu-textarea" :value="note"
             @ionChange="changeOrderNote($event.target.value)" 
             style="text-align: left;"></ion-textarea>

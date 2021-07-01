@@ -338,7 +338,7 @@ export default {
                     else
                     {
                         const isDelivery = pay.paymentInfo.isDelivery || false;
-                        await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4', isDelivery)
+                        await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, pay.paymentInfo.method, isDelivery)
                         //console.log("Response Void")
                         //console.log(resVoid)
                         const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);

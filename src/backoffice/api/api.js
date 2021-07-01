@@ -431,6 +431,26 @@ export var Api = {
         return await axios.put(this.endPointURL + 'login?unsubscribe=1', data, {headers: {'Authorization':this.token, 'restaurantid': restId}})
     },
 
+    testRestaurantEmail: async function(data){       
+        return await axios.post(this.endPointURL + 'setting?testEmail=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    testSupportEmail: async function(data){       
+        return await axios.post(this.endPointURL + 'imenusupport?testEmail=1', data, {headers: {'Authorization':this.defaultToken}})
+    },
+
+    payPayFabric: async function(data){       
+        return await axios.post(this.endPointURL + 'payment?payPayFabric=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    authorizePayFabric: async function(data){       
+        return await axios.post(this.endPointURL + 'payment?authorizePayFabric=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    processPayFabric: async function(data){       
+        return await axios.post(this.endPointURL + 'payment?processPayFabric=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
 
 
 

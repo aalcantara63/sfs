@@ -20,16 +20,36 @@
                <restaurant-type-show  :restaurantType="restaurantType[restaurantTypeSelected]"></restaurant-type-show>
         </modal>
 
+         <modal name="terms-and-condition"  width="80%" height="auto" >               
+                <ion-header>
+                <ion-toolbar>
+                     <ion-buttons slot="start" @click="hideTerms()">
+                        <ion-back-button default-href="home"></ion-back-button>
+                    </ion-buttons>
+                    <ion-title>Software Terms and Conditions of Use</ion-title>
+                </ion-toolbar>
+                </ion-header>
+
+                <div>
+                     <TermAndConditions/>
+                </div>
+
+             <ion-button @click="hideTerms()">Cancelar</ion-button>
+             <ion-button @click="termAndCondition=true,hideTerms()">Aceptar</ion-button>
+        </modal>
+
         <div >
 
             <ion-header>
                 <ion-toolbar>
-                    <ion-buttons slot="start" @click="goInit()" >
+                    <div style="display: flex;     justify-content: space-between;">
+                        <ion-buttons slot="start" @click="goInit()" >
                         <ion-back-button default-href="/"></ion-back-button>
                     </ion-buttons>
-                    <div style="margin: 0 auto; ">
                       <h3 >{{$t('frontend.createNew.createTitle')}}</h3>                     
-                    </div> 
+                    
+                    <Language />
+                    </div>
                 </ion-toolbar>
             </ion-header> 
 
@@ -40,22 +60,22 @@
                              <ion-card-title style="text-align: left;padding: 15px;">
                                {{$t('frontend.createNew.dataRestaurant')}}
                             </ion-card-title>
-                            <ion-card-content>
+                            <ion-card-content :key="restaurantKey">
                                 <div  style="display: flex;justify-content: flex-start;align-items: center;">  
                                     
-                                    <h2>{{$t('frontend.createNew.restaurantType')}}</h2>
+                                    <h2>{{$t('frontend.createNew.restaurantType')}}<strong style="color: red">*</strong></h2>
                                     <ion-select interface="popover" icon="add" v-if="restaurantType.length > 0"
                                     style=""
                                     :ok-text="$t('backoffice.form.messages.buttons.ok')"
-                                    :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
-                                    :value="restaurantType[0].Type"
+                                    :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"                                    
                                     :placeholder="$t('frontend.createNew.select')"
-                                    @ionChange="restaurantTypeSelected=$event.target.value,defaultData=false"                          
-                                >
+                                    :value="restaurantTypeSelected"
+                                    @ionChange="restaurantTypeSelected=$event.target.value"                          
+                                    >
                                         <ion-select-option v-for="(res, index) in restaurantType"                    
                                         :key="index" 
                                         :value="index" >{{res.Type}}
-                                        </ion-select-option>                                
+                                        </ion-select-option>  
                                     </ion-select>
                                     <div v-if="restaurantTypeSelected !==-1" style="display: flex;">
                                         <div  v-if="restaurantType[restaurantTypeSelected].Datas.length > 0" @click="showRestaurantType()">
@@ -63,14 +83,7 @@
                                         </div>
                                     </div>
                                             
-                                </div>
-                                <div v-if="restaurantTypeSelected !==-1">
-                                    <div style="display: flex;justify-content: flex-start;align-items: center;"
-                                    v-if="restaurantType[restaurantTypeSelected].Datas.length > 0" >
-                                        <ion-label style="display: contents;">Cargar datos de prueba</ion-label>                                          
-                                        <ion-toggle @ionChange="defaultData=$event.target.checked" :checked="defaultData"></ion-toggle>
-                                    </div>
-                                </div>
+                                </div>                               
                                 <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'"  >
                                     <ion-label position="floating">{{$t('frontend.createNew.restaurantName')}}<strong style="color: red">*</strong></ion-label>                                          
                                     <ion-input type="text" required=true  
@@ -84,9 +97,21 @@
                                     ></ion-input>
                                 </ion-item>
                                 <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                                    <ion-label position="floating">{{$t('frontend.createNew.restaurantZipcode')}}<strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-label position="floating">{{$t('frontend.createNew.restaurantZipcode')}} <strong style="color: red">*</strong></ion-label>                                          
                                     <ion-input type="text" required=true
-                                        :value="restaurantZipcode" @change="restaurantZipcode=ValidateZipcode($event.target.value)"
+                                        :value="restaurantZipcode" @change="restaurantZipcode=ValidateZipcode($event.target.value, 'restaurant')"
+                                    ></ion-input>
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.home.city')}} <strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="text" readonly=true
+                                        :value="restaurantCity" 
+                                    ></ion-input>
+                                </ion-item>
+                                 <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.home.state')}} <strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="text" readonly=true
+                                        :value="restaurantState" 
                                     ></ion-input>
                                 </ion-item>
                                 <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
@@ -123,50 +148,62 @@
                                {{$t('frontend.createNew.dataMercahnt')}}
                             </ion-card-title>                            
                             
-                            <ion-card-content>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                            <ion-label position="floating">{{$t('frontend.createNew.merchantName')}}<strong style="color: red">*</strong></ion-label>                                          
-                            <ion-input type="text" required=true                                 
-                                :value="merchantName" @input="merchantName = $event.target.value"
-                            ></ion-input>
-                            </ion-item>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                                <ion-label position="floating">{{$t('frontend.createNew.merchantLastName')}}<strong style="color: red">*</strong></ion-label>                                          
+                            <ion-card-content :key="merchantKey">
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                <ion-label position="floating">{{$t('frontend.createNew.merchantName')}}<strong style="color: red">*</strong></ion-label>                                          
                                 <ion-input type="text" required=true                                 
-                                    :value="merchantLastName" @input="merchantLastName = $event.target.value"
+                                    :value="merchantName" @input="merchantName = $event.target.value"
                                 ></ion-input>
-                            </ion-item>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                                <ion-label position="floating">{{$t('frontend.createNew.merchantAddres')}}<strong style="color: red">*</strong></ion-label>                                          
-                                <ion-input type="text" required=true
-                                    :value="merchantAddres" @input="merchantAddres = $event.target.value"
-                                ></ion-input>
-                            </ion-item>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'">
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.createNew.merchantLastName')}}<strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="text" required=true                                 
+                                        :value="merchantLastName" @input="merchantLastName = $event.target.value"
+                                    ></ion-input>
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.createNew.merchantAddres')}}<strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="text" required=true
+                                        :value="merchantAddres" @input="merchantAddres = $event.target.value"
+                                    ></ion-input>
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'">
                                     <ion-label position="floating">{{$t('frontend.createNew.merchantZipcode')}}<strong style="color: red">*</strong></ion-label>                                          
                                     <ion-input type="text" required=true
-                                        :value="merchantZipcode" @change="merchantZipcode=ValidateZipcode($event.target.value)"
+                                        :value="merchantZipcode" @change="merchantZipcode=ValidateZipcode($event.target.value, 'merchant')"
                                     ></ion-input>
-                            </ion-item>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                                <ion-label position="floating">{{$t('frontend.createNew.merchantPhone')}}<strong style="color: red">*</strong></ion-label>                                          
-                                <ion-input type="text" required=true                                 
-                                    :value="merchantPhone" @input="merchantPhone = $event.target.value"
-                                    @change=" validatePhone($event.target.value, 'merchant')"
-                                ></ion-input>
-                            </ion-item>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                                <ion-label position="floating">{{$t('frontend.createNew.merchantEmail')}}<strong style="color: red">*</strong></ion-label>                                          
-                                <ion-input type="text" required=true                                 
-                                    :value="merchantEmail" @input="merchantEmail = $event.target.value"  @change="validateEmail($event.target.value, 'merchant')"
-                                ></ion-input>
-                            </ion-item>
-                            <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
-                                <ion-label position="floating">{{$t('frontend.createNew.merchantClerk')}}<strong style="color: red">*</strong></ion-label>                                          
-                                <ion-input type="number" required=true                                 
-                                    :value="merchantClerk" @input="merchantClerk = $event.target.value"  @change="validateClerk($event.target.value)"
-                                ></ion-input>
-                            </ion-item>
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                        <ion-label position="floating">{{$t('frontend.home.city')}} <strong style="color: red">*</strong></ion-label>                                          
+                                        <ion-input type="text" readonly=true
+                                            :value="merchantCity" 
+                                        ></ion-input>
+                                    </ion-item>
+                                    <ion-item  :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                        <ion-label position="floating">{{$t('frontend.home.state')}} <strong style="color: red">*</strong></ion-label>                                          
+                                        <ion-input type="text" readonly=true
+                                            :value="merchantState" 
+                                        ></ion-input>
+                                    </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.createNew.merchantPhone')}}<strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="text" required=true                                 
+                                        :value="merchantPhone" @input="merchantPhone = $event.target.value"
+                                        @change=" validatePhone($event.target.value, 'merchant')"
+                                    ></ion-input>
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.createNew.merchantEmail')}}<strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="text" required=true                                 
+                                        :value="merchantEmail" @input="merchantEmail = $event.target.value"  @change="validateEmail($event.target.value, 'merchant')"
+                                    ></ion-input>
+                                </ion-item>
+                                <ion-item    :class="scope.isSmall || scope.noMatch ?'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories': 'menu-col-4 card-categories'" >
+                                    <ion-label position="floating">{{$t('frontend.createNew.merchantClerk')}}<strong style="color: red">*</strong></ion-label>                                          
+                                    <ion-input type="number" required=true                                 
+                                        :value="merchantClerk" @input="merchantClerk = $event.target.value"  @change="validateClerk($event.target.value)"
+                                    ></ion-input>
+                                </ion-item>
 
                             </ion-card-content>
                         </ion-card> 
@@ -175,6 +212,16 @@
                 </v-breakpoint>
         </div>
         <ion-input @ionChange="paymentRes=$event.target.value" id="newRestaurantPayment" ref="abc" style="display:none"></ion-input>
+
+         <div style="margin: 10px;display: flex;justify-content: center;align-items: center">
+             <ion-checkbox 
+             :checked="termAndCondition" 
+             @ionChange="termAndCondition=$event.target.checked" 
+             style="margin: 0 10px;"></ion-checkbox>
+            <a @click="showTerms()">{{$t('frontend.createNew.temrsAndCondition')}}</a>                                          
+        </div>
+
+        
 
             <ion-button 
                 :disabled="spinner? true: false" 
@@ -223,7 +270,9 @@ import { parsePhoneNumber } from 'libphonenumber-js'
 import { Api } from '../../backoffice/api/api.js';
 import md5 from "crypto-js/hmac-md5";
 import RestaurantTypeShow from './RestaurantTypeShow.vue'
+import TermAndConditions from './TermsAndCondition.vue'
 import { VBreakpoint } from 'vue-breakpoint-component'
+import Language from '../../backoffice/views/Locale.vue'
 
 export default {
     name: 'NewRestaurant',
@@ -234,6 +283,8 @@ export default {
     components:{
         RestaurantTypeShow,
          VBreakpoint,
+         TermAndConditions,
+         Language
     },
     props: {  
        parent: {type: Object, default: () => {} },
@@ -267,6 +318,8 @@ export default {
            restaurantEmail: '',
            restaurantWeb: '',
            restaurantFax: '',
+           restaurantCity: '',
+           restaurantState: '',
            merchantName: '',
            merchantLastName: '',
            merchantAddres: '',
@@ -275,6 +328,8 @@ export default {
            merchantEmail: '',
            merchantClerk: '',
            key: 0,
+           restaurantKey:1,
+           merchantKey: 2,
            merchantCity: '',
            merchantState: '',
            utc: '',
@@ -286,7 +341,7 @@ export default {
            paySpinner: false,
            restaurantType: [],
            restaurantTypeSelected: -1,
-           defaultData: false,
+           termAndCondition: false,
         }
     },  
     methods:{
@@ -300,7 +355,7 @@ export default {
             if(this.restaurantName === '' || this.restaurantAddres ==='' || this.restaurantPhone === '' ||
                 this.restaurantZipcode === '' || this.restaurantEmail === '' || this.merchantName === '' ||
                 this.merchantLastName === '' || this.merchantAddres === '' || this.merchantPhone === '' || 
-                this.merchantEmail === '' || this.merchantClerk === '')
+                this.merchantEmail === '' || this.merchantClerk === '' || !this.termAndCondition || this.restaurantTypeSelected ===-1)
                 return false;
             return true;
         },
@@ -330,7 +385,7 @@ export default {
                 }
             if(this.restaurantFax !== '') res.Fax = this.restaurantFax;
             if(this.restaurantWeb !== '') res.Web = this.restaurantWeb;
-            if(this.defaultData && this.restaurantTypeSelected !==-1)
+            if(this.restaurantTypeSelected !==-1)
                 res.defaultData = this.restaurantType[this.restaurantTypeSelected]._id;
             
 
@@ -349,24 +404,52 @@ export default {
         validateEmail(value, model){
          let emailRegex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
             if (emailRegex.test(value) == false){
-                if(model === 'merchant') this.merchantEmail = ''
-                else this.restaurantEmail = '';
-                this.key ++;
+                if(model === 'merchant'){
+                     this.merchantEmail = ''; 
+                     this.merchantKey++
+                }
+                else{ 
+                    this.restaurantEmail = '';
+                    this.restaurantKey ++
+                }
+              
                 return this.openMs(this.$t('frontend.home.notValidEmail'), 'danger');
             }               
         },
 
-        ValidateZipcode(event){
-        this.key ++;
-        
+        ValidateZipcode(event, merchant){
+            
+         
         var hills = LibCodes.lookup(event);   
-        if(!hills){        
-            this.restaurantZipcode = '';      
+        if(!hills){ 
+            if(merchant==='merchant') {
+                this.merchantZipcode = ''   
+                this.merchantCity = ''
+                this.merchantState = ''
+                this.merchantKey ++;
+             }   
+            else {
+                this.restaurantZipcode = '';  
+                this.restaurantCity =''  
+                this.restaurantState = ''
+                 this.restaurantKey ++;
+            }  
             this.openMs(this.$t('frontend.home.zipCodeNotValid'), 'danger') ;
             return '';     
         }     
         else{
-            this.restaurantZipcode = event;        
+            if(merchant==='merchant') {
+                this.merchantZipcode = event 
+                 this.merchantCity = hills.city
+                this.merchantState = hills.state;
+                this.merchantKey ++;
+            }
+            else {
+                this.restaurantZipcode = event;  
+                this.restaurantCity = hills.city
+                this.restaurantState = hills.state;     
+                this.restaurantKey ++;
+            }
             return event;
         }      
         },  
@@ -388,14 +471,13 @@ export default {
         },    
 
         validateClerk(value){ 
+            this.merchantKey ++;
             if(value <= 0) {
-                this.merchantClerk = '';
-                this.key ++;
+                this.merchantClerk = '';               
                 return this.openMs(this.$t('frontend.createNew.clerkNotValid'), 'danger');
             }
             if(value.toString().length > 5){
-                this.merchantClerk = '';
-                this.key ++;
+                this.merchantClerk = '';                
                 return this.openMs(this.$t('frontend.createNew.clerkToLong'), 'danger');
             }
         },
@@ -419,8 +501,7 @@ export default {
             .then(a => a.present())
         },
 
-      
-          getSingleHash(){
+        getSingleHash(){
             if(this.utc !== ''){
                 let md5String = `${this.api_access_id}|schedule|2.0|${this.amount}|${this.utc}|A030||`
                 const signature = md5(md5String, this.api_secure_key); 
@@ -447,7 +528,15 @@ export default {
            
             try {
                 const response = await Api.fetchAll('restauranttype')
-                this.restaurantType = response.data;               
+                this.restaurantType = response.data;        
+                
+                const index = this.restaurantType.findIndex( r => r.Type === 'Blank Restaurant')  
+                if(index !== -1){
+                    this.restaurantTypeSelected = index;
+                }
+                
+
+                console.log()
                 
             } catch (error) {
                 error;
@@ -463,7 +552,16 @@ export default {
          this.$modal.hide('restaurant-type-modal');
         },
 
+        showTerms() {
+         this.$modal.show('terms-and-condition');
+        },
 
+        hideTerms() {
+         this.$modal.hide('terms-and-condition');
+        },
+
+
+      
     },
 
     

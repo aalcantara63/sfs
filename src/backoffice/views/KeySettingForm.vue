@@ -1,8 +1,8 @@
 <template>
     
-    <div class="screen">
-        <ion-backdrop v-if="isBackdrop"></ion-backdrop>
-        <ion-header>
+    <div>
+        <!-- <ion-backdrop v-if="isBackdrop"></ion-backdrop> -->
+        <!-- <ion-header>
             <ion-toolbar>
                 <ion-buttons slot="start">
                 <ion-back-button default-href="/controlPanel" @click="$router.push({ name: 'ControlPanel'})"></ion-back-button>
@@ -12,7 +12,7 @@
                 </ion-label>
             </ion-toolbar>
         </ion-header>
-        <br/>
+        <br/> -->
 
     <div v-if="spinner">
         <ion-spinner name="lines" class="spinner"></ion-spinner>
@@ -90,7 +90,9 @@
             }
         },
         created: function(){
-            this.id = this.$route.params.settingId;
+             //  if(this.$route.params.settingId)
+            //     this.id = this.$route.params.settingId;
+            this.id = this.$store.state.user.RestaurantId
             if (this.id){
                 this.$ionic.loadingController
                 .create({
@@ -309,10 +311,10 @@
                     }
                     //If I am editing
                     if (this.id){
-                    item['_id'] = this.id;
-                    //console.log(item);
-                    this.spinner = true;
-                    Api.putIn(this.modelName, item)
+                        item['_id'] = this.id;
+                        //console.log(item);
+                        this.spinner = true;
+                        Api.putIn(this.modelName, item)
                         .then(response => {
                                 // alert("Success edited");
                                 // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
@@ -320,9 +322,9 @@
                                 //         this.$t('backoffice.list.messages.titleEditSetting'));
                                 this.showToastMessage(this.$t('backoffice.list.messages.messageEditSuccessSetting'), "success");
                                 this.spinner = false;
-                                this.$router.push({
-                                    name: 'ControlPanel', 
-                                });
+                                // this.$router.push({
+                                //     name: 'ControlPanel', 
+                                // });
                                 return response;
                         })
                         .catch(e => {
@@ -332,28 +334,28 @@
                             this.ifErrorOccured(this.saveSetting);
                         })
                     }
-                    else{
-                    //Else, I am created a new category
-                    this.spinner = true;
-                    Api.postIn(this.modelName, item)
-                        .then(response => {
-                            // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
-                            //         this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
-                            //             this.$t('backoffice.list.messages.titleCreateSetting'));
-                            this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
-                            this.spinner = false;
-                            this.$router.push({
-                                name: 'ControlPanel', 
-                            });
-                            return response;
-                        })
-                        .catch(e => {
-                            this.isBackdrop = false;
-                            console.log(e);
-                            this.spinner = false;
-                            this.ifErrorOccured(this.saveSetting);
-                        })
-                    }
+                    // else{
+                    // //Else, I am created a new category
+                    // this.spinner = true;
+                    // Api.postIn(this.modelName, item)
+                    //     .then(response => {
+                    //         // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
+                    //         //         this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
+                    //         //             this.$t('backoffice.list.messages.titleCreateSetting'));
+                    //         this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
+                    //         this.spinner = false;
+                    //         this.$router.push({
+                    //             name: 'ControlPanel', 
+                    //         });
+                    //         return response;
+                    //     })
+                    //     .catch(e => {
+                    //         this.isBackdrop = false;
+                    //         console.log(e);
+                    //         this.spinner = false;
+                    //         this.ifErrorOccured(this.saveSetting);
+                    //     })
+                    // }
 
                 }
             },

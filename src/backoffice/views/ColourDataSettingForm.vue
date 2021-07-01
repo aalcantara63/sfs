@@ -1,8 +1,8 @@
 <template>
-    <div class="screen" style="margin-bottom: 160px">
-    <ion-backdrop v-if="isBackdrop"></ion-backdrop>
+    <div style="margin-bottom: 160px">
+    <!-- <ion-backdrop v-if="isBackdrop"></ion-backdrop> -->
 
-    <ion-header>
+    <!-- <ion-header>
           <ion-toolbar>
             <ion-buttons slot="start">
               <ion-back-button default-href="/controlPanel" @click="$router.push({ name: 'ControlPanel'})"></ion-back-button>
@@ -12,7 +12,7 @@
             </ion-label>
           </ion-toolbar>
     </ion-header>
-    <br/>
+    <br/> -->
 
       <!-- <ion-card> -->
     <div v-if="spinner">
@@ -158,7 +158,9 @@ export default {
   },
   methods: {
       init(){
-            this.id = this.$route.params.settingId;
+         //  if(this.$route.params.settingId)
+        this.id = this.$route.params.settingId;
+        // this.id = this.$store.state.user.RestaurantId
             //console.log("SETTING_ID")
             //console.log(this.id)
             if (this.id){
@@ -538,9 +540,9 @@ export default {
                         var allStyles= item['AllStyles'];
                             document.querySelector('style').innerHTML += allStyles;
                         this.spinner = false;
-                        this.$router.push({
-                          name: 'ControlPanel',
-                        });
+                        // this.$router.push({
+                        //   name: 'ControlPanel',
+                        // });
                         return response;
                   })
                   .catch(e => {
@@ -550,29 +552,29 @@ export default {
                         this.ifErrorOccured(this.saveSetting);
                   })
             }
-            else{
-              //Else, I am created a new category
-              this.spinner = true;
-              Api.postIn(this.modelName, item)
-                  .then(response => {
-                    //   this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
-                    //          this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
-                    //             this.$t('backoffice.list.messages.titleCreateSetting'));
-                      var allStyles = document.querySelector('style').innerHTML += allStyles;
-                      this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
-                      this.spinner = false;
-                      this.$router.push({
-                        name: 'ControlPanel', 
-                      });
-                      return response;
-                  })
-                  .catch(e => {
-                      this.isBackdrop = false;
-                      console.log(e);
-                      this.spinner = false;
-                      this.ifErrorOccured(this.saveSetting);
-                  })
-            }
+            // else{
+            //   //Else, I am created a new category
+            //   this.spinner = true;
+            //   Api.postIn(this.modelName, item)
+            //       .then(response => {
+            //         //   this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
+            //         //          this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
+            //         //             this.$t('backoffice.list.messages.titleCreateSetting'));
+            //           var allStyles = document.querySelector('style').innerHTML += allStyles;
+            //           this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
+            //           this.spinner = false;
+            //           this.$router.push({
+            //             name: 'ControlPanel', 
+            //           });
+            //           return response;
+            //       })
+            //       .catch(e => {
+            //           this.isBackdrop = false;
+            //           console.log(e);
+            //           this.spinner = false;
+            //           this.ifErrorOccured(this.saveSetting);
+            //       })
+            // }
 
         }
     },
@@ -632,9 +634,9 @@ export default {
                             document.querySelector('style').innerHTML += allStyles;
                       this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
                       this.spinner = false
-                      this.$router.push({
-                        name: 'ControlPanel', 
-                      });
+                    //   this.$router.push({
+                    //     name: 'ControlPanel', 
+                    //   });
                       return response;
                   })
                   .catch(e => {

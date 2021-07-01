@@ -750,7 +750,7 @@ export default {
           const invoiceNumber = this.order.AuthorizationPayment[0].paymentInfo.transId;
           const moto = this.order.AuthorizationPayment[0].paymentInfo.moto;
 
-          const response = await payAuthorizeNet.captureOrder(invoiceNumber, moto, this.restaurantSelectedId, this.restaurantActive.payMethod,);      
+          const response = await payAuthorizeNet.captureOrder(invoiceNumber, moto, this.restaurantSelectedId, this.restaurantActive.payMethod, this.order.Total);      
           delete this.order.AuthorizationPayment;
           this.spinner = false;
           return this.recivePaymentInCloseTicket(response);

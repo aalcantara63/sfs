@@ -1,6 +1,6 @@
 <template>
     <div class="screen">
-    <ion-backdrop v-if="isBackdrop"></ion-backdrop>
+    <!-- <ion-backdrop v-if="isBackdrop"></ion-backdrop> -->
 
     <ion-header>
           <ion-toolbar>
@@ -12,8 +12,17 @@
             </ion-label>
 
             <ion-segment scrollable id="productSegment" @ionChange="segmentChanged($event.target.value)" :value="segmentValue" @input="value=segmentValue">
+               <ion-segment-button value="basic">
+                    <span>{{ $t('backoffice.options.manageBasicSettings') }}</span>
+                </ion-segment-button>                
+                <ion-segment-button value="about">
+                    <span>{{ $t('backoffice.options.manageAboutSettings') }}</span>
+                </ion-segment-button>
                 <ion-segment-button value="general">
                     <span>{{$t('backoffice.form.titles.genaral')}}</span>
+                </ion-segment-button>
+                 <ion-segment-button value="payments">
+                    <span>{{$t('backoffice.options.managePaymentSettings')}}</span>
                 </ion-segment-button>
                 <ion-segment-button value="catering">
                     <span>{{$t('backoffice.form.fields.catering')}}</span>
@@ -30,6 +39,12 @@
                 <ion-segment-button value="devices">
                     <span>{{$t('backoffice.form.titles.devices')}}</span>
                 </ion-segment-button>
+                <ion-segment-button value="colors">
+                    <span>{{$t('backoffice.options.manageColourSettings')}}</span>
+                </ion-segment-button>
+                <ion-segment-button value="poskey">
+                    <span>{{$t('backoffice.options.manageKeySettings')}}</span>
+                </ion-segment-button>
                 <ion-segment-button value="backup">
                     <span>Backup</span>
                 </ion-segment-button>
@@ -43,6 +58,12 @@
     </div>
     <div v-else>
       <!-- <ion-card> -->
+        <div v-if="basic">
+           <Basic/>
+        </div>
+         <div v-if="about">
+            <About/>
+        </div>
         <div v-if="general">
             <ion-item>
               <ion-label>{{$t('backoffice.form.fields.SelectPickHour')}}</ion-label>
@@ -156,6 +177,10 @@
                 v-bind:value="roomPrefix">
                 </ion-input>
             </ion-item>
+            <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
+        </div>
+        <div v-if="payments">
+           <Payments/>
         </div>
         <div v-if="catering">
         <ion-item>
@@ -271,6 +296,7 @@
               </div>
 
           </div>
+        <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
         <!-- Reservation -->
         <div v-if="reservation">
@@ -449,6 +475,7 @@
                     </ion-item>
                 </div>
             </div>
+            <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
         <!-- Tip -->
         <div v-if="tip">
@@ -476,6 +503,7 @@
                     </ion-item>
                 </ion-list>
             </div>
+            <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
         <!-- Zipcodes -->
         <div v-if="zipCode">
@@ -503,6 +531,7 @@
               </ion-list>
               
           </div>
+          <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
         <!-- Devices -->
         <div v-if="devices">
@@ -541,14 +570,21 @@
                     </ion-item>
                 </ion-list>
             </div>
+            <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
+        </div>
+        <div v-if="colors">
+           <Colores/>
+        </div>
+        <div v-if="poskey"> 
+            <PosKey/> 
         </div>
         <!-- Backups -->
         <div v-if="backup">
             <div style="margin-left: 30px">
                 <ion-list>
-                    <ion-item>
+                    <!-- <ion-item>
                       <h1>{{$t('backoffice.form.titles.backups')}} Backups</h1>
-                    </ion-item>
+                    </ion-item> -->
                     <ion-item>
                         <ion-label>Make backup and download</ion-label>
                         <ion-label slot="end"><ion-button color="primary" @click="doBackup()">Backup</ion-button></ion-label>
@@ -566,10 +602,11 @@
                     </ion-item>
                 </ion-list>
             </div>
+            <!-- <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button> -->
         </div>
 
-      <br/>
-      <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
+      <!-- <br/>
+      <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button> -->
     </div>
     </div>
 </template>
@@ -580,6 +617,11 @@ import { Api } from '../api/api.js';
 import LibCodes from 'zipcodes';
 import Moment from 'moment';
 import Cripto from "crypto-js";
+import About from './AboutDataSetting.vue'
+import Basic from './BasicDataSettingsForm.vue'
+import Colores from './ColourDataSettingForm.vue'
+import Payments from './PaymentSettingsForm.vue'
+import PosKey from './KeySettingForm.vue'
 
 export default {
 
@@ -678,14 +720,20 @@ export default {
       spinner: false,
 
       //Segment
-      segmentValue: 'general',
-      general: true,
+      segmentValue: 'basic',
+      about: false,
+      basic:true,
+      general: false,
       catering: false,
       reservation: false,
       tip: false,
       zipCode: false,
       devices: false,
       backup: false,
+      payments: false,
+      colors: false  , 
+      poskey: false,
+     
 
       //Backup file
       backupFile: null,
@@ -704,6 +752,9 @@ export default {
   created: function(){
       this.init();
   },
+  components:{
+      About, Basic, Colores, Payments, PosKey
+  },
   computed: {
         title() {
             return this.id ? this.$t('backoffice.form.titles.funSettingEditTitle') :  this.$t('backoffice.form.titles.funSettingNewTitle');
@@ -712,6 +763,35 @@ export default {
   methods: {
     segmentChanged(value){            
         //console.log(value)
+        if(value === 'basic'){
+            this.basic = true;
+            this.about = false
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
+            this.backup = false
+            this.colors = false;
+            this.payments = false;
+            this.poskey = false;
+            
+        }
+        if(value === 'about'){
+            this.about = true;
+            this.basic = false;
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
+            this.backup = false
+            this.colors = false;
+            this.payments = false;
+            this.poskey = false;
+        }
         if(value === 'general'){
             this.general = true
             this.catering = false
@@ -720,6 +800,39 @@ export default {
             this.zipCode = false
             this.devices = false
             this.backup = false
+            this.about = false;
+            this.basic = false;   
+            this.colors = false;
+            this.payments = false;  
+            this.poskey = false;       
+        }
+        if(value === 'payments'){
+            this.payments = true;
+            this.basic = false;
+            this.about = false
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
+            this.backup = false
+            this.colors = false;
+            this.poskey = false;
+        }
+           if(value === 'colors'){
+            this.colors = true;
+            this.payments = false;
+            this.basic = false;
+            this.about = false
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
+            this.backup = false
+            this.poskey = false;
         }
         if(value === 'catering'){
             this.general = false
@@ -729,6 +842,11 @@ export default {
             this.zipCode = false
             this.devices = false
             this.backup = false
+            this.about = false;
+            this.basic = false;
+            this.colors = false;
+            this.payments = false;
+            this.poskey = false;
         }  
         if(value === 'reservation'){
             this.general = false
@@ -737,7 +855,12 @@ export default {
             this.tip = false
             this.zipCode = false
             this.devices = false
-            this.backup = false            
+            this.backup = false  
+            this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false; 
+            this.poskey = false;       
         }
         if(value === 'tip'){
             this.general = false
@@ -746,7 +869,12 @@ export default {
             this.tip = true
             this.zipCode = false
             this.devices = false
-            this.backup = false               
+            this.backup = false 
+             this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false; 
+            this.poskey = false;            
         }
         if(value === 'zipCodes'){
             this.general = false
@@ -755,7 +883,13 @@ export default {
             this.tip = false
             this.zipCode = true
             this.devices = false
-            this.backup = false               
+            this.backup = false   
+            this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false;   
+            this.poskey = false;          
+              
         }
         if(value === 'backup'){
             this.general = false
@@ -764,7 +898,12 @@ export default {
             this.tip = false
             this.zipCode = false
             this.devices = false
-            this.backup = true               
+            this.backup = true  
+            this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false;  
+            this.poskey = false;                  
         }
         if(value === 'devices'){
             this.general = false
@@ -773,7 +912,26 @@ export default {
             this.tip = false
             this.zipCode = false
             this.devices = true
-            this.backup = false               
+            this.backup = false
+            this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false; 
+            this.poskey = false;                     
+        }
+         if(value === 'poskey'){
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
+            this.backup = false  
+            this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false;   
+            this.poskey = true;                 
         }
         if(value === 'backup'){
             this.general = false
@@ -782,7 +940,12 @@ export default {
             this.tip = false
             this.zipCode = false
             this.devices = false
-            this.backup = true               
+            this.backup = true  
+            this.about = false;
+            this.basic = false;  
+            this.colors = false;
+            this.payments = false;   
+            this.poskey = false;                 
         }
         this.segmentValue = value;
     },
@@ -847,6 +1010,9 @@ export default {
                         this.amountPayForReservarionQuotation  = response.data.PayForReservationQuotation; 
                         this.setReservationDateAndTime(response.data.ReservationDaysAndTime);
                     }
+
+                    if (this.$route.params.tab == 'about')
+                        this.segmentChanged('about')
                    
                     loading.dismiss();
                     return response;
@@ -1225,6 +1391,7 @@ export default {
 
             if (this.viewCatering){
 
+              item["ViewCatering"] = this.viewCatering
               item["MinAmoutCatering"] = this.minAmoutCatering
               item["MinAmountCateringDelivery"] = this.minAmountCateringDelivery
               item["PartialPay"] = this.partialPay
@@ -1257,9 +1424,9 @@ export default {
                         //         this.$t('backoffice.list.messages.titleEditSetting'));
                         this.showToastMessage(this.$t('backoffice.list.messages.messageEditSuccessSetting'), "success");
                         this.spinner = false;
-                        this.$router.push({
-                          name: 'ControlPanel', 
-                        });
+                        // this.$router.push({
+                        //   name: 'ControlPanel', 
+                        // });
                         return response;
                   })
                   .catch(e => {
@@ -1268,28 +1435,27 @@ export default {
                         this.ifErrorOccured(this.saveSetting);
                   })
             }
-            else{
-              //Else, I am created a new category
-              this.spinner = true
-              Api.postIn(this.modelName, item)
-                  .then(response => {
-                      // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
-                      //        this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
-                      //           this.$t('backoffice.list.messages.titleCreateSetting'));
-                      this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
-                      this.spinner = false
-                      this.$router.push({
-                        name: 'ControlPanel', 
-                      });
-                      return response;
-                  })
-                  .catch(e => {
-                      console.log(e);
-                      this.spinner = false
-                      this.ifErrorOccured(this.saveSetting);
-                  })
-            }
-
+            // else{
+            //   //Else, I am created a new category
+            //   this.spinner = true
+            //   Api.postIn(this.modelName, item)
+            //       .then(response => {
+            //           // this.ShowMessage(this.$t('backoffice.list.messages.infoDeleteSuccess'),
+            //           //        this.$t('backoffice.list.messages.messageCreateSuccessSetting'), 
+            //           //           this.$t('backoffice.list.messages.titleCreateSetting'));
+            //           this.showToastMessage(this.$t('backoffice.list.messages.messageCreateSuccessSetting'), "success");
+            //           this.spinner = false
+            //           this.$router.push({
+            //             name: 'ControlPanel', 
+            //           });
+            //           return response;
+            //       })
+            //       .catch(e => {
+            //           console.log(e);
+            //           this.spinner = false
+            //           this.ifErrorOccured(this.saveSetting);
+            //       })
+            // }
         }
     },
 

@@ -1,14 +1,14 @@
 <template>
-  <div id="category" class="screen">
+  <div id="category">
 
     <ion-header>
           <ion-toolbar>
-            <ion-buttons slot="start">
+            <!-- <ion-buttons slot="start">
               <ion-back-button default-href="/controlPanel" @click="$router.push({ name: 'ControlPanel'})"></ion-back-button>
-            </ion-buttons>
-            <ion-label style="padding: 20px 100px;">
+            </ion-buttons> -->
+            <!-- <ion-label style="padding: 20px 100px;">
               <h1>{{$t('backoffice.titles.about')}}</h1>            
-            </ion-label>
+            </ion-label> -->
 
             <ion-label slot="end">
             <router-link v-if="abouts.length < 3" to="/aboutDataSettingsForm">

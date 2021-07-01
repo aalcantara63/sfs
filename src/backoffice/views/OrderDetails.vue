@@ -650,6 +650,48 @@ export default {
                     this.spinner = false
                 }
             }
+            else if (restaurant.data.PayMethod == 'PayFabric'){
+                try{
+                    const datas = {
+                                    "restaurantId": restaurantID,
+                                    "payMethod": 'PayFabric',
+                                    "total": parseFloat(count).toFixed(2),                                  
+                                    "invoiceNumber": pay.paymentInfo.transId
+                                }
+    
+                    //console.log(datas)                   
+                    await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto, false)
+                    
+                    const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                    if(paymeD){                        
+                        const payUpd = paymeD.data[0];
+                        payUpd.Refund = parseFloat(count).toFixed(2);
+                        await Api.putIn('Allpayments', payUpd);
+                    }
+                   
+
+                    this.order.Payment[key]["state"] = 2;
+                    this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
+                    let item = {
+                        "_id": this.order._id,
+                        "Payment": this.order.Payment,
+                    };
+                    Api.putIn('order', item)
+                    .then(() => {
+                      
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+
+                    this.spinner = false
+                }
+                catch(e){
+                    console.log(e)
+                    this.showToastMessage(e, 'danger')
+                    this.spinner = false
+                }
+            }
             
       },
       async setVoid(pay, key){
@@ -788,12 +830,12 @@ export default {
                 
 
             }*/
-            else if(restaurant.data.PayMethod == 'SHIFT4' || restaurant.data.PayMethod == 'Device') {
+            else if( ['SHIFT4', 'Device', 'PayFabric'].includes(restaurant.data.PayMethod) ) {
                 
                 try
                 {
                     const isDelivery = pay.paymentInfo.isDelivery || false;
-                    await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'SHIFT4', isDelivery)
+                    await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, restaurant.data.PayMethod, isDelivery)
                     //console.log("Response Void")
                     //console.log(resVoid)
                     const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
@@ -834,7 +876,7 @@ export default {
                 try
                 {
                     const isDelivery = pay.paymentInfo.isDelivery || false;
-                    await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, 'TSYS', isDelivery)
+                    await payAuthorizeNet.void(pay.paymentInfo.transId, pay.paymentInfo.moto, restaurantID, restaurant.data.PayMethod, isDelivery)
                     //console.log("Response Void")
                     //console.log(resVoid)
                     const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);

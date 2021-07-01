@@ -515,11 +515,13 @@ export var Commons = {
           
       }
 
-      if(order.OtherCharges.length >0){
-          html += `<tr ><td colspan=6 ><h4 ><strong>${i18n.t('frontend.order.otherCharges')}</strong></h4></td></tr>`;
-          for(var e = 0; e< order.OtherCharges.length ; e++){
-              html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p> ${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
-          }
+      if(order.OtherCharges){
+          if(order.OtherCharges.length >0){
+            html += `<tr ><td colspan=6 ><h4 ><strong>${i18n.t('frontend.order.otherCharges')}</strong></h4></td></tr>`;
+            for(var e = 0; e< order.OtherCharges.length ; e++){
+                html += ` <tr ><td colspan=5 style="width: 75%;border-bottom: 1px solid #dbd1d1;"><p >${order.OtherCharges[e].Name}</p></td> <td style="border-bottom: 1px solid #dbd1d1;"> <p> ${this.getFormatPrice(order.OtherCharges[e].Price)}</p></td></tr>`;
+            }
+        }
       }
       html += `<tr ><td colspan=5 ><p ><strong>${i18n.t('frontend.order.subtotal')}</strong></p></td> <td > <p > ${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;
       html += `<tr><td  colspan=5><p  ><strong>${i18n.t('frontend.order.taxe')} ${order.Taxe}%</strong></p></td> <td > <p >${ this.getFormatPrice(order.Taxe * order.SubTotal / 100) }</p> </td></tr>`;
