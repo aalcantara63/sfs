@@ -1,4 +1,4 @@
-package net.imenuapps.imenuapps;
+package net.imenuapps;
 
 import android.os.Bundle;
 
