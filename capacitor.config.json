@@ -1,5 +1,5 @@
 {
-  "appId": "net.imenuapps",
+  "appId": "net.imenuapps.imenuapps",
   "appName": "imenuapps",
   "bundledWebRuntime": false,
   "npmClient": "npm",
