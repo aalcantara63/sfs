@@ -44,7 +44,7 @@
                 <ion-label>
                     <h2>{{ tax.Name }}</h2>
                     <h3>Tax percentage: {{ tax.Percentage }}%</h3>
-                    <h3>Tax priority: {{ tax.Priority }}</h3>
+                    <!-- <h3>Tax priority: {{ tax.Priority }}</h3> -->
                 </ion-label>
                 <div v-if="hasPermission('canEditTax')">
                     <ion-checkbox v-if="tax.Available" checked="true" slot="end" @click="activeTax(tax, false)"></ion-checkbox>
@@ -94,7 +94,7 @@
                 <ion-label style="margin-left: 15px">
                     <h2>{{ tax.Name }}</h2>
                     <h3>Tax percentage: {{ tax.Percentage }}%</h3>
-                    <h3>Tax priority: {{ tax.Priority }}</h3>
+                    <!-- <h3>Tax priority: {{ tax.Priority }}</h3> -->
                 </ion-label>
                 <!-- <ion-label>
                     <ion-checkbox v-if="tax.Available" disabled="true" checked="true"></ion-checkbox>

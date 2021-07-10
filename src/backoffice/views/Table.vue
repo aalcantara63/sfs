@@ -160,26 +160,87 @@
     <div  v-if="!spinner && orderTable">
 
       <v-breakpoint>
-          <div slot-scope="scope" >
+          <div slot-scope="scope" :key="keyShape+'C'"   style="    display: flex;flex-wrap: wrap; align-items: center;">
               <div  v-for="(table, index) in filterTables"  
               
-                :key="index" style="float: left; margin-top: 15px;" 
+                :key="index" style="float: left; padding: 5px; 2px" 
                 :class="scope.isLarge || scope.isXlarge ? 'menu-col-3' : scope.isMedium? 'menu-col-4 card-categories' : scope.isSmall || scope.noMatch ?'menu-col-12 card-categories': 'menu-col-3 card-categories'">
-                
-                  <ion-card 
-                    :color="table.State=='Free' ?'secondary': 'medium'" 
-                    style="font-size: 18px;font-weight: 600;border: 1px solid grey;"> 
 
-                
+                <ion-card :key="keyShape"
+                    :class="table.Shape==='Square'?'square':table.Shape==='Circle'?'circle' :table.Shape==='Rectangular'? 'rectangle': 'oval'"
+                    :style="table.State=='Free' ? '--background:#76fb3838;font-size: 18px;font-weight: 600;border: 1px solid grey;overflow: visible' :'--background:#ff00001f;font-size: 18px;font-weight: 600;border: 1px solid grey;overflow: visible'"
+                   > 
+                    <div class="content">
+                      
+                        <ion-badge slot="start" style="padding: 10px; margin: 10px;position: absolute;left: 0;" @click="getOrdersDetails(table.Name)"
+                            color="light">{{getListOrder(table.Name).length}} / {{table.Seats.length}}
+                        </ion-badge> 
 
 
-                  <ion-badge slot="end" style="padding: 10px; margin: 10px;" @click="getOrdersDetails(table.Name)"
-                      color="light">{{getListOrder(table.Name).length}} / {{table.Seats.length}}</ion-badge> 
-                  {{table.Name}} 
-                        <br>
-                    <p style="text-align: center;">TOTAL: {{ getAmoutByTable(table.Name) }}   </p>        
+                <!-- <ion-fab horizontal="end" vertical="top" slot="fixed" style="overflow: visible;top: 0; right: 0;z-index: 10;">
+                  <ion-fab-button color="primary">
+                    <span class="iconify" data-icon="icon-park-outline:config" data-inline="false"></span>
+                  </ion-fab-button>
+                  <ion-fab-list side="top">
+                    <ion-fab-button color="primary" @click="seeQrCode(table.Seats)" >
+                        <span class="iconify" data-icon="ion:qr-code-sharp" data-inline="false"></span>  
+                    </ion-fab-button>
+                  </ion-fab-list>
+                  
+                  <ion-fab-list side="bottom">
+                    <ion-fab-button color="primary" @click="editTable(table._id)">
+                        <span class="iconify" data-icon="akar-icons:edit" data-inline="false"></span>
+                    </ion-fab-button>
+                  </ion-fab-list>
+                  <ion-fab-list side="start" v-if="(table.State=='Busy' || table.State=='Dirty') ">
+                    <ion-fab-button color="primary" @click="setAvailable(table)">
+                      <span class="iconify" data-icon="eva:checkmark-fill" data-inline="false" ></span>
+                    </ion-fab-button>
+                  </ion-fab-list>
+                  <ion-fab-list side="start" v-if="table.State=='Free'">
+                    <ion-fab-button color="primary" @click="setBusy(table)">
+                      <span class="iconify" data-icon="eva:close-fill" data-inline="false" ></span>
+                    </ion-fab-button>
+                  </ion-fab-list>        
+                </ion-fab> -->
+
+                                  
+                        <ion-fab  vertical="top" horizontal="end" slot="fixed" style="overflow: visible;top: 0; right: 0;z-index: 10;">
+                          <ion-fab-button color="success">
+                            <span v-if="table.Shape==='Square'" class="iconify" data-icon="akar-icons:square" data-inline="false"></span>
+                            <span v-if="table.Shape==='Rectangular'" class="iconify" data-icon="cil:rectangle" data-inline="false"></span>
+                            <span v-if="table.Shape==='Circle'" class="iconify" data-icon="akar-icons:circle" data-inline="false"></span>
+                            <span v-if="table.Shape==='Oval'" class="iconify" data-icon="akar-icons:oval" data-inline="false" data-rotate="90deg" ></span>
+
+                          </ion-fab-button>
+                            <ion-fab-list side="botton">
+                              <ion-fab-button @click="setTableShape(table, 'Square')" 
+                              :color="table.Shape==='Square'? 'success': 'light'">
+                                <span class="iconify" data-icon="akar-icons:square" data-inline="false"></span>
+                              </ion-fab-button>
+                              <ion-fab-button @click="setTableShape(table, 'Rectangular')" 
+                              :color="table.Shape==='Rectangular'? 'success': 'light'">
+                                <span class="iconify" data-icon="cil:rectangle" data-inline="false"></span>
+                              </ion-fab-button>
+                              <ion-fab-button @click="setTableShape(table, 'Circle')"
+                              :color="table.Shape==='Circle'? 'success': 'light'">
+                                <span class="iconify" data-icon="akar-icons:circle" data-inline="false"></span>
+                              </ion-fab-button>                                   
+                              <ion-fab-button @click="setTableShape(table, 'Oval')"
+                              :color="table.Shape==='Oval'? 'success': 'light'">
+                                <span class="iconify" data-icon="akar-icons:oval" data-inline="false" data-rotate="90deg" ></span>
+                              </ion-fab-button>
+                            </ion-fab-list>
+                        </ion-fab>
+                                  
+                        <div style="display: flex; flex-direction: column; align-items: center;margin-top: 25%">
+                            {{table.Name}}
+                          <br>
+                          <p style="text-align: center;">TOTAL: {{ getAmoutByTable(table.Name) }}   </p>     
+                        </div>
+                    </div>     
                     
-                  </ion-card>  
+                </ion-card>  
               
           
 
@@ -225,6 +286,7 @@ export default {
       orderTable: false,
       segmentValue: 'table',
       orders: [],
+      keyShape: 0,
     }
   }, 
   methods: {
@@ -357,14 +419,15 @@ export default {
         .then(m => m.present())
     },
     setAvailable(table){
-        this.spinnerState = true;
+        // this.spinnerState = true;
         table.State = 'Free';
+        this.keyShape ++;
         table.Seats.forEach(seat => {
             seat.available = true
         });
         Api.putIn('table', table).then(response => {
             this.showToastMessage('La mesa está hora disponible.', 'success')
-            this.spinnerState = false
+            // this.spinnerState = false
             return response
         })
         .catch(e => {
@@ -373,14 +436,15 @@ export default {
         })
     },
     setBusy(table){
-        this.spinner = true;
+        // this.spinner = true;
         table.State = 'Busy';
+        this.keyShape ++;
         table.Seats.forEach(seat => {
             seat.available = false
         });
         Api.putIn('table', table).then(response => {
             this.showToastMessage('Se ha ocupado la mesa.', 'success')
-            this.spinner = false
+            // this.spinner = false
             return response
         })
         .catch(e => {
@@ -535,6 +599,18 @@ export default {
        //console.log(listO)
        return listO;
      },
+
+     setTableShape(table, shape){
+        
+        table.Shape = shape;  
+        this.keyShape ++;      
+        Api.putIn('table', table).then(response => {
+            response
+        })
+        .catch(e => {
+            console.log(e)            
+        })
+    },
   },
 
 }
@@ -624,13 +700,49 @@ li.disabled a {
     text-align: left;
     visibility: visible;
     }
+ 
+.content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.square {
+  width: 100%;
+}
 
-    .table-circle{
-          width: 150px;
-    height: 150px;
+.square:after {
+  content: "";
+  display: block;
+  padding-bottom: 80%;
+}
+
+.circle{
+    width: 100%;
+  border-radius: 50%;
+}
+.circle:after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+.rectangle{
+    width: 100%; 
+}
+.rectangle:after {
+  content: "";
+  display: block;
+  padding-bottom: 60%;
+}
+.oval{
+    width: 100%; 
     border-radius: 50%;
-    border: 1px solid #e1dddd;
-    }
+}
+.oval:after {
+  content: "";
+  display: block;
+  padding-bottom: 60%;
+}
+
 @media only screen and (min-width : 1024px){
 
     .screen{

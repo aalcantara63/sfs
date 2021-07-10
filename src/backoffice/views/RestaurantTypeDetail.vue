@@ -191,7 +191,7 @@
            
             <div>
               <ion-button @click="saveRestaurantType()">{{$t('backoffice.form.buttons.save')}}</ion-button>
-              <ion-button v-if="restaurantType._id" @click="deleteRestaurantType()">Delete</ion-button>
+              <ion-button v-if="restaurantType._id && restaurantType.CanDelete" @click="deleteRestaurantType()">Delete</ion-button>
             </div>
           </div>
                   
@@ -243,78 +243,83 @@
 
          
           <ion-card v-if="indexMenu !== -1" >
-            <div style="display: flex;align-items: center;justify-content: space-around;" >
-                  <ion-item :disabled="spinner? true: false"  >                  
-                    <ion-label position="floating">{{$t('backoffice.form.fields.name')}}<strong style="color: red">*</strong></ion-label>                               
-                    <ion-input type="text" required=true  
-                    :value="restaurantType.Datas[indexMenu].Name"  @input="restaurantType.Datas[indexMenu].Name=$event.target.value"
-                    ></ion-input>
-                </ion-item>               
-                <div  style="display: flex;align-items: center;flex-direction: column;">                  
-                    <ion-label>{{$t('backoffice.titles.cateringMenus')}}  <strong style="color: red">*</strong></ion-label>                               
-                    <ion-toggle :checked ="restaurantType.Datas[indexMenu].IsCatering" @ionChange="restaurantType.Datas[indexMenu].IsCatering=$event.target.checked"></ion-toggle>
-                </div>
-                <div  style="display: flex;align-items: center;flex-direction: column;" >                  
-                    <ion-label >{{$t('backoffice.form.fields.isService')}}<strong style="color: red">*</strong></ion-label>                               
-                    <ion-toggle :checked ="restaurantType.Datas[indexMenu].IsService" @ionChange="restaurantType.Datas[indexMenu].IsService=$event.target.checked"></ion-toggle>
-                </div>  
-                <div style="display: flex">
-                    <div @click="showCategory()" style="    display: table;"><span class="iconify" data-icon="fluent:add-square-multiple-16-filled" data-inline="false"></span></div>
-                    <div @click="restaurantType.Datas.splice(indexMenu,1), indexMenu=-1,updateKey+=1"><span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span></div>
-                </div>
-            </div>
+            
+             <v-breakpoint>
+              <div slot-scope="scope" >
 
-            <ion-card >                                   
-               
-             <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
-                      <div  v-for="(category, indexC) in restaurantType.Datas[indexMenu].Categories" :key="indexC"              
-                        class="menu-col-3 card-categories">  
-                                         
-                        <ion-card                         
-                          color="primary"                          
-                          :style="categorySelected===indexC? 'opacity: 1;text-align: center;margin-bottom: 0;': 'opacity: 0.75;text-align: center;margin-bottom: 0;'"
-                          @click="categorySelected=indexC,showProd=true"
-                         > 
-                        
-                          <ion-avatar style="margin-inline: auto; margin-top: 25px;" >
-                            <img :src="category.ImageUrl">
-                          </ion-avatar>
-                           <h1 class="elipsy-center" v-tooltip="category.Name" style="margin: 5px;">{{category.Name}}</h1>                                                                                                               
-                        </ion-card>
-                        <ion-card style="display: flex;justify-content: space-around;margin-top: 0.5px;" color="ligth">
-                           <div @click="categoryForEdit=indexC,showAddProduct()"><span class="iconify" data-icon="fluent:add-square-multiple-16-filled" data-inline="false"></span></div>
-                           <div @click="categoryForEdit=indexC,showCategoryEdit()"><span class="iconify" data-icon="fa-solid:edit" data-inline="false" ></span></div>
-                            <div @click="deleteCategory(indexC)"><span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span></div>
-                         </ion-card>
+                  <div style="display: flex;align-items: center;justify-content: space-around;" >
+                        <ion-item :disabled="spinner? true: false"  >                  
+                          <ion-label position="floating">{{$t('backoffice.form.fields.name')}}<strong style="color: red">*</strong></ion-label>                               
+                          <ion-input type="text" required=true  
+                          :value="restaurantType.Datas[indexMenu].Name"  @input="restaurantType.Datas[indexMenu].Name=$event.target.value"
+                          ></ion-input>
+                      </ion-item>               
+                      <div  style="display: flex;align-items: center;flex-direction: column;">                  
+                          <ion-label>{{$t('backoffice.titles.cateringMenus')}}  <strong style="color: red">*</strong></ion-label>                               
+                          <ion-toggle :checked ="restaurantType.Datas[indexMenu].IsCatering" @ionChange="restaurantType.Datas[indexMenu].IsCatering=$event.target.checked"></ion-toggle>
                       </div>
-              </div>            
+                      <div  style="display: flex;align-items: center;flex-direction: column;" >                  
+                          <ion-label >{{$t('backoffice.form.fields.isService')}}<strong style="color: red">*</strong></ion-label>                               
+                          <ion-toggle :checked ="restaurantType.Datas[indexMenu].IsService" @ionChange="restaurantType.Datas[indexMenu].IsService=$event.target.checked"></ion-toggle>
+                      </div>  
+                      <div style="display: flex">
+                          <div @click="showCategory()" style="    display: table;"><span class="iconify" data-icon="fluent:add-square-multiple-16-filled" data-inline="false"></span></div>
+                          <div @click="restaurantType.Datas.splice(indexMenu,1), indexMenu=-1,updateKey+=1"><span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span></div>
+                      </div>
+                  </div>
 
-              <div  v-if="categorySelected !==''" :key="updateKey">
-
-                <ion-label v-if="categorySelected !==''">{{restaurantType.Datas[indexMenu].Categories[categorySelected].Description}}</ion-label>
-                <div v-if="categorySelected !==''" style="display: flex;flex-direction: row;flex-wrap: wrap;">                
-                  <div  v-for="(product, indexP) in restaurantType.Datas[indexMenu].Categories[categorySelected].Product" :key="indexP"              
-                        class="menu-col-3 card-categories">        
+                  <ion-card >                                   
+                    
+                    <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+                              <div  v-for="(category, indexC) in restaurantType.Datas[indexMenu].Categories" :key="indexC"              
+                                  :class="scope.isSmall || scope.noMatch? 'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories' : 'menu-col-3 card-categories'">  
+                                                
+                                <ion-card                         
+                                  color="primary"                          
+                                  :style="categorySelected===indexC? 'opacity: 1;text-align: center;margin-bottom: 0;': 'opacity: 0.75;text-align: center;margin-bottom: 0;'"
+                                  @click="categorySelected=indexC,showProd=true"
+                                > 
                                 
-                        <ion-card  color="primary" style="    text-align: center;" > 
-                          <ion-avatar style="margin-inline: auto; margin-top: 25px;" >
-                            <img :src="product.ImageUrl">
-                          </ion-avatar>
-                           <h1 class="elipsy-center" v-tooltip="product.Name" style="margin: 5px;">{{product.Name}}</h1> 
-                           {{getFormatPrice(product.SalePrice) }}                                                                                                             
-                        </ion-card>
-                         <ion-card style="display: flex;justify-content:space-around;margin-top: 0.5px;" color="light">
-                            <div @click="productForEdit=indexP,showEditProduct()"><span class="iconify" data-icon="fa-solid:edit" data-inline="false" ></span></div>
-                            <div @click="deleteProduct(indexP)"><span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span></div>
-                         </ion-card> 
-                      </div>
-                </div>        
+                                  <ion-avatar style="margin-inline: auto; margin-top: 25px;" >
+                                    <img :src="category.ImageUrl">
+                                  </ion-avatar>
+                                  <h1 class="elipsy-center" v-tooltip="category.Name" style="margin: 5px;">{{category.Name}}</h1>                                                                                                               
+                                </ion-card>
+                                <ion-card style="display: flex;justify-content: space-around;margin-top: 0.5px;" color="ligth">
+                                  <div @click="categoryForEdit=indexC,showAddProduct()"><span class="iconify" data-icon="fluent:add-square-multiple-16-filled" data-inline="false"></span></div>
+                                  <div @click="categoryForEdit=indexC,showCategoryEdit()"><span class="iconify" data-icon="fa-solid:edit" data-inline="false" ></span></div>
+                                    <div @click="deleteCategory(indexC)"><span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span></div>
+                                </ion-card>
+                              </div>
+                    </div>            
+
+                    <div  v-if="categorySelected !==''" :key="updateKey">
+
+                      <ion-label v-if="categorySelected !==''">{{restaurantType.Datas[indexMenu].Categories[categorySelected].Description}}</ion-label>
+                      <div v-if="categorySelected !==''" style="display: flex;flex-direction: row;flex-wrap: wrap;">                
+                        <div  v-for="(product, indexP) in restaurantType.Datas[indexMenu].Categories[categorySelected].Product" :key="indexP"              
+                              :class="scope.isSmall || scope.noMatch? 'menu-col-12 card-categories' : scope.isMedium? 'menu-col-6 card-categories' : 'menu-col-3 card-categories'">        
+                                      
+                              <ion-card  color="primary" style="    text-align: center;" > 
+                                <ion-avatar style="margin-inline: auto; margin-top: 25px;" >
+                                  <img :src="product.ImageUrl">
+                                </ion-avatar>
+                                <h1 class="elipsy-center" v-tooltip="product.Name" style="margin: 5px;">{{product.Name}}</h1> 
+                                {{getFormatPrice(product.SalePrice) }}                                                                                                             
+                              </ion-card>
+                              <ion-card style="display: flex;justify-content:space-around;margin-top: 0.5px;" color="light">
+                                  <div @click="productForEdit=indexP,showEditProduct()"><span class="iconify" data-icon="fa-solid:edit" data-inline="false" ></span></div>
+                                  <div @click="deleteProduct(indexP)"><span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span></div>
+                              </ion-card> 
+                            </div>
+                      </div>        
+
+                    </div>
+
+                  </ion-card>
 
               </div>
-
-                   
-
-          </ion-card>
+             </v-breakpoint>
 
           </ion-card>
 
@@ -332,7 +337,7 @@
 
 import { Api } from '../api/api.js';
 // import { Utils } from '../utils/utils.js';
-// import { VBreakpoint } from 'vue-breakpoint-component'
+import { VBreakpoint } from 'vue-breakpoint-component'
 
 export default {
 
@@ -358,7 +363,7 @@ export default {
   
   },
   components:{   
-    // VBreakpoint: VBreakpoint,  
+    VBreakpoint: VBreakpoint,  
   },
   data () {
     return {

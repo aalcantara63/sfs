@@ -100,6 +100,47 @@
                 </ion-item>
             </ion-card>
         </div>
+        <!-- NAB -->
+        <div>
+            <ion-card>
+                <ion-item><h5 style="text-align: left">NAB</h5></ion-item>
+                <ion-item>
+                    <ion-label>{{$t('backoffice.form.fields.active')}} NAB</ion-label>
+                    <ion-toggle color="primary"
+                    @ionChange="changePayMethod($event.target.checked, 'NAB')"
+                    :checked="payNAB"></ion-toggle>
+                </ion-item>
+                <ion-item v-if="payNAB">
+                    <!-- EndPointUrlNAB: '',
+                        EpiIdNAB: '',
+                        EpiKeyNAB: '', -->
+                    <ion-label position="floating">
+                        EndPointUrl:
+                    </ion-label>
+                    <ion-input type="text" name="EndPointUrlNAB"
+                        @input="EndPointUrlNAB = $event.target.value" 
+                        v-bind:value="EndPointUrlNAB">
+                    </ion-input>
+                    <ion-label position="floating">
+                        EpiId:
+                    </ion-label>
+                    <ion-input type="text" name="EpiIdNAB"
+                        @input="EpiIdNAB = $event.target.value" 
+                        v-bind:value="EpiIdNAB">
+                    </ion-input>
+                    <ion-label position="floating">
+                        EpiKey:
+                    </ion-label>
+                    <ion-input type="text" name="EpiKeyNAB"
+                        @input="EpiKeyNAB = $event.target.value" 
+                        v-bind:value="EpiKeyNAB">
+                    </ion-input>
+                    <ion-item>
+                        <ion-button color="primary" @click="activateNAB()">{{$t('backoffice.form.fields.active')}}</ion-button>
+                    </ion-item>
+                </ion-item>
+            </ion-card>
+        </div>
         <!-- Tsys -->
         <div>
             <ion-card>
@@ -160,7 +201,7 @@
             </ion-card>
         </div>
         <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="save()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
-        <!-- <ion-button color="primary" @click="clear()">Clear</ion-button> -->
+        <!-- <ion-button color="primary" @click="verifyActivePayMethod()">Verify</ion-button> -->
     </div>
 </div>
 </template>
@@ -197,6 +238,12 @@ export default {
             DeviceIdPayFabric: '',
             SetupIdIdPayFabric: '',
             EndPointUrlPayFabric: '',
+
+            //NAB
+            payNAB: false,
+            EndPointUrlNAB: '',
+            EpiIdNAB: '',
+            EpiKeyNAB: '',
 
             //Tsys
             payTsys: false,
@@ -288,6 +335,7 @@ export default {
                     this.payAuth = false
                     this.payShift4 = true
                     this.payPayFabric = false
+                    this.payNAB = false
                     this.payTsys = false
                     this.payMethod = method
                 }
@@ -299,6 +347,7 @@ export default {
                     this.payShift4 = false
                     this.payAuth = true
                     this.payPayFabric = false
+                    this.payNAB = false
                     this.payTsys = false
                     this.payMethod = method
                 }
@@ -310,17 +359,31 @@ export default {
                     this.payShift4 = false
                     this.payAuth = false
                     this.payPayFabric = true
+                    this.payNAB = false
                     this.payTsys = false
                     this.payMethod = method
                 }
                 else
                     this.payPayFabric = false
             }
+            if (method === 'NAB'){
+                if (value){
+                    this.payAuth = false
+                    this.payShift4 = false
+                    this.payPayFabric = false
+                    this.payNAB = true
+                    this.payTsys = false
+                    this.payMethod = method
+                }
+                else
+                    this.payShift4 = false
+            }
             if (method === 'TSYS'){
                 if (value){
                     this.payShift4 = false
                     this.payAuth = false
                     this.payPayFabric = false
+                    this.payNAB = false
                     this.payTsys = true
                     this.payMethod = method
                 }
@@ -331,7 +394,7 @@ export default {
         isValidForm(){
             if (!this.id)
                 return false
-            if (!this.payShift4 && !this.payAuth && !this.payPayFabric)
+            if (!this.payShift4 && !this.payAuth && !this.payPayFabric && !this.payTsys && !this.payNAB)
                 return false    
             return true
         },
@@ -342,6 +405,11 @@ export default {
                     return true
             }
             return false
+        },
+        verifyActivePayMethod(){
+            return this.payAuth || this.payShift4 || 
+                this.payPayFabric || this.payTsys || this.payNAB
+
         },
         submitShift4Token(){
             // if (!this.testActiveMethods('SHIFT4'))
@@ -481,6 +549,80 @@ export default {
                     }
             }
         },
+        async activateNAB(){
+            if (!this.testActiveMethods('NAB'))
+            {
+                this.paymentMethods.push('NAB');
+                const items = {
+                    "_id": this.id,
+                    "PaymentMethods": this.paymentMethods
+                }
+                this.$ionic.loadingController
+                .create({
+                    cssClass: 'my-custom-class',
+                    message: this.$t('backoffice.titles.loading'),
+                    backdropDismiss: true
+                })
+                .then(loading => {
+                    loading.present()
+                    setTimeout(() => {  // Some AJAX call occurs
+                        Api.putIn(this.modelName, items)
+                        .then(async () => {
+                            try{
+                                const payMethodTable = await Api.fetchAll('methodpay');
+                                // console.log(payMethodTable.data)
+                                let item = {
+                                    "EndPointUrlNAB": this.EndPointUrlNAB,
+                                    "EpiIdNAB":this.EpiIdNAB,
+                                    "EpiKeyNAB":this.EpiKeyNAB
+                                }
+                                if (payMethodTable.data.length > 0){
+                                    item._id = payMethodTable.data[0]._id
+                                    await Api.putIn('methodpay', item)
+                                }
+                                else{
+                                    await Api.postIn('methodpay', item)
+                                }
+                            }
+                            catch(e){
+                                console.log(e)
+                            }
+                            this.getPaymentData()
+                            this.showToastMessage('NAB ' + this.$t('backoffice.form.messages.activatePaymentMethod'), 'success')
+                            loading.dismiss()
+                        })
+                        .catch(e => {
+                            console.log(e)
+                            this.showToastMessage(this.$t('backoffice.form.messages.unexpectedError'), 'danger')
+                            loading.dismiss()
+                        })
+                    })
+                })
+            }
+            else{
+                try{
+                        const payMethodTable = await Api.fetchAll('methodpay');
+                        // console.log(payMethodTable.data)
+                        let item = {
+                            "EndPointUrlNAB": this.EndPointUrlNAB,
+                            "EpiIdNAB":this.EpiIdNAB,
+                            "EpiKeyNAB":this.EpiKeyNAB
+                        }
+                        if (payMethodTable.data.length > 0){
+                            item._id = payMethodTable.data[0]._id
+                            await Api.putIn('methodpay', item)
+                        }
+                        else{
+                            await Api.postIn('methodpay', item)
+                        }
+                         this.getPaymentData()
+                         this.showToastMessage('NAB ' + this.$t('backoffice.form.messages.activatePaymentMethod'), 'success')
+                    }
+                    catch(e){
+                        console.log(e)
+                    }
+            }
+        },
         async activateTsys(){
             if (!this.testActiveMethods('TSYS'))
             {
@@ -591,9 +733,11 @@ export default {
             if (this.payShift4 || this.payAuth || this.payPayFabric)
             {
                 //console.log(this.payMethod)
+                const isActive = this.verifyActivePayMethod()
                 const item = {
                     "_id": this.id,
-                    "PayMethod": this.payMethod
+                    "PayMethod": this.payMethod,
+                    "HasPaymentCardConfig": isActive
                 }
 
                 this.$ionic.loadingController

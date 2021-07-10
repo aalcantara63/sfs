@@ -257,6 +257,9 @@
             <ion-row>
                 <ion-col>
                     <div class="end"><span class="title">{{$t('backoffice.form.titles.tax')}}:</span> {{ getFormateNumber(calcTax)}} ({{order.Taxe}}%)</div>
+                    <div v-if="order.AllTaxes">
+                        <div class="end" v-for="tax in order.AllTaxes" v-bind:key="tax._id"><span class="title">{{tax.Name}}:</span>{{calcAmountTax(tax.Percentage)}} ({{tax.Percentage}}%)</div>
+                    </div>
                 </ion-col>
             </ion-row>
              <ion-row>
@@ -490,7 +493,10 @@ export default {
       }
   },
   methods:{
-
+      calcAmountTax(percentage)
+      {
+          return (this.order.SubTotal * percentage / 100).toFixed(2)
+      },
       async setRefund(pay, key, count){
 
           //Obtengo el restaurante
@@ -530,7 +536,7 @@ export default {
                 return true;
 
           }
-           else if (restaurant.data.PayMethod == 'SHIFT4')
+          else if (restaurant.data.PayMethod == 'SHIFT4')
             {
 
                 //Hay que obtener el token.
@@ -655,6 +661,48 @@ export default {
                     const datas = {
                                     "restaurantId": restaurantID,
                                     "payMethod": 'PayFabric',
+                                    "total": parseFloat(count).toFixed(2),                                  
+                                    "invoiceNumber": pay.paymentInfo.transId
+                                }
+    
+                    //console.log(datas)                   
+                    await payAuthorizeNet.refundOrder(datas, pay.paymentInfo.moto, false)
+                    
+                    const paymeD = await Api.getPaymentByInvoice(pay.paymentInfo.transId, restaurantID);
+                    if(paymeD){                        
+                        const payUpd = paymeD.data[0];
+                        payUpd.Refund = parseFloat(count).toFixed(2);
+                        await Api.putIn('Allpayments', payUpd);
+                    }
+                   
+
+                    this.order.Payment[key]["state"] = 2;
+                    this.order.Payment[key]["refundValue"] = parseFloat(count).toFixed(2);
+                    let item = {
+                        "_id": this.order._id,
+                        "Payment": this.order.Payment,
+                    };
+                    Api.putIn('order', item)
+                    .then(() => {
+                      
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+
+                    this.spinner = false
+                }
+                catch(e){
+                    console.log(e)
+                    this.showToastMessage(e, 'danger')
+                    this.spinner = false
+                }
+            }
+            else if (restaurant.data.PayMethod == 'NAB'){
+                try{
+                    const datas = {
+                                    "restaurantId": restaurantID,
+                                    "payMethod": 'NAB',
                                     "total": parseFloat(count).toFixed(2),                                  
                                     "invoiceNumber": pay.paymentInfo.transId
                                 }
@@ -830,7 +878,7 @@ export default {
                 
 
             }*/
-            else if( ['SHIFT4', 'Device', 'PayFabric'].includes(restaurant.data.PayMethod) ) {
+            else if( ['SHIFT4', 'Device', 'PayFabric', 'NAB'].includes(restaurant.data.PayMethod) ) {
                 
                 try
                 {
@@ -1020,7 +1068,6 @@ export default {
             this.fetchOccupations();
             this.fetchUsers();
             this.id = this.$route.params.orderId;
-            //console.log(this.id);
 
             this.getOrder();
       },
@@ -1115,6 +1162,7 @@ export default {
                                     //console.log("THE ORDER:");
                                     //console.log(this.order);
                                     //console.log(this.order);
+                                    console.log(this.order.AllTaxes);
                                     this.fillPossibleStates();
                                     loading.dismiss();
                                     return this.getCustomer(this.order.ClientId);

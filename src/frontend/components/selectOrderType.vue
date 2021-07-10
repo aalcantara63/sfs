@@ -539,53 +539,60 @@ methods: {
       "Password": this.password
     }
     
-    this.spinner = true;
-    await Api.customerLogIn(item).then(async response => { 
-        if(response.status === 200 ) {
-          store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));                    
-          this.clientId = response.data._id            
-          this.CustomerName = response.data.Name  
-          this.phone = response.data.Phone  
-          if(response.data.MarketingConsent){
-            this.marketingEmail = response.data.MarketingConsent.Email
-            this.marketingPhone = response.data.MarketingConsent.Phone
-          }
-          this.email = response.data.EmailAddress 
+   try {
+      this.spinner = true;
+      const response = await Api.customerLogIn(item)
+      if(response.status === 200 ) {
+        store.commit("setCustomer", JSON.parse(JSON.stringify(response.data)));                    
+        this.clientId = response.data._id            
+        this.CustomerName = response.data.Name 
+        this.email = response.data.EmailAddress 
+        this.phone = response.data.Phone  
+        if(response.data.MarketingConsent){
+          this.marketingEmail = response.data.MarketingConsent.Email
+          this.marketingPhone = response.data.MarketingConsent.Phone
+        } 
+
+        EventBus.$emit('updateCustomer', true);        
+        EventBus.$emit('startCustomerCounter', true); 
+
+        if(this.newRoute !== '')        {
           await Commons.getOrders();
           await Commons.getListReservation();
           await Commons.getTickets();
-
-          this.spinner = false; 
-
-          EventBus.$emit('updateCustomer', true); 
-          EventBus.$emit('startCustomerCounter', true); 
-          if(this.newRoute !=='')  EventBus.$emit('changeRoute', this.newRoute); 
-
-          console.log(this.newRoute) 
-          console.log('Aquiiii') 
+           EventBus.$emit('changeRoute', this.newRoute);
+        }
+        
+        this.spinner = false; 
+        
+        var nn = findNumbers(this.phone,{v2:true});
+        if(nn.length > 0){
+          var pais = this.countries.filter(p => p.country == nn[0].number.country)
           
-          var nn = findNumbers(this.phone,{v2:true});
-          if(nn.length > 0){
-            var pais = this.countries.filter(p => p.country == nn[0].number.country)
-            
-            if(pais.length > 0){
-              this.country = pais[0];
-              this.phone = nn[0].number.nationalNumber;
-            }            
-          }
-            this.$ionic.modalController.dismiss();               
-        }                      
-      })
-      .catch(e => {
-        console.log(e);
-        this.email = '';
-        this.password = '';
-        this.spinner = false;
-        return  this.$ionic.alertController
+          if(pais.length > 0){
+            this.country = pais[0];
+            this.phone = nn[0].number.nationalNumber;
+          }            
+        }
+        console.log('Aquiiii')
+        return  this.$ionic.modalController.dismiss();               
+      }    
+     
+   } catch (error) {
+      this.email = '';
+      this.password = '';
+      this.spinner = false;
+      return this.messageController(this.i18n.t('frontend.menu.errorLogIn'), )
+   }
+
+       },
+
+  messageController(mss){
+     return  this.$ionic.alertController
             .create({
                 cssClass: 'my-custom-class',
                 header: 'Error',
-                message: this.i18n.t('frontend.menu.errorLogIn'),
+                message: mss,
                 buttons: [                   
                 {
                     text: this.i18n.t('frontend.home.acept'),
@@ -594,9 +601,8 @@ methods: {
                 ],
             })
             .then(a => a.present())
-      })
 
-    },
+  }  ,
 
    validateEmail(email){
 

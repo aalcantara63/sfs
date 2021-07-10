@@ -56,6 +56,7 @@
                             <p><router-link to="/category">{{ getCategoryNameById(product.CategoryId) }}</router-link></p>
                             <p>{{$t('backoffice.form.fields.costPrice')}}: {{ getFormateNumber(product.CostPrice)}} </p>
                             <p>{{$t('backoffice.form.fields.salePrice')}}: {{ getFormateNumber(product.SalePrice)}} </p>
+                            <p v-if="product.SpecialPrice">Special Price: <span style="color: red">{{ getFormateNumber(product.SpecialPrice)}}</span></p>
                         </ion-label>
                         <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
                     </ion-item>
@@ -113,6 +114,7 @@
                         <p><router-link :to="'/category-form/'+product.CategoryId">{{ getCategoryNameById(product.CategoryId) }}</router-link></p>
                         <p>{{$t('backoffice.form.fields.costPrice')}}: {{ getFormateNumber(product.CostPrice)}}</p>
                         <p>{{$t('backoffice.form.fields.salePrice')}}: {{ getFormateNumber(product.SalePrice)}}</p>
+                        <p v-if="product.SpecialPrice">Special Price: <span style="color: red">{{ getFormateNumber(product.SpecialPrice)}}</span></p>
                     </ion-label>
                     <ion-item-group side="end">
                         <ion-button v-if="hasPermission('canEditProduct')" color="primary" @click="editProduct(product._id, product.Name, product.Description,

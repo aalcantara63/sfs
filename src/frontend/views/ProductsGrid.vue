@@ -310,6 +310,7 @@ export default {
 
           this.$store.commit('setCart', this.cart);
           this.openToast();
+          this.$parent.$parent.segmentValue = 'order';
       },
      
     removeFromCart: function(id){

@@ -1,6 +1,6 @@
 <template>
-  <keep-alive>
-     <div style="overflow: overlay;padding: 0 25px 0 0; display: inherit;">
+ 
+     <div style="overflow: overlay;padding: 0 25px 0 0; display: inherit;" :key="modalKey">
         <ion-header >      
           <ion-toolbar color="primary" >
              <ion-button expand="full" style="float: right;" @click="dismissModal()">
@@ -86,7 +86,7 @@
         </div>
 
         <div v-if="!split" >
-
+            
          <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" :key="keyShare">
             <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
@@ -96,14 +96,13 @@
               <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>            
             </ion-button> 
 
-            <ion-button @click="changePayment(),fabricPay = true,getUrlPayFabric()" :style="fabricPay? 'float: left;border: solid' : 'float: left'" 
+            <ion-button @click="changePayment(),fabricPay = true" :style="fabricPay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
-              v-if="payMethod==='PayFabric'"
+              v-if="payMethod ==='PayFabric'"
               v-tooltip="i18n.t('frontend.payment.tjtPayment')"
               :class="fabricPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
               <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>            
             </ion-button>  
-           
             <ion-button @click="changePayment(), devicePay = true" :style="devicePay? 'float: left;border: solid' : 'float: left'" 
               :disabled="spinner"
                v-tooltip="i18n.t('frontend.payment.devicePayment')"
@@ -270,6 +269,7 @@
           <ion-card v-if="fabricPay">   
 
               <PayFabricPayment 
+              v-if="fabricPay"
               :urlPayFabric="urlPayFabric"
               :parent="this"
               :total="Total"></PayFabricPayment>
@@ -398,7 +398,7 @@
         </div>
   </div>
   
-  </keep-alive>
+ 
 </template>
 
 <script>
@@ -441,8 +441,9 @@ import  RoutingValidator from 'bank-routing-number-validator';
 import { Commons } from '../commons';
  
 export default {
-   name: 'PaymentModal',  
+   name: 'PaymentModal',   
    created: async function(){   
+     this.order = store.state.order;
     
     this.i18n = i18n;  
     if(this.order.StaffName)
@@ -484,11 +485,36 @@ export default {
       if(this.payMethod === 'PayFabric'){
         this.changePayment();       
       }
+
+      this.deviceData = {
+             'amountInformation': {
+                    'TransactionAmount': parseFloat(this.Total).toFixed(2),
+                    'TipAmount': 0,
+                    'TaxAmount': ((parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
+                },
+                'accountInformation':{
+                    'FirstName': this.order.CustomerName
+                },
+                'traceInformation':{
+                    'TransactionNumber': ''
+                },
+                'commercialInformation': this.commercialInformation(),
+                'destinationZipCode': this.ccode
+        };
+      this.olapayData = {
+            'tip': this.order.Tip,
+            'total': this.order.Total,
+            'subtotal': this.order.SubTotal,
+            'tax': this.order.Taxe,  
+            'device': store.state.device 
+        };
+
+      
      
    },
+
    props: {  
-    parent: {type: Object, default: ()=> {}} ,
-    order: {type: Object, default: ()=> {}} ,
+    parent: {type: Object, default: ()=> {}} ,   
     canSplitPayment: {type: Boolean, default: false } ,
     isCatering: {type: Boolean, default: false } ,   
     Total:  {type: String, default:"" } ,
@@ -515,6 +541,7 @@ export default {
    data () {
     return {    
         i18n: {},  
+        order: {},  
         keyGoogle: 0,                 
         spinner: false ,
         dateTodaymin: new Date().toISOString().substr(0, 7),
@@ -561,33 +588,13 @@ export default {
         ccode: '',
         urlPayFabric: '',
         
-        deviceData: {
-             'amountInformation': {
-                    'TransactionAmount': parseFloat(this.Total).toFixed(2),
-                    'TipAmount': 0,
-                    'TaxAmount': ((parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
-                },
-                'accountInformation':{
-                    'FirstName': this.order.CustomerName
-                },
-                'traceInformation':{
-                    'TransactionNumber': ''
-                },
-                'commercialInformation': this.commercialInformation(),
-                'destinationZipCode': this.ccode
-                
-        },
-          olapayData: {
-            'tip': this.order.Tip,
-            'total': this.order.Total,
-            'subtotal': this.order.SubTotal,
-            'tax': this.order.Taxe,  
-            'device': store.state.device 
-        },
+        deviceData: {},
+          olapayData: {},
         deviceTransactionType: '01',
         shareText1: ' ',
         shareText2: '',
         allTypeOrder: {},
+        modalKey: 0
     }
   }, 
 
@@ -820,7 +827,7 @@ export default {
     },
 
     dismissModal(){
-         return this.$ionic.modalController.dismiss()
+         return this.$ionic.modalController.dismiss();
     }, 
     
     responseApplePay(response){   
@@ -946,6 +953,7 @@ export default {
                 await this.parent.recivePayment(response);
                 this.dismissModal();						
                 loading.dismiss();
+                return;
                 
               } catch (error) {
                 loading.dismiss();
@@ -1020,6 +1028,7 @@ export default {
           cardSecurityCode: this.cardCode,
           cardExpirationDateF1: moment(this.expirationCard).format('MMYY'),
           cardExpirationDateF2: moment(this.expirationCard).format('YYYY-MM'),
+          cardExpirationDateF3: moment(this.expirationCard).format('YYMM'),
           products: this.order.Products,
         }
       }  
@@ -1223,15 +1232,12 @@ export default {
 
     async makeSplitPayment(value, flag){    
       if(!flag) flag = false; 
-
-      console.log('in makeSplitPayment');
-      console.log(value)
-     
+         
      this.order.Payment[this.indexForPay].state = 1;
      this.order.Payment[this.indexForPay].paymentInfo = value;
      this.order.Payment[this.indexForPay].PaymentMethod =value.method + ' '+value.accountType+ ' '+ value.accountNumber;
 
-    console.log('is payment complete: '+ this.isPaymentComplete())
+   
       if(this.isPaymentComplete()){        
         this.order.State = 1;
         const response = await Api.putIn('Order', this.order)      

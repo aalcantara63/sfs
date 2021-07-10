@@ -132,6 +132,7 @@ export default {
           }
           const item = {
               "Email": this.forgotEmail,
+              // "subject": "Change Password",
           }
           Api.loginForgot(item)
           .then(() => {
@@ -224,19 +225,19 @@ export default {
 
               this.spinner = false
               this.loginButtonPush = false
-              if (this.userLogin.IsSupport){
-                  this.$router.push({
-                      name: 'Support'
-                  }); 
-              }
-              else{
+              // if (this.userLogin.IsSupport){
+              //     this.$router.push({
+              //         name: 'Support'
+              //     }); 
+              // }
+              // else{
                   this.$router.push({
                       name: 'ControlPanel',
                       params: {
                           'firstLogin': true,
                       }
                   });
-              }             
+              // }             
           })
           .catch(e => {
             console.log(e)

@@ -3,14 +3,17 @@
 
            <ion-header>
           <ion-toolbar>
+              
             <ion-buttons slot="start"  @click="allOrder()" v-if="clientId !==''">
               <ion-back-button default-href="home"></ion-back-button>
             </ion-buttons>
-            <ion-label style="padding: 20px 100px;">
+           
+            <ion-label style="padding: 20px 100px;display: flex;justify-content: center;align-items: center;" :key="keyOrder+'L'">
+                <div v-if="indexPosition > 0" @click="ordenBack()"><span class="iconify" data-icon="eva:arrow-back-fill" data-inline="false" ></span></div>
                 <h1  v-if="order.OrderForCatering"> {{$t('frontend.order.orderDetail')}} |  {{$t('frontend.menu.catering')}}</h1>            
-                <h1 v-else> {{$t('frontend.order.orderDetail')}} </h1>            
+                <h1 v-else> {{$t('frontend.order.orderDetail')}} </h1>      
+                <div v-if="indexPosition < allOrders.length -1" @click="ordenFor()"> <span class="iconify" data-icon="eva:arrow-forward-fill" data-inline="false" ></span></div>      
             </ion-label>
-                          
           </ion-toolbar>
         </ion-header>
 
@@ -39,7 +42,7 @@
                 {{$t('frontend.home.clientRequired')}}</p>
         </ion-label>
 
-        <v-breakpoint v-if="!spinner1 && clientId !==''">
+        <v-breakpoint v-if="!spinner1 && clientId !==''" :key="keyOrder">
             <div slot-scope="scope" style="argin-top: 10px;">
 
                 <span > 
@@ -361,10 +364,10 @@
                                     <div :class="scope.isSmall ||  scope.noMatch? 'menu-col-5 padding-menu' : 'menu-col-3'"  style="text-align:right">{{getFormatPrice(order.SubTotal)}}</div>                    
                                 </ion-item>                               
 
-                                <ion-item style="font-size: 16px;font-weight: bold;"> 
+                                <ion-item style="font-size: 16px;font-weight: bold;" v-for="(tax, index) in order.AllTaxes" :key="index"> 
                                     <ion-label :class="scope.isSmall ||  scope.noMatch? '' : 'menu-col-4'"> </ion-label>
-                                    <div :class="scope.isSmall || scope.noMatch? 'menu-col-6' : 'menu-col-3'" ><p class="menu-bold-title" style="text-align:right"> {{$t('frontend.order.taxe')}} {{order.Taxe }}%</p></div>
-                                    <p :class="scope.isSmall || scope.noMatch? 'menu-col-5' : 'menu-col-3'"  style="text-align:right">{{ getFormatPrice(order.Taxe * order.SubTotal / 100)}} </p>                    
+                                    <div :class="scope.isSmall || scope.noMatch? 'menu-col-6' : 'menu-col-3'" ><p class="menu-bold-title" style="text-align:right">{{tax.Name}} ({{tax.Percentage}} %)</p></div>
+                                    <p :class="scope.isSmall || scope.noMatch? 'menu-col-5' : 'menu-col-3'"  style="text-align:right">{{ getFormatPrice(tax.Percentage * order.SubTotal / 100)}} </p>                    
                                 </ion-item>
 
                                 <ion-item v-if="order.OrderType =='Delivery' && order.Shipping" style="font-size: 16px;font-weight: bold;"> 
@@ -543,7 +546,10 @@ export default {
     },     
     created: function(){
 
-        this.taxes = this.$store.state.tax.taxesName || 0;
+        this.allOrders = this.$store.state.allOrders;
+
+       
+         this.allTaxes = this.$store.state.allTaxes || [];
         this.shippingName = this.$store.state.shipping.shippingName || '';
         this.shipping = this.$store.state.shipping.shipping || 0;
          this.restaurantSelectedId = this.$store.state.restaurantActive.restaurantId || ''; 
@@ -567,6 +573,10 @@ export default {
         this.restaurantActive = this.$store.state.restaurantActive
 
         this.fromMyAccount = this.$route.params.fromMyAccount;
+      
+       this.indexPosition = this.$route.params.indexPosition
+
+        console.log(this.$route.params.indexPosition)
 
 
         if(this.order.OrderType === 'PickUp' || this.order.OrderType === 'Curbside'){
@@ -635,12 +645,14 @@ export default {
     data() {
         return {
             order: [],
-            taxes : 0,
+            keyOrder: 0,           
+            allTaxes: [],
             shippingName : '',
             shipping: 0,
             restaurantSelectedId: '', 
             products: [],
             CustomerName: '',
+            indexPosition: -1,
             clientId: '',
             showStates: '',
             showCooker: false,
@@ -796,8 +808,8 @@ export default {
                 Acept: this.$t('frontend.home.acept'),
                 Cancel: this.$t('frontend.home.cancel'), 
                 Total: total,
-                Tax:  this.taxes.toString(),
-                TaxName: this.TaxName,     
+                Tax:  this.getSumatoryTax().toString(),
+                TaxName: this.getSumatoryTaxName(),     
                 restaurantId: this.restaurantSelectedId,
                 payMethod: this.restaurantActive.payMethod  ,                
                 errorPaymentHeader: this.$t('frontend.order.transictionTitle'),
@@ -1133,6 +1145,36 @@ export default {
     hasSomeNote(car){
       return Commons.hasSomeNote(car);
     },
+    ordenFor(){
+        console.log('for ')
+         if(this.indexPosition < this.allOrders.length -1){
+             this.indexPosition +=1;
+             this.order = this.allOrders[this.indexPosition];
+             this.keyOrder ++;
+         }
+    },
+    ordenBack(){
+        console.log('back ')
+          if(this.indexPosition > 0){
+             this.indexPosition -=1;
+             this.order = this.allOrders[this.indexPosition];
+             this.keyOrder ++;
+         }
+       
+    },
+
+   getSumatoryTax(){
+      let total = 0;
+      this.allTaxes.forEach(t => { total += t.Percentage });
+      return total;
+
+    },
+
+  getSumatoryTaxName(){
+      let name = '| ';
+      this.allTaxes.forEach(t => { name += t.Name + ' | '});
+      return name;
+    }
 
   }, 
 

@@ -10,6 +10,8 @@ import VuePaginate from 'vue-paginate'
 import VTooltip from 'v-tooltip'
 import Cors from 'cors'
 import router from './backoffice/router/index.js'
+// import VueSocketIO from 'vue-socket.io'
+
 
 import * as VueGoogleMaps from 'vue2-google-maps'
 
@@ -148,6 +150,7 @@ const store = new Vuex.Store({
     variants: [],
     categories: [],
     tax:{},
+    allTaxes: [],
     shipping: {},
     cart: [],
     order: {}, 
@@ -163,6 +166,7 @@ const store = new Vuex.Store({
     subscriptors: [],
   },
   mutations: { 
+   
     setAuthentication(state, status) {
       state.authenticated = status;
     },
@@ -252,9 +256,23 @@ const store = new Vuex.Store({
     setSubscriptors(state, subscriptors) {
       state.subscriptors = subscriptors;
     },
+    setAllTaxes(state, allTaxes) {
+      state.allTaxes = allTaxes;
+    },
   
   }
 });
+
+// Vue.use(new VueSocketIO({
+//   debug: true,
+//   connection: 'http://192.168.50.254:8765',
+//   vuex: {
+//       store,
+//       actionPrefix: 'SOCKET_',
+//       mutationPrefix: 'SOCKET_'
+//   },
+//   // options: { path: "/my-app/" } //Optional options
+// }))
 
 
 export default store;

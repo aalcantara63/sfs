@@ -35,13 +35,13 @@
           v-bind:value="percent">
           </ion-input>
         </ion-item>
-        <ion-item>
+        <!-- <ion-item>
           <ion-label position="floating">{{$t('backoffice.form.fields.priority')}}</ion-label>
           <ion-input type="number" name="priority"
           @input="priority = $event.target.value" @change="validatePriority($event.target.value)"
           v-bind:value="priority">
           </ion-input>
-        </ion-item>
+        </ion-item> -->
         <ion-item>
            <ion-label>{{$t('backoffice.form.fields.available')}}</ion-label>
            <ion-checkbox slot="end" name="available"
@@ -71,7 +71,7 @@ export default {
       id: null,
       name: '',
       percent: 0,
-      priority: 0,
+      // priority: 0,
       available: false,
       epos: null,
 
@@ -105,7 +105,7 @@ export default {
                       .then(response => {
                         this.name = response.data.Name;
                         this.percent = response.data.Percentage;
-                        this.priority = response.data.Priority;
+                        // this.priority = response.data.Priority;
                         this.available = response.data.Available;
                         this.epos = response.data.EposId;
                         loading.dismiss();
@@ -143,11 +143,11 @@ export default {
             })
             .then(a => a.present());
         },
-        validatePriority(value){
-            if (parseInt(value) != 0 && parseInt(value) != 1){
-                this.priority = 0
-            }
-        },
+        // validatePriority(value){
+        //     if (parseInt(value) != 0 && parseInt(value) != 1){
+        //         this.priority = 0
+        //     }
+        // },
         isValidForm(){
             // let errors = [];
             if (this.name == "")
@@ -213,7 +213,7 @@ export default {
             let item = {
               "Name": this.name,
               "Percentage": this.percent,
-              "Priority": this.priority,
+              // "Priority": this.priority,
               "Available": this.available,
             }
             //If I am editing

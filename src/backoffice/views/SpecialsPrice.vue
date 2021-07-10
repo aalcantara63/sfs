@@ -1,35 +1,38 @@
 <template>
-  <div id="order" >
+  <div id="order" class="screen">
 
     
     <ion-header>
           <ion-toolbar>
+
+             <ion-toolbar>
+                <ion-buttons slot="start">
+                  <ion-back-button default-href="/controlPanel" @click="$router.push({ name: 'ControlPanel'})"></ion-back-button>
+                </ion-buttons>
+
+                <ion-label style="padding: 20px 100px;">
+                  <h1>{{$t('frontend.specialsPrice.titles')}}</h1>   
+                           
+                </ion-label>
+
+                  <ion-label v-if="hasPermission('canCreateSpecialPrices')" slot="end">
+                      <ion-chip style="font-size: 30px" @click="viewOrder()">
+                          <ion-label><ion-icon name="add"></ion-icon></ion-label>
+                      </ion-chip>
+                  </ion-label>
+          </ion-toolbar>
            
             
-
-              <div style="display: flex;justify-content: center;align-items: center"> 
-                  <ion-button @click="menuactive='list'" :style="menuactive==='list'? 'opacity: 1;;border: outset;' : 'opacity: 0.65;border: none;' ">
-                    <span class="iconify" data-icon="foundation:list-bullet" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
-                  </ion-button>  
-                  <ion-button    @click="menuactive='grid'" :style="menuactive==='grid'? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;' ">
-                    <span class="iconify" data-icon="clarity:grid-chart-solid" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
-                  </ion-button> 
-                  <div v-tooltip="$t('frontend.createNew.active')" :style="showActive? 'opacity: 1;border: outset;display: flex' : 'opacity: 0.65;border: outset;display: flex' "
-                    @click="showActive = !showActive , getActives()">
-                    <span class="iconify" data-icon="flat-color-icons:ok" data-inline="false"></span>
-                  </div> 
-                  <div style="border: outset; display: flex" @click="reverseOrders()">
-                    <span class="iconify" data-icon="fluent:chevron-up-down-20-filled" data-inline="false" style="width: 20px;height: 20px;margin: 5px;"></span>
-                  </div>                    
-              </div> 
-
                       
           </ion-toolbar>
 
           <ion-searchbar  
-              @input="handleInput($event.target.value)" @ionClear="filterOrders = orders"
-                :placeholder="$t('frontend.home.search')">           
+              @ionClear="handleInput('')"
+                @input="$event.target.value?handleInput($event.target.value):handleInput('')"
+              :placeholder="$t('frontend.home.search')">           
           </ion-searchbar>
+
+          
           
     </ion-header>
 
@@ -50,11 +53,7 @@
       ></ion-loading>
   
     <div>  
-            <div>
-              <ion-chip style="font-size: 30px; float: right" outline color="primary" @click="viewOrder()" >
-                <ion-label><ion-icon name="add"></ion-icon></ion-label>
-            </ion-chip>
-            </div>
+            
 
         <div  v-if="menuactive==='list'">
           <paginate
@@ -63,29 +62,36 @@
             :list="filterOrders"
             :per="8"                     
           >
+          <h3>{{$t('frontend.specialsPrice.activeRule')}}</h3>
             <ion-item-sliding  v-for="order in paginated('languages')" v-bind:key="order._id">
-              <ion-item 
+              <ion-item :color="order.Active? 'success' : 'warning'"
              
               @click="viewOrder(order)">
-               <ion-label class="menu-col-5 elipsis-menu">                   
-                    <h6>{{ order.Type }}</h6>                   
+               <ion-label class="menu-col-4 elipsis-menu">                   
+                    <h6>{{ order.Name }}</h6>                   
                 </ion-label> 
-                <ion-label class="menu-col-5 ">                   
-                   {{ getFormatedDate(order.Date) }}                                
+                <ion-label class="menu-col-4 ">                   
+                    <h6>{{ order.For }} {{order.Amount}} 
+                      <span v-if="order.Type==='Percent'">%</span>
+                      <span v-if="order.Type==='Amount'">$</span>
+                      </h6>                              
                 </ion-label>
-                <ion-label class="menu-col-2 elipsis-menu"> 
-                  <span>{{$t('frontend.menu.menu')}} ({{order.Datas.length}})</span>                  
-                                          
+                <ion-label class="menu-col-2 elipsis-menu">                               
+                          {{order.Repeat}}                
+                </ion-label>
+                 <ion-label class="menu-col-2 elipsis-menu">    
+                   <span v-if="order.Active">{{$t('frontend.createNew.active')}}</span>                           
+                   <span v-else>{{$t('frontend.createNew.inactive')}}</span>                         
                 </ion-label>
 
                
                             
               </ion-item>
               <ion-item-options side="end">                   
-                  <ion-item-option color="primary" @click="viewOrder(order)">
+                  <ion-item-option v-if="hasPermission('canEditSpecialPrices')" color="primary" @click="viewOrder(order)">
                     <ion-icon slot="icon-only" name="list"></ion-icon>
                   </ion-item-option> 
-                   <ion-item-option v-if="order.CanDelete" color="primary" @click="deleteOrder(order._id)">
+                   <ion-item-option v-if="hasPermission('canDeleteSpecialPrices')" color="danger" @click="deleteOrder(order._id)">
                     <span class="iconify" data-icon="fluent:delete-48-regular" data-inline="false"></span>
                   </ion-item-option>                  
                 </ion-item-options >
@@ -151,21 +157,21 @@
 
 import { Api } from '../api/api.js';
 import { Utils } from '../utils/utils.js';
-import { VBreakpoint } from 'vue-breakpoint-component'
+// import { VBreakpoint } from 'vue-breakpoint-component'
 
 export default {
 
-  name: 'restaurantType',
+  name: 'SpecialsPrice',
   created: function(){  
     this.fetchOrders();
   
   },
   components:{   
-    VBreakpoint: VBreakpoint,  
+    // VBreakpoint: VBreakpoint,  
   },
   data () {
     return {
-      modelName: 'restauranttype',
+      modelName: 'SpecialsPrice',
       orders: [],
 
       filterOrders: [],
@@ -192,31 +198,7 @@ export default {
       await this.fetchOrders();      
       event.target.complete();
     },
-  
-    
-    ifErrorOccured(action){
-      return this.$ionic.alertController.create({
-          title: this.$t('backoffice.list.messages.connectionError'),
-          message: this.$t('backoffice.list.messages.connectionErrorMessage'),
-          buttons: [
-            {
-              text: this.$t('backoffice.list.messages.buttons.goToAdministration'),
-              handler: () => {
-                  this.$router.push({
-                      name: 'ControlPanel',
-                  });
-              }
-            },
-            {
-              text: this.$t('backoffice.list.messages.buttons.retry'),
-              handler: () => {
-                  action();
-              }
-            }
-          ]
-        })
-        .then(a => a.present());
-    },
+
     showToastMessage(message, tColor){
       return this.$ionic.toastController.create({
         color: tColor,
@@ -226,33 +208,34 @@ export default {
         showCloseButton: false
       }).then(a => a.present())
     }, 
-    
+
     handleInput(value){
-     
+
+       
       const query = value.toLowerCase();
       requestAnimationFrame(() => {   
-        const orderFiltered = this.orders.filter(p =>
-                                        p.Date && p.Type);
-        let cat2 = orderFiltered.filter(p => p.Type.toLowerCase().indexOf(query) > -1 )
+        let cat2 = this.orders.filter(item => item.Name.toLowerCase().indexOf(query) > -1 ||
+                                          item.Type.toLowerCase().indexOf(query) > -1 )
         if(cat2.length> 0)
           this.filterOrders = cat2
         else
-          this.filterOrders = this.orders  
+          this.fil = this.orders 
       });
     },
+       
 
-    viewOrder: function(restaurantType){
-        console.log('Open Restaurant type con ID '+ restaurantType);
-        return this.$router.push({ name: 'RestaurantType', params: {restaurantType: restaurantType, parent: this} })
+    viewOrder: function(specialsPrice){
+        console.log('Open specialsprice type con ID '+ specialsPrice);
+        return this.$router.push({ name: 'SpecialsPriceDetail', params: {specialsPrice: specialsPrice} })
     },
 
     
     async deleteOrder(id){
 
-      console.log('delete restaurantype: ' + id)
+      console.log('delete specialsprice: ' + id)
       try {
         this.spinner = true;
-        const response = await Api.deleteById('restauranttype', id);
+        const response = await Api.deleteById('specialsprice', id);
         if(response.status === 200)
            await this.fetchOrders(); 
          this.spinner = false;
@@ -271,7 +254,7 @@ export default {
     fetchOrders: async function(){
       this.spinner = true;
       try {
-        const response = await Api.fetchAll('restauranttype')
+        const response = await Api.fetchAll('specialsprice')
         this.orders = response.data;
         this.filterOrders = this.orders; 
          this.spinner = false;
@@ -289,23 +272,7 @@ export default {
          return result;
     },
 
-    async toastError(message) {
-      return this.$ionic.toastController      
-        .create({
-          message: message,         
-          position: 'middle',
-          color:'danger',
-           buttons: [
-            {
-              text: 'Done',
-              role: 'cancel',
-              handler: () => {}
-            }
-          ]
-        })
-      .then(a => a.present())
-    },
-
+   
     reverseOrders(){
       this.filterOrders.reverse();
     },
@@ -316,12 +283,42 @@ export default {
  
    getActives(){
      if(this.showActive)
-      this.filterOrders = this.filterOrders.filter(p => p.State === true);
+      this.filterOrders = this.filterOrders.filter(p => p.Active === true);
       else
        this.filterOrders = this.orders 
    },
 
-     
+  hasPermission(permission){
+            
+            let res = false;
+            if (this.$store.state.authenticated)
+            {
+                let roles = this.$store.state.roles;
+                for (let index = 0; index < roles.length; index++) {
+                    switch(permission){                        
+                        case 'canViewSpecialPrices':
+                            res = roles[index].canViewSpecialPrices;
+                            break;
+                        case 'canEditSpecialPrices':
+                            res = roles[index].canEditSpecialPrices;
+                            break;
+                        case 'canCreateSpecialPrices':
+                            res = roles[index].canCreateSpecialPrices;
+                            break;
+                        case 'canDeleteSpecialPrices':
+                            res = roles[index].canDeleteSpecialPrices;
+                            break;
+                        default:    
+                            break;
+                    }
+                    if (res)
+                    { 
+                        return res;
+                    }              
+                }
+            }
+            return res;
+        }, 
     
   },
 

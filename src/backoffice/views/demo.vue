@@ -211,6 +211,10 @@ Pay Now</ion-button>
   <ion-button @click="preview()">Preview</ion-button>
 </div>
 
+<!-- <div>
+    <ion-button @click="sendMess()"></ion-button>
+</div> -->
+
   </div>
 
 </template>
@@ -333,7 +337,31 @@ export default {
       this.loadTemplate()
 
   },
+  // sockets:{
+  //     connect: function () {
+  //             console.log('socket connected')
+  //     },
+  //     customEmit: function (data) {
+  //         console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)')
+  //         console.log(data)
+  //     }
+  // },
   methods: {
+    // sendMess(){
+    //   const data= {
+    //       "action":{
+    //           "processor":"EVO",
+    //           "receipt":true
+    //       },
+    //       "payment":{
+    //           "type":"Sale",
+    //           "amount":"1.00",
+    //           "tip_amount":"0.00"
+    //       }
+    //   }
+
+    //   this.$socket.emit('emit_method', data)
+    // },
     preview(){
         this.$router.push({
             name: 'EMPreview'

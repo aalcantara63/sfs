@@ -1,46 +1,84 @@
 <template>
-<ion-card>
-  
-      
-  <ion-toolbar>
-      
-    <ion-segment id="reservationSegment" @ionChange="segmentChanged($event.target.value)" :value="segmentValue" @input="value=segmentValue">
-      <ion-segment-button value="ads1">
-        <span class="iconify" data-icon="ant-design:plus-outlined" data-inline="false"></span>
-         <!-- ADD -->
-      </ion-segment-button>
-      <ion-segment-button value="ads2">
-      <span class="iconify" data-icon="tabler:search" data-inline="false"></span>
-      <!-- SEARCH -->
-      </ion-segment-button>
-      <ion-segment-button value="ads3">
-      <span class="iconify" data-icon="ant-design:unordered-list-outlined" data-inline="false"></span>
-      <!-- LIST -->
-    </ion-segment-button>
-    </ion-segment>
+<div>
    
-  </ion-toolbar>
+      <ion-toolbar>
+      <ion-segment   @ionChange="segmentValue=$event.target.value" :value="segmentValue" >
+        <ion-segment-button value="-1">
+          <span class="iconify" data-icon="bx:bx-slider" data-inline="false"></span>
+        </ion-segment-button>   
+        <ion-segment-button v-for="(ads, index) in adsList" :key="index" :value="index">
+          {{ads.Name}}
+        </ion-segment-button>    
+      </ion-segment>   
+    </ion-toolbar>
 
-  <div v-if="ads1" >
+    <div v-if="segmentValue==-1">      
+          <ion-slides  pager="true" :options="slideOpts">               
+
+                <ion-slide v-for="(ads, index) in adsList" :key="index"  >
+                    <ion-card   style="padding:10px">
+                        <ion-card-header>                           
+                            <ion-card-title>{{ads.Name}}</ion-card-title>
+                        </ion-card-header>
+                        <ion-card-content>
+                             <iframe v-if="['url','map'].includes(ads.Type)" :src="ads.Value" autoplay></iframe>
+        
+                              <video v-if="ads.Type=='video'" :src="ads.Value" controls autoplay></video>
+
+                              <img v-if="ads.Type=='image'" :src="ads.Value"/>
+
+                              <div v-if="ads.Type=='menu'">
+                                 <menu-ads
+                                    :menuId="ads.Value"
+                                  ></menu-ads>
+                              </div>
+                        </ion-card-content>
+                    </ion-card> 
+               
+                </ion-slide>
+
+            </ion-slides> 
+    </div>
+
+    <div v-for="(ads, index) in adsList" :key="index">
+      <div v-if="index==segmentValue">
+      
+        <iframe v-if="['url','map'].includes(ads.Type)" :src="ads.Value" autoplay></iframe>
+        
+        <video v-if="ads.Type=='video'" :src="ads.Value" controls autoplay></video>
+
+        <img v-if="ads.Type=='image'" :src="ads.Value"/>
+
+        <div v-if="ads.Type=='menu'">         
+          <menu-ads
+            :menuId="ads.Value"
+          ></menu-ads>
+        </div>
+
+
+
+      </div>
+    </div>
+   
+
+  <!-- <div v-if="ads1" >
     ADS 1   
-    <!-- <iframe width="853" height="480" src="https://www.youtube.com/embed/lZgHntLXIL0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  -->
      <iframe  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" frameborder="0" 
       src="https://www.youtube.com/embed/lZgHntLXIL0" style="width: 100%; height: 90vh;"></iframe>
 
-    <!-- {{adsList}} -->
   </div>
   
   <div v-if="ads2">
     ADS 2
 
-    vuejs-2-the-complete-guide
+    vuejs-2-the-complete-guide -->
     <!-- <video src="https://youtu.be/vxobr4A8pSA" width=320  height=240 controls >
       Lo sentimos. Este vídeo no puede ser reproducido en tu navegador.<br>
       La versión descargable está disponible en <a href="URL">Enlace</a>. 
     </video> -->
 
         
-      <iframe :src="adsList[1].url" style="width: 100%; height: 90vh;"></iframe>
+      <!-- <iframe :src="adsList[1].url" style="width: 100%; height: 90vh;"></iframe>
         
   </div>
 
@@ -49,16 +87,18 @@
       <iframe src="https://youtu.be/vxobr4A8pSA" style="width: 100%; height: 90vh;"></iframe>
 
   </div>
+ -->
 
-
-</ion-card>
+</div>
 </template>
 <script>
 
+import MenuAds from './MenuAds.vue'
 
 export default {
     name: 'Reservation',
-     components: {   
+     components: { 
+       MenuAds,  
   },
      data () {
       return {
@@ -68,6 +108,7 @@ export default {
          spinner: false,   
          segmentValue: 'ads1',    
          adsList: [],
+         slideOpts:{ initialSlide: 0, slidesPerView: 1, autoplay:"5000", loop:"true", speed:"300"},
       }
      },     
      created: function(){

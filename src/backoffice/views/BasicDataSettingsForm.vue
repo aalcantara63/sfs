@@ -896,7 +896,7 @@ export default {
             item["Sociasls"] = listS
             //If I am editing
             if (this.id){
-              item['_id'] = this.id;
+              item['_id'] = this.id
               this.spinner = true
               Api.putIn(this.modelName, item)
                   .then(response => {

@@ -263,6 +263,9 @@
             <ion-row>
                 <ion-col>
                     <div class="end"><span class="title">{{$t('backoffice.form.titles.tax')}}:</span> {{ getFormateNumber(calcTax)}} ({{taxe}}%)</div>
+                    <div v-if="order.AllTaxes">
+                        <div class="end" v-for="tax in order.AllTaxes" v-bind:key="tax._id"><span class="title">{{tax.Name}}:</span>{{calcAmountTax(tax.Percentage)}} ({{tax.Percentage}}%)</div>
+                    </div>
                 </ion-col>
             </ion-row>
             <ion-row>
@@ -452,6 +455,10 @@ export default {
         }
   },
   methods: {
+    calcAmountTax(percentage)
+    {
+        return (this.order.SubTotal * percentage / 100).toFixed(2)
+    },
     init(){
         this.id = this.$route.params.orderId;
         this.getCurrency();

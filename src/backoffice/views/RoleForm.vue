@@ -117,7 +117,24 @@
             </ion-item>
         </ion-list>
 
-        reservationPermissions
+        <ion-item>
+            <p>{{$t('backoffice.form.permissionsGroup.permissionSpecialPrice')}}</p>
+            <ion-chip slot="end" :color="specialprice_color" @click="selectDeselectSpecialPrice()">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <ion-label>{{specialprice_title}}</ion-label>
+            </ion-chip>
+        </ion-item>
+        <ion-list>
+            <ion-item v-for="permission in specialpricePermissions" v-bind:key="permission.val">
+            <ion-label>{{permission.val}}</ion-label>
+            <ion-checkbox
+                slot="end"
+                @ionChange="permission.isChecked=$event.target.checked"
+                :checked="permission.isChecked">
+            </ion-checkbox>
+            </ion-item>
+        </ion-list>
+
         <ion-item>
             <p>{{$t('backoffice.form.permissionsGroup.permissionReservation')}}</p>
             <ion-chip slot="end" :color="reservation_color" @click="selectDeselectReservation()">
@@ -460,6 +477,25 @@
             </ion-item>
         </ion-list>
 
+        <ion-item>
+            <p>{{$t('backoffice.form.permissionsGroup.permissionClockin')}}</p>
+            <ion-chip slot="end" :color="clockin_color" @click="selectDeselectClockin()">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                <ion-label>{{clockin_title}}</ion-label>
+            </ion-chip>
+        </ion-item>
+        <ion-list>
+            <ion-item v-for="permission in clockinPermissions" v-bind:key="permission.val">
+            <ion-label>{{permission.val}}</ion-label>
+            <ion-checkbox
+                slot="end"
+                @ionChange="permission.isChecked=$event.target.checked"
+                :checked="permission.isChecked"
+                >
+            </ion-checkbox>
+            </ion-item>
+        </ion-list>
+
       <br/>
       <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveRole()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
     </div>
@@ -500,6 +536,12 @@ export default {
         { id: 'canCreateProduct', val: this.$t('backoffice.form.permissionsGroup.canCreateProduct'), isChecked: false },
         { id: 'canEditProduct', val: this.$t('backoffice.form.permissionsGroup.canEditProduct'), isChecked: false },
         { id: 'canDeleteProduct', val: this.$t('backoffice.form.permissionsGroup.canDeleteProduct'), isChecked: false },
+      ],
+      specialpricePermissions: [
+        { id: 'canViewSpecialPrices', val: this.$t('backoffice.form.permissionsGroup.canViewSpecialPrices'), isChecked: false },
+        { id: 'canCreateSpecialPrices', val: this.$t('backoffice.form.permissionsGroup.canCreateSpecialPrices'), isChecked: false },
+        { id: 'canEditSpecialPrices', val: this.$t('backoffice.form.permissionsGroup.canEditSpecialPrices'), isChecked: false },
+        { id: 'canDeleteSpecialPrices', val: this.$t('backoffice.form.permissionsGroup.canDeleteSpecialPrices'), isChecked: false },
       ],
       customerPermissions: [
         { id: 'canViewCustomer', val: this.$t('backoffice.form.permissionsGroup.canViewCustomer'), isChecked: false },
@@ -585,6 +627,9 @@ export default {
       paymentPermissions: [
         { id: 'canViewPayments', val: this.$t('backoffice.form.permissionsGroup.canViewPayment'), isChecked: false },  
       ],
+      clockinPermissions: [
+        { id: 'canIgnoreClockin', val: this.$t('backoffice.form.permissionsGroup.canIgnoreClockin'), isChecked: false },  
+      ],
 
       isBackdrop: false,
 
@@ -602,6 +647,10 @@ export default {
         payment: false,
         payment_color: 'success',
         payment_title: 'Select all',
+
+        clockin: false,
+        clockin_color: 'success',
+        clockin_title: 'Select all',
 
         order: false,
         order_color: 'success',
@@ -654,6 +703,10 @@ export default {
         product: false,
         product_color: 'success',
         product_title: 'Select all',
+
+        specialprice: false,
+        specialprice_color: 'success',
+        specialprice_title: 'Select all',
 
         category: false,
         category_color: 'success',
@@ -814,7 +867,8 @@ export default {
                     setTimeout(() => {  // Some AJAX call occurs
                         Api.fetchById(this.modelName, this.id)
                             .then(response => {
-                                //console.log(response.data);
+                            console.log(response.data);
+
                             this.name = response.data.Name;
                             this.description = response.data.Description;
                             this.canEdit = response.data.CanEdit;
@@ -833,6 +887,11 @@ export default {
                             this.productPermissions[1].isChecked = response.data.canCreateProduct;
                             this.productPermissions[2].isChecked = response.data.canEditProduct;
                             this.productPermissions[3].isChecked = response.data.canDeleteProduct;
+
+                            this.specialpricePermissions[0].isChecked = response.data.canViewSpecialPrices;
+                            this.specialpricePermissions[1].isChecked = response.data.canCreateSpecialPrices;
+                            this.specialpricePermissions[2].isChecked = response.data.canEditSpecialPrices;
+                            this.specialpricePermissions[3].isChecked = response.data.canDeleteSpecialPrices;
 
                             this.customerPermissions[0].isChecked = response.data.canViewCustomer;
                             this.customerPermissions[1].isChecked = response.data.canCreateCustomer;
@@ -889,7 +948,6 @@ export default {
                             this.reservationPermissions[2].isChecked = response.data.canEditReservation;
                             this.reservationPermissions[3].isChecked = response.data.canDeleteReservation;
 
-
                             this.orderPermissions[0].isChecked = response.data.canViewOrder;
                             this.orderPermissions[1].isChecked = response.data.canEditOrder;
                             this.orderPermissions[2].isChecked = response.data.canCreateOrder;
@@ -898,6 +956,8 @@ export default {
                             this.settingPermissions[0].isChecked = response.data.canChangeSetting;
 
                             this.paymentPermissions[0].isChecked = response.data.canViewPayments;
+
+                            this.clockinPermissions[0].isChecked = response.data.canIgnoreClockin;
 
                             this.driverPermissions[0].isChecked = response.data.canViewDriver;
                             this.driverPermissions[1].isChecked = response.data.canEditDriver;
@@ -1013,6 +1073,25 @@ export default {
 
         this.productPermissions.forEach(permission => {
             if (this.product)
+                permission.isChecked = true;
+            else
+                permission.isChecked = false;
+        });
+    },
+    selectDeselectSpecialPrice(){
+        this.specialprice = !this.specialprice;
+        if (this.specialprice_color == 'success')
+        {
+            this.specialprice_color = 'danger'
+            this.specialprice_title = 'Deselect all'
+        }  
+        else{
+            this.specialprice_color = 'success'
+            this.specialprice_title = 'Select All'
+        }
+
+        this.specialpricePermissions.forEach(permission => {
+            if (this.specialprice)
                 permission.isChecked = true;
             else
                 permission.isChecked = false;
@@ -1304,6 +1383,25 @@ export default {
                 permission.isChecked = false;
         });
     },
+    selectDeselectClockin(){
+        this.clockin = !this.clockin;
+        if (this.clockin_color == 'success')
+        {
+            this.clockin_color = 'danger'
+            this.clockin_title = 'Deselect all'
+        }  
+        else{
+            this.clockin_color = 'success'
+            this.clockin_title = 'Select All'
+        }
+
+        this.clockinPermissions.forEach(permission => {
+            if (this.clockin)
+                permission.isChecked = true;
+            else
+                permission.isChecked = false;
+        });
+    },
     selectDeselectAll(){
         this.all = !this.all;
         if (this.all_color == 'success')
@@ -1319,6 +1417,7 @@ export default {
         this.selectDeselectMenu(this.all);
         this.selectDeselectCategory(this.all);
         this.selectDeselectProduct(this.all);
+        this.selectDeselectSpecialPrice(this.all);
         this.selectDeselectCustomer(this.all);
         this.selectDeselectSuscriptor(this.all);
         this.selectDeselectTable(this.all);
@@ -1333,6 +1432,7 @@ export default {
         this.selectDeselectOrder(this.all);
         this.selectDeselectSetting(this.all);
         this.selectDeselectPayment(this.all);
+        this.selectDeselectClockin(this.all);
         this.selectDeselectDriver(this.all);
     },
     isValidForm(){
@@ -1382,6 +1482,10 @@ export default {
                 "canCreateProduct": this.productPermissions[1].isChecked,
                 "canEditProduct": this.productPermissions[2].isChecked,
                 "canDeleteProduct": this.productPermissions[3].isChecked,
+                "canViewSpecialPrices": this.specialpricePermissions[0].isChecked,
+                "canCreateSpecialPrices": this.specialpricePermissions[1].isChecked,
+                "canEditSpecialPrices": this.specialpricePermissions[2].isChecked,
+                "canDeleteSpecialPrices": this.specialpricePermissions[3].isChecked,
                 "canViewCustomer": this.customerPermissions[0].isChecked,
                 "canCreateCustomer": this.customerPermissions[1].isChecked,
                 "canEditCustomer": this.customerPermissions[2].isChecked,
@@ -1432,11 +1536,13 @@ export default {
                 "canViewOrderForDelivery": this.orderPermissions[3].isChecked,
                 "canChangeSetting": this.settingPermissions[0].isChecked,
                 "canViewPayments": this.paymentPermissions[0].isChecked,
+                "canIgnoreClockin": this.clockinPermissions[0].isChecked,
                 "canViewDriver": this.driverPermissions[0].isChecked,
                 "canCreateDriver": this.driverPermissions[1].isChecked,
                 "canEditDriver": this.driverPermissions[2].isChecked,
                 "canDeleteDriver": this.driverPermissions[3].isChecked,
             }
+            console.log(item)
             //If I am editing
             if (this.id){
               item['_id'] = this.id;

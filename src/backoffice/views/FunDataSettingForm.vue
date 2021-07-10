@@ -36,6 +36,9 @@
                 <ion-segment-button value="zipCodes">
                     <span>{{$t('backoffice.form.titles.zipCodes')}}</span>
                 </ion-segment-button>
+                <ion-segment-button value="ads">
+                    <span>Ads</span>
+                </ion-segment-button>
                 <ion-segment-button value="devices">
                     <span>{{$t('backoffice.form.titles.devices')}}</span>
                 </ion-segment-button>
@@ -533,6 +536,10 @@
           </div>
           <ion-button expand="full" color="primary" :disabled="!isValidForm()" @click="saveSetting()">{{ $t('backoffice.form.buttons.save') }}</ion-button>
         </div>
+        <!-- Ads -->
+        <div v-if="ads">
+            <ManageAds />
+        </div>
         <!-- Devices -->
         <div v-if="devices">
 
@@ -622,6 +629,7 @@ import Basic from './BasicDataSettingsForm.vue'
 import Colores from './ColourDataSettingForm.vue'
 import Payments from './PaymentSettingsForm.vue'
 import PosKey from './KeySettingForm.vue'
+import ManageAds from './manageAds.vue'
 
 export default {
 
@@ -733,7 +741,7 @@ export default {
       payments: false,
       colors: false  , 
       poskey: false,
-     
+      ads: false,
 
       //Backup file
       backupFile: null,
@@ -753,7 +761,7 @@ export default {
       this.init();
   },
   components:{
-      About, Basic, Colores, Payments, PosKey
+      About, Basic, Colores, Payments, PosKey, ManageAds,
   },
   computed: {
         title() {
@@ -776,7 +784,7 @@ export default {
             this.colors = false;
             this.payments = false;
             this.poskey = false;
-            
+            this.ads = false;
         }
         if(value === 'about'){
             this.about = true;
@@ -791,6 +799,7 @@ export default {
             this.colors = false;
             this.payments = false;
             this.poskey = false;
+            this.ads = false;
         }
         if(value === 'general'){
             this.general = true
@@ -804,7 +813,8 @@ export default {
             this.basic = false;   
             this.colors = false;
             this.payments = false;  
-            this.poskey = false;       
+            this.poskey = false;
+            this.ads = false;       
         }
         if(value === 'payments'){
             this.payments = true;
@@ -819,6 +829,7 @@ export default {
             this.backup = false
             this.colors = false;
             this.poskey = false;
+            this.ads = false;
         }
            if(value === 'colors'){
             this.colors = true;
@@ -833,6 +844,7 @@ export default {
             this.devices = false
             this.backup = false
             this.poskey = false;
+            this.ads = false;
         }
         if(value === 'catering'){
             this.general = false
@@ -847,6 +859,7 @@ export default {
             this.colors = false;
             this.payments = false;
             this.poskey = false;
+            this.ads = false;
         }  
         if(value === 'reservation'){
             this.general = false
@@ -860,7 +873,8 @@ export default {
             this.basic = false;  
             this.colors = false;
             this.payments = false; 
-            this.poskey = false;       
+            this.poskey = false; 
+            this.ads = false;      
         }
         if(value === 'tip'){
             this.general = false
@@ -874,7 +888,23 @@ export default {
             this.basic = false;  
             this.colors = false;
             this.payments = false; 
-            this.poskey = false;            
+            this.poskey = false;  
+            this.ads = false;          
+        }
+        if(value === 'ads'){
+            this.about = false;
+            this.basic = false;
+            this.general = false
+            this.catering = false
+            this.reservation = false
+            this.tip = false
+            this.zipCode = false
+            this.devices = false
+            this.backup = false
+            this.colors = false;
+            this.payments = false;
+            this.poskey = false;
+            this.ads = true;
         }
         if(value === 'zipCodes'){
             this.general = false
@@ -889,7 +919,7 @@ export default {
             this.colors = false;
             this.payments = false;   
             this.poskey = false;          
-              
+            this.ads = false;
         }
         if(value === 'backup'){
             this.general = false
@@ -903,7 +933,8 @@ export default {
             this.basic = false;  
             this.colors = false;
             this.payments = false;  
-            this.poskey = false;                  
+            this.poskey = false;    
+            this.ads = false;              
         }
         if(value === 'devices'){
             this.general = false
@@ -917,7 +948,8 @@ export default {
             this.basic = false;  
             this.colors = false;
             this.payments = false; 
-            this.poskey = false;                     
+            this.poskey = false;  
+            this.ads = false;                   
         }
          if(value === 'poskey'){
             this.general = false
@@ -931,7 +963,8 @@ export default {
             this.basic = false;  
             this.colors = false;
             this.payments = false;   
-            this.poskey = true;                 
+            this.poskey = true;  
+            this.ads = false;               
         }
         if(value === 'backup'){
             this.general = false
@@ -945,7 +978,8 @@ export default {
             this.basic = false;  
             this.colors = false;
             this.payments = false;   
-            this.poskey = false;                 
+            this.poskey = false;   
+            this.ads = false;              
         }
         this.segmentValue = value;
     },

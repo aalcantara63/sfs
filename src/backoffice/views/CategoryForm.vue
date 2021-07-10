@@ -66,6 +66,7 @@
                 <ion-label>{{$t('backoffice.form.titles.selectACategory')}}</ion-label>
                 <ion-select  :ok-text="$t('backoffice.form.messages.buttons.ok')" :cancel-text="$t('backoffice.form.messages.buttons.dismiss')"
                 @ionChange="parentId = $event.target.value" v-bind:value="parentId">
+                    <ion-select-option :key="null" value="" >None</ion-select-option>
                     <ion-select-option v-for="category in categories" v-bind:key="category.Id" v-bind:value="category._id" >{{category.Name}}</ion-select-option>
                 </ion-select>
             </ion-item>
@@ -144,6 +145,7 @@ export default {
               setTimeout(() => {  // Some AJAX call occurs
                   Api.fetchById(this.modelName, this.id)
                     .then(response => {
+                      console.log(response.data);
                       this.service = response.data.Service;
                       this.name = response.data.Name;
                       this.description = response.data.Description;
@@ -334,6 +336,7 @@ export default {
               "Description": this.description,
               "Service": this.service,
               "ImageUrl": "",
+              "ParentId": "",
             }
             if (this.file != null)
             {

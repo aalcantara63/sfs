@@ -516,6 +516,22 @@ Vue.use(VueRouter)
     }
   },
   {
+    path: '/assistance',
+    name: 'Assistance',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/ClockInClockOut.vue'),
+    beforeEnter: (to, from, next) =>{
+      if (store.state.authenticated == false)
+      {
+        next("/");
+      } else {
+        next();
+      }
+    }
+  },
+  {
     path: '/payment',
     name: 'Payment',
     // route level code-splitting
@@ -767,6 +783,32 @@ Vue.use(VueRouter)
     path: '/restaurantype',
     name: 'RestaurantType',
     component: () => import('../views/RestaurantTypeDetail.vue'),
+    beforeEnter: (to, from, next) =>{
+      if (store.state.authenticated == false)
+      {
+        next("/");
+      } else {
+        next();
+      }
+    }
+  },
+  {
+    path: '/specialsprice',
+    name: 'Specialsprice',
+    component: () => import('../views/SpecialsPrice.vue'),
+    beforeEnter: (to, from, next) =>{
+      if (store.state.authenticated == false)
+      {
+        next("/");
+      } else {
+        next();
+      }
+    }
+  },
+  {
+    path: '/specialspricedetail',
+    name: 'SpecialsPriceDetail',
+    component: () => import('../views/SpecialsPriceDetail.vue'),
     beforeEnter: (to, from, next) =>{
       if (store.state.authenticated == false)
       {

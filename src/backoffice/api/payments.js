@@ -145,7 +145,7 @@ export var payAuthorizeNet = {
                 "ReferenceKey":invoice
               }
             const res = await Api.processPayFabric(items);
-            console.log(res);
+           
             if(res.status===200 && res.data.Message === "APPROVED"){
                 const response1 = {
                     "total": res.data.TrxAmount,
@@ -160,6 +160,26 @@ export var payAuthorizeNet = {
             }
            
         }
+        else if(payMethod === 'NAB'){
+            
+            const items = {
+                "amount": parseFloat(total),                
+                }
+            const response = await Api.captureNAB(items, invoice);
+            if(response.status === 200){
+                
+                const response1 = {
+                    "total": total,
+                    "transId": response.data.bric,
+                    "accountNumber": '',
+                    "expirationCard": '',
+                    "accountType": '',
+                    "method": 'Authorization',
+                    "moto": false,                       
+                }                   
+                return response1;
+            }      
+        } 
 
         return false
     },
@@ -407,7 +427,66 @@ export var payAuthorizeNet = {
                 "moto": moto,
             }   
             return response1;
-        }  
+        } 
+        else if(payMethod === 'NAB'){
+            if(!datas.invoiceNumber){
+
+                const invoiceSequence = await Api.getInvoiceSequence(restaurantId)          
+                const items = {
+                     "account": datas.cardNumber,
+                     "amount": parseFloat(datas.total),
+                     "transaction": invoiceSequence.data,
+                     "taxAmount": parseFloat(datas.tax),
+                     "tipAmount": parseFloat(datas.tip),
+                     
+                     "expirationDate":  datas.cardExpirationDateF3,
+                     "cvv2": datas.cardSecurityCode, 
+                     "address": {
+                        "firstName": datas.firstName,
+                        "lastName": datas.lastName,
+                        "address": datas.address,
+                        "zipCode": datas.zip
+                    },
+                }                          
+                const response = await Api.authorizeNAB(items);
+                if(response.status === 200){                    
+                    const response1 = {
+                        "total": datas.total,
+                        "transId": response.data.bric,
+                        "accountNumber": '',
+                        "expirationCard": '',
+                        "accountType": '',
+                        "method": 'Card',
+                        "moto": false,                       
+                    }
+                  
+                   return response1;
+                }
+            }
+            else{
+                const items = {
+                    "amount": parseFloat(datas.total),
+                    "tipAmount": parseFloat(datas.tip),
+                    "taxAmount": parseFloat(datas.tax),
+                   }
+                const response = await Api.incrementAuthorizeNAB(items, datas.invoiceNumber);
+                if(response.status === 200){
+                    
+                    const response1 = {
+                        "total": datas.total,
+                        "transId": datas.invoiceNumber,
+                        "accountNumber": '',
+                        "expirationCard": '',
+                        "accountType": '',
+                        "method": 'Card',
+                        "moto": false,                       
+                    }                   
+                   return response1;
+                }
+            }
+           
+            return false;
+        } 
         return true;
     },
 
@@ -651,7 +730,41 @@ export var payAuthorizeNet = {
             }
             return false;
         }
-        
+        else if(payMethod === 'NAB'){
+            const invoiceSequence = await Api.getInvoiceSequence(restaurantId)          
+            const items = {
+                 "account": datas.cardNumber,
+                 "amount": parseFloat(datas.total),
+                 "transaction": invoiceSequence.data,
+                 "taxAmount": parseFloat(datas.tax),
+                 "tipAmount": parseFloat(datas.tip),
+                 
+                 "expirationDate":  datas.cardExpirationDateF3,
+                 "cvv2": datas.cardSecurityCode, 
+                 "address": {
+                    "firstName": datas.firstName,
+                    "lastName": datas.lastName,
+                    "address": datas.address,
+                    "zipCode": datas.zip
+                },
+            }
+                      
+            const response = await Api.payNAB(items);
+            if(response.status === 200){
+                const response1 = {
+                    "total": datas.total,
+                    "transId": response.data.bric,
+                    "accountNumber": '',
+                    "expirationCard": '',
+                    "accountType": '',
+                    "method": 'Card',
+                    "moto": false,
+                    "isDelivery": isDelivery,
+                }
+               return response1;
+            }
+            return false;
+        }
         return true;
     },
 
@@ -873,6 +986,15 @@ export var payAuthorizeNet = {
             const res = await Api.processPayFabric(items);
             return res;
         }
+        if(payMethod === 'NAB'){
+
+            const items =  {
+                "amount": parseFloat(datas.total),
+                "transaction": 123              
+              }
+            const res = await Api.refundNAB(items, datas.invoiceNumber);
+            return res;
+        }
 
         throw new Error("Debe especificar en metodo de pago")
     },
@@ -923,14 +1045,17 @@ export var payAuthorizeNet = {
             }
         }
         if(payMethod === 'PayFabric'){
-
            const items =  {
                 "Type": "Void",
                 "ReferenceKey": invoice
               }
             const res = await Api.processPayFabric(items);
             return res;
-
+        }
+        if(payMethod === 'NAB'){
+            const items =  {}
+            const res = await Api.voidNAB(items, invoice);
+            return res;
         }
         
 

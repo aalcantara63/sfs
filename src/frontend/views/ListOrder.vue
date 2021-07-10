@@ -86,7 +86,7 @@
           :list="orders"
           :per="8"
         >
-          <ion-item-sliding v-for="order in paginated('languages')" :key="order._id">
+          <ion-item-sliding v-for="(order, index) in paginated('languages')" :key="index">
 
              <v-breakpoint >
                <div  slot-scope="scope" :key="refreshKey">
@@ -95,17 +95,17 @@
                     v-if="!scope.isSmall && !scope.noMatch"
                   
                    style="width: 100%;"
-                   @click="seeDetail(order)"
+                   @click="seeDetail(order, index)"
                    :style="order.State===6 ? '--background:#ff00001f' : order.State===5 ? '--background: #71676738': order.State===7 ? '--background: #edeb3038' : order.State===8 ? '--background: #ef914938' :'--background: #14eb1412'">
 
                     
                     <ion-label v-if="order.OrderForCatering" 
                       class="ion-text-wrap menu-col-3 elipsis-menu"> 
-                        <h2>{{ allTypeOrder[order.OrderType] }}(Catering)</h2>               
-                    </ion-label>
+                        <h2>{{ allTypeOrder[order.OrderType] }}(Catering)</h2>           
+                    </ion-label> 
                     <ion-label v-else 
                      class="ion-text-wrap menu-col-3 elipsis-menu"> 
-                        <h2>{{ allTypeOrder[order.OrderType] }}</h2>               
+                        <h2>{{ allTypeOrder[order.OrderType] }}</h2>                
                     </ion-label>
                     <ion-label 
                     class="ion-text-wrap menu-col-3 elipsis-menu">        
@@ -129,7 +129,7 @@
                     v-if="scope.isSmall || scope.noMatch"
                   
                    style="width: 100%;"
-                   @click="seeDetail(order)"
+                   @click="seeDetail(order, index)"
                    :style="order.State===6 ? '--background:#ff00001f' : order.State===5 ? '--background: #71676738': order.State===7 ? '--background: #edeb3038' : order.State===8 ? '--background: #ef914938' :'--background: #14eb1412'">
 
                     
@@ -310,7 +310,7 @@ export default {
       });
     },
 
-    seeDetail: function(order){
+    seeDetail: function(order, index){
       let orderInfo = '';
       if(order.OrderType == 'Delivery')
           orderInfo = order.AddressToDeliver
@@ -319,7 +319,7 @@ export default {
       if(order.OrderType == 'On Table')
           orderInfo = order.tableService
       
-      return this.$router.push({ name: 'OrderState', params: {order: order, CustomerName: this.name, orderInfo: orderInfo, fromMyAccount: this.fromMyAccount, currentPageOrder: this.currentPageOrder } })
+      return this.$router.push({ name: 'OrderState', params: {order: order, CustomerName: this.name, orderInfo: orderInfo, fromMyAccount: this.fromMyAccount, currentPageOrder: this.currentPageOrder, indexPosition: index } })
     },
 
     addOrder: function(){
@@ -414,6 +414,7 @@ export default {
       if(order.Discount ) delete order.Discount;
       if(order.isTicket ) delete order.isTicket;
        delete order._id;
+       delete order.Payment;
 
        this.$store.commit('setOrder', order);
        this.$store.commit('setCart', order.Products);

@@ -77,7 +77,7 @@
         <ion-card>
            <ion-item>
             <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated')}} <strong style="color: red">*</strong></ion-label>
-            <ion-datetime :value="dateToDay" max="2030"  @ionChange="dateToDay=$event.target.value" :min="dateToDay"     
+            <ion-datetime :value="dateToDay"   @ionChange="dateToDay=$event.target.value" :min="minDay" :max="maxDay"   
             ></ion-datetime>
           </ion-item>
           <ion-item>
@@ -109,7 +109,7 @@
         <ion-card>
            <ion-item>
             <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated')}} <strong style="color: red">*</strong></ion-label>
-            <ion-datetime :value="dateToDay" max="2030"  @ionChange="dateToDay=$event.target.value" :min="dateToDay"     
+            <ion-datetime :value="dateToDay"  @ionChange="dateToDay=$event.target.value" :min="minDay" :max="maxDay"      
             ></ion-datetime>
           </ion-item>
           <ion-item>
@@ -149,7 +149,7 @@
             <ion-card>
                 <ion-item>
                 <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated')}} <strong style="color: red">*</strong></ion-label> 
-                <ion-datetime :value="dateToDay" max="2030"  @ionChange="dateEstimateToPick=$event.target.value, validateHour()"  :min="minDay"   
+                <ion-datetime :value="dateToDay" :max="maxDay" @ionChange="dateEstimateToPick=$event.target.value, validateHour()"  :min="minDay"   
                 ></ion-datetime>
             </ion-item>
             <ion-item>
@@ -200,7 +200,7 @@
             <ion-card>
                 <ion-item>
                 <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated')}} <strong style="color: red">*</strong></ion-label>  
-                <ion-datetime :value="dateToDay" max="2030"  @ionChange="dateEstimateToPick=$event.target.value, validateHour()" :min="minDay"     
+                <ion-datetime :value="dateToDay" :max="maxDay"   @ionChange="dateEstimateToPick=$event.target.value, validateHour()" :min="minDay"     
                 ></ion-datetime>
             </ion-item>
             <ion-item>
@@ -387,17 +387,18 @@
               
 
                   <ion-segment id="reservationSegment" :value="segmentValue" style="margin: 0px 0 25px;">
-                    <ion-segment-button value="order"  @click="changeSegmentValue('order')">
-                      <span class="iconify" data-icon="clarity:shopping-cart-solid" data-inline="false" data-width="15" data-height="15"></span>
-                    {{$t('frontend.order.cart') }}  
-                    </ion-segment-button>
+                   
                     <ion-segment-button value="table"  @click="changeSegmentValue('table')">
                       <span class="iconify" data-icon="grommet-icons:location-pin" data-inline="false" data-width="15" data-height="15"></span>
                       {{$t('frontend.order.orderType') }}
                     </ion-segment-button>
-                    <ion-segment-button value="customer"  @click="changeSegmentValue('customer')">
-                    <span class="iconify" data-icon="raphael:customer" data-inline="false" data-width="15" data-height="15"></span>
-                    {{$t('frontend.order.client') }}
+                     <ion-segment-button value="customer"  @click="changeSegmentValue('customer')">
+                      <span class="iconify" data-icon="raphael:customer" data-inline="false" data-width="15" data-height="15"></span>
+                      {{$t('frontend.order.client') }}
+                    </ion-segment-button>
+                    <ion-segment-button value="order"  @click="changeSegmentValue('order')">
+                      <span class="iconify" data-icon="clarity:shopping-cart-solid" data-inline="false" data-width="15" data-height="15"></span>
+                    {{$t('frontend.order.cart') }}  
                     </ion-segment-button>
                     
                   </ion-segment>
@@ -410,8 +411,8 @@
                       ></cart>
                     </div>
 
-                    <div v-if="segmentValue==='customer'">
-                      <guess :isCatering="isCatering">                          
+                    <div v-if="segmentValue==='customer'" >
+                      <guess :isCatering="isCatering" :key="keyForceUpdate+'G'">                          
                       </guess>
                     </div>
 
@@ -419,7 +420,7 @@
                     
                         <ion-button  class="button-ordertype-parent"
                           v-if="configuration.viewDelivery && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
-                          :style="isDelivery? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;'" 
+                          :style="isDelivery? 'opacity: 1;' : 'opacity: 0.65;'" 
                           color="secondary" 
                           @click="!isCatering? showDeliver() : showDeliveryCatering()" 
                           v-tooltip="$t('frontend.app.deliver')"> 
@@ -431,7 +432,7 @@
 
                         
                         <ion-button class="button-ordertype-parent"
-                          :style="isPick? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;'"  
+                          :style="isPick? 'opacity: 1;' : 'opacity: 0.65;'"  
                           color="secondary" 
                           v-if="restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
                           @click="isCatering? showPickUpCatering(): configuration.selectPickHour? showPickUp() :  sinPickAction() " 
@@ -444,7 +445,7 @@
                       
                         <ion-button  class="button-ordertype-parent"
                           v-if="configuration.viewOnTable && !isCatering" 
-                          :style="isTable? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;'" 
+                          :style="isTable? 'opacity: 1;' : 'opacity: 0.65;'" 
                           color="secondary" 
                           @click="show"  
                           v-tooltip="$t('frontend.app.table')" >
@@ -456,7 +457,7 @@
                         
                         <ion-button  class="button-ordertype-parent"
                           v-if="configuration.viewCurbside && !isCatering && restaurantActive.hasPaymentCardConfig && $store.state.allTickets.length === 0" 
-                          :style="isCurbside? 'opacity: 1;border: outset;' : 'opacity: 0.65;border: none;'" 
+                          :style="isCurbside? 'opacity: 1;' : 'opacity: 0.65;'" 
                           color="secondary" 
                           @click="showCurbside" 
                           v-tooltip="$t('frontend.app.curbside')">
@@ -485,7 +486,7 @@
                               <div v-else  @click="showPickUp()">                                      
                                 <ion-item   >
                                   <ion-label position="floating">{{$t('frontend.order.dateToPickEstimated') }}<strong style="color: red">*</strong> </ion-label> 
-                                  <ion-datetime :key="key1 + '3'" style="text-align: left;" :min="minDay"
+                                  <ion-datetime :key="key1 + '3'" style="text-align: left;" :min="minDay" :max="maxDay" 
                                     :value="dateToDay" @ionChange="dateToDay=$event.target.value" ></ion-datetime>                                
                                 </ion-item>
                                 <ion-item  >
@@ -585,72 +586,7 @@
                     </div>
                   </div>
 
-                <!-- <ion-footer >
-                  
-                  <ion-toolbar v-if="$store.state.cart.length > 0 " style="text-align: center">
-                  
-
-                    <div style="padding: 20px 0 0; text-align: center" v-if="$store.state.allTickets.length === 0 && !isCatering">
-                      <ion-item v-if="( restaurantActive.payMethod==='SHIFT4' && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
-                        (restaurantActive.payMethod==='TSYS' && order.OrderType === 'On Table'  && staffName != '')">
-                          <p style=" float: left;text-align: left;padding: 0" class="subtitles-order menu-col-4">{{$t('frontend.order.isTicket')}} </p>                               
-                          <ion-toggle color="primary" :value="isTicket" @ionChange="isTicket = !isTicket"></ion-toggle>
-                      </ion-item> 
-
-                      <ion-button                             
-                        @click="goHome()">{{$t('frontend.home.cancel')}}
-                      </ion-button>  
-
-                      <ion-button 
-                        v-if="!isTicket " 
-                        @click="segmentValue = 'order', openCardPayment()">{{$t('frontend.order.pay')}}
-                      </ion-button>
-
-                      <ion-button  
-                        v-if="isTicket " 
-                        @click="segmentValue = 'order', openCardPayment()">{{$t('frontend.order.payAsTicket')}}
-                      </ion-button>  
-
-                      <ion-button
-                        v-if="isTicket && staffName != ''" 
-                        @click="saveAsTicket()">{{$t('frontend.order.saveAsTicket')}}
-                      </ion-button>                          
-                    </div>
-                    <div v-if="$store.state.allTickets.length > 0 && !isCatering" style="padding: 20px 0; text-align: center"> 
-                                            
-                      <ion-button  v-if="order.isTicket && $store.state.allTickets.length > 0" 
-                          @click="closeTicket()">
-                          {{$t('frontend.order.closeTicket')}}
-                      </ion-button> 
-                      <ion-button  
-                          @click="updateAuthorization()">
-                          {{$t('frontend.order.updateTicket')}}
-                        </ion-button>
-                    </div>
-                    <div v-if="isCatering" style="padding: 20px 0; text-align: center">
-
-                    <div>
-                        <ion-label v-if="order.OrderType=='Delivery' && configuration.minAmountCateringDelivery > 0 && configuration.minAmountCateringDelivery > order.Total" class="menu-col-12 catering-amount" >{{$t('frontend.orderType.minAmountDelivery') +' '+  getFormatPrice(configuration.minAmountCateringDelivery)}}</ion-label>
-                      <ion-label v-if="order.OrderType=='PickUp' && configuration.minAmoutCatering > 0 && configuration.minAmoutCatering > order.Total" class="menu-col-12 catering-amount">{{ $t('frontend.orderType.minAmountPickUp') + ' ' + getFormatPrice(configuration.minAmoutCatering)  }}</ion-label>                        
-                    </div>
-                      <ion-button                             
-                        @click="goHome()">{{$t('frontend.home.cancel')}}
-                      </ion-button> 
-                      <ion-button 
-                      :disabled="clientId ==='' || !order.OrderType ||
-                      (order.OrderType=='Delivery' && configuration.minAmountCateringDelivery > 0 && configuration.minAmountCateringDelivery > order.Total) ||
-                      (order.OrderType=='PickUp' && configuration.minAmoutCatering > 0 && configuration.minAmoutCatering > order.Total)"
-                          @click="sendOrderCatering()">{{$t('frontend.order.sendRequest')}}
-                      </ion-button> 
-                    </div>
-
-                    <a  style="font-size: 14px;text-transform: uppercase;font-weight: bold;"
-                        @click="showOrder()">{{$t('frontend.home.checkout')}}
-                    </a>   
-                  
-                  </ion-toolbar>
-                </ion-footer> -->
-    
+               
               
                 <ion-fab 
                  v-if="$store.state.cart.length > 0 "
@@ -660,8 +596,8 @@
                   
                     <div style="padding: 10px 0 0; text-align: center" v-if="$store.state.allTickets.length === 0 && !isCatering">
                       <div style="display: flex;justify-content: flex-start;align-items: center;" 
-                      v-if="(  ['SHIFT4','PayFabric'].includes(restaurantActive.payMethod) && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
-                        (restaurantActive.payMethod==='TSYS' && order.OrderType === 'On Table'  && staffName != '')">
+                      v-if="(  ['SHIFT4', 'NAB'].includes(restaurantActive.payMethod) && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
+                        (['TSYS','PayFabric'].includes(restaurantActive.payMethod) && order.OrderType === 'On Table'  && staffName != '')">
                           <p style="margin:0">{{$t('frontend.order.isTicket')}} </p>                               
                           <ion-toggle color="primary" :value="isTicket" @ionChange="isTicket = !isTicket"></ion-toggle>
                       </div> 
@@ -672,12 +608,12 @@
 
                       <ion-button 
                         v-if="!isTicket " 
-                        @click="segmentValue = 'order', openCardPayment()">{{$t('frontend.order.pay')}}
+                        @click="segmentValue='order', openCardPayment()">{{$t('frontend.order.pay')}}
                       </ion-button>
 
                       <ion-button  
                         v-if="isTicket " 
-                        @click="segmentValue = 'order', openCardPayment()">{{$t('frontend.order.payAsTicket')}}
+                        @click="segmentValue='order', openCardPayment()">{{$t('frontend.order.payAsTicket')}}
                       </ion-button>  
 
                       <ion-button
@@ -722,19 +658,10 @@
                 
               </div>
 
-          
-
-
-
-
           </div>
         </v-breakpoint>
 
       </div>
-
-      
-
-
          
     </div>
 </template>
@@ -796,6 +723,8 @@ export default {
         this.showOrder();
       }                     
     });
+
+    EventBus.$on('updateCustomerGuess', (value) => {value; this.keyForceUpdate++; });
        
    
   },  
@@ -810,8 +739,7 @@ export default {
       variants: [],
       staffName: '' , 
       staffId: '' , 
-      taxesName: '' ,
-      taxes: 0 ,
+      allTaxes: [],
       shippingName: '' ,
       shipping: 0 ,    
       menuListInHome: [],
@@ -857,8 +785,9 @@ export default {
       configuration: {},
       restaurantActive: {},      
       keyUpdateOrder: 1,
-      segmentValue: 'order',
+      segmentValue: 'table',
       minDay: moment.tz(moment.tz.guess()).format('YYYY-MM-DD'),
+      maxDay: Moment().add(2, 'years').format('YYYY-MM-DD'),
       key1: 1,
       key2: 3,
       isTicket: false,
@@ -891,24 +820,11 @@ export default {
     Guess: Guess,
   },
   beforeRouteEnter(to, from, next) { 
-    console.log('beforeRouteEnter')   
       to.hash+from.hash
       next(vm => {
         vm.loadHome();
     })
-  }  ,
-  beforeRouteUpdate(to, from, next) {  
-    console.log('beforeRouteUpdate') 
-      to.hash+from.hash
-     next();
-  },
-  beforeRouteLeave(to, from, next) {  
-    console.log('beforeRouteLeave')
-    console.log(to)
-    console.log(from)
-      to.hash+from.hash
-    next()
-  }  ,
+  }  ,  
   methods: {
     loadHome(){
 
@@ -921,13 +837,11 @@ export default {
         this.products = this.$store.state.products|| [];
         this.variants = this.$store.state.variants|| [];
         this.staffName = this.$store.state.staffName || '';
-        this.staffId = this.$store.state.staffId || '';
-        this.taxesName = this.$store.state.tax.taxesName || ''; 
-        this.taxes = this.$store.state.tax.taxesName || 0;
+        this.staffId = this.$store.state.staffId || '';  
+        this.allTaxes = this.$store.state.allTaxes || [];
         this.shippingName = this.$store.state.shipping.shippingName || '';
         this.shipping = this.$store.state.shipping.shipping || 0; 
-
-        
+              
 
         if(this.$route.params.isCatering){
             this.isCatering = true;
@@ -947,6 +861,7 @@ export default {
         }
 
         this.order = this.$store.state.order;
+       
         this.configuration = this.$store.state.configuration;
         this.restaurantActive = this.$store.state.restaurantActive    
         this.cart = this.$store.state.cart;
@@ -1336,6 +1251,7 @@ export default {
       var codeFromQr = value.split('-');
       var tableId = '';
       var sitName = '';
+
       if(codeFromQr.length === 2){
         tableId = codeFromQr[0];
         sitName = codeFromQr[1];
@@ -1347,6 +1263,7 @@ export default {
 
       Api.fetchById("Table", tableId).then(response => {        
       this.spinner = false  
+
         if(response.status === 200 && response.data.Available){
 
           const seat = response.data.Seats.findIndex(t => t.name === value)
@@ -1367,7 +1284,8 @@ export default {
               this.isTable = true;             
               this.order.OrderType = "On Table";
               this.order.tableService = this.tableService; 
-              this.order.ClientId = this.clientId,    
+              this.order.ClientId = this.clientId,
+             
 
               this.$store.commit('setOrder', this.order);
               
@@ -1397,8 +1315,8 @@ export default {
         }
       })
       .catch(e => {
+        e;
         this.spinner = false
-        console.log(e)
         return this.notValidQr();
       });
    },
@@ -1655,7 +1573,7 @@ export default {
       let flag = 1;
 
       if(this.isCatering && !this.$store.state.guess._id){
-         mss += this.$t('frontend.order.requiredCustomer') +'. ';
+         mss += '<br><strong>' + this.$t('frontend.order.requiredCustomer') +'.</strong> ';
           flag = 0;
       }
       else if(this.order.OrderType !== 'On Table'){ 
@@ -1665,12 +1583,12 @@ export default {
          this.phone= this.$store.state.guess.Phone || '';   
 
         if(this.CustomerName ==='' || this.email === '' || this.phone === ''){
-              mss += this.$t('frontend.order.requiredCustomer') +'. ';
+              mss +='<br><strong>' +  this.$t('frontend.order.requiredCustomer') +'.</strong> ';
               flag = 0;
         }               
       } 
       if(!this.order.OrderType){       
-        mss += this.$t('frontend.order.requiredOrderType') +'. ';
+        mss +='<br><strong>' + this.$t('frontend.order.requiredOrderType') +'.</strong> ';
         flag = 0;
       }
       if(flag === 0) return mss;
@@ -1683,7 +1601,7 @@ export default {
         if(this.staffName !='')
             this.order.StaffName = this.staffName;
         if(this.staffId !='')
-            this.order.staffId = this.staffId        
+            this.order.staffId = this.staffId   
 
         if(this.$store.state.guess._id)
           this.order.ClientId = this.$store.state.guess._id;
@@ -1720,7 +1638,6 @@ export default {
         if(!this.order.Total) return 
             
         const flag = this.validateBeforePay();
-        console.l
         if(flag !== 1 )
             return this.alertRequiredDatas(flag);
         this.buildOrder()
@@ -1742,12 +1659,11 @@ export default {
                 content: 'New Content',
               },
               propsData: { 
-                parent: this, 
-                order: this.order,   
+                parent: this,  
                 canSplitPayment: !this.isTicket,                        
                 Total: tt,
-                Tax:  this.taxes.toString(),
-                TaxName: this.taxesName,     
+                Tax:  this.getSumatoryTax().toString(),
+                TaxName: this.getSumatoryTaxName(),     
                 restaurantId: this.restaurantSelectedId,
                 payMethod: this.restaurantActive.payMethod  ,  
                 RestaurantName: this.restaurantActive.restaurantName, 
@@ -1902,7 +1818,10 @@ export default {
        
     },
 
-    recivePayment: async function(res){  
+    recivePayment: async function(res){      
+      
+
+      this.order = this.$store.state.order
 
       if(this.isCatering) return this.recivePaymentCatering(res);
       if(this.isTicket) return this.recivePaymentTicket(res);
@@ -1991,7 +1910,8 @@ export default {
         if(this.order.Discount > 0 && this.order.CodeToDiscount)
              await this.closeReservation(); 
       } 
-      this.goHome();     
+      
+     this.forceUpdateFunction()  
       
       this.spinner = false;
                                              
@@ -2001,12 +1921,15 @@ export default {
           return this.$router.push({ name: 'Ticket' });
         else if(this.staffName !== '' && !this.isTicket)
           return this.$router.push({ name: 'Order' });            
-        else return this.forceUpdateFunction();             
+                
     },
 
     forceUpdateFunction(){      
-        this.keyForceUpdate ++;
-        this.goHome();
+        
+      this.goHome();
+      this.order = this.$store.state.order;  
+      this.cart = this.$store.state.cart;
+      this.keyForceUpdate ++;
       this.$forceUpdate();
     },
 
@@ -2077,9 +2000,9 @@ export default {
         restaurantId: this.restaurantSelectedId,
         payMethod: this.restaurantActive.payMethod,
         total: this.order.Total,
-        tax: ((parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
+        tax: ((parseFloat(this.getSumatoryTax()) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
         tip: ((parseFloat(this.order.Tip) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
-        taxName: this.taxesName,         
+        taxName: this.getSumatoryTaxName(),         
         products: this.$store.state.cart,  
         firstName : this.order.CustomerName        
       }
@@ -2320,7 +2243,6 @@ export default {
     async sendOrderCatering(){
      
         const flag = this.validateBeforePay();
-        console.l
         if(flag !== 1 )
             return this.alertRequiredDatas(flag);
         this.buildOrder()
@@ -2352,6 +2274,18 @@ export default {
       this.cart = this.$store.state.cart;
       this.segmentValue=value;
       this.keyUpdateOrder++;
+    },
+
+    getSumatoryTax(){
+      let total = 0;
+      this.allTaxes.forEach(t => { total += t.Percentage });
+      return total;
+
+    },
+    getSumatoryTaxName(){
+      let name = '| ';
+      this.allTaxes.forEach(t => { name += t.Name + ' | '});
+      return name;
     }
 
   },

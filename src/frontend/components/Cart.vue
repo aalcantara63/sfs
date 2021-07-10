@@ -114,6 +114,7 @@
                   </ion-item>
 
               </div> 
+
               <div v-if="otherCharges.length > 0">
                     <ion-label class="ion-text-wrap" >
                         <h2 class="titles-order" :style="otherCharges.length === 0 ? 'color: lightgrey;':'color: initial;'">{{i18n.t('frontend.order.otherCharges')}}
@@ -135,83 +136,86 @@
 
               </div>
 
-            <div v-if="cart.length > 0">
-                <ion-item > 
-                  <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
-                    <ion-label :key="key+'St'" style="text-align: right;">{{i18n.t('frontend.order.subtotal')}}:  {{ getFormatPrice(finalTotal()) }}</ion-label>                                           
-                  </div>
-              </ion-item>
-              <ion-item  v-if="discount === 0"> 
-                <div class="menu-col-12" style="padding: 20px 0;text-align: right;">   
-                  <a style="margin-left: auto;    display: block;" @click="showDiscount=!showDiscount">{{i18n.t('frontend.reservation.discount')}}</a>          
-                    <ion-button v-if="showDiscount" :disabled="spinnerDiscount" color="light" @click="getDiscountByCode()">
-                      <ion-input  placeholder="codigo de descuento" @input="theCodeToDiscount=$event.target.value">                      
-                      </ion-input>
-                      <span class="iconify" data-icon="websymbol:ok" data-inline="false" style="color: green;width: 15px;"></span>
-                    </ion-button>                                 
-                </div>
-              </ion-item>  
-              <ion-item v-if="discount > 0"> 
-                    <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;text-align: right;"> 
-                      <ion-label class="menu-col-12" :key="key+'D'" style="text-align: right;display: contents;">{{i18n.t('frontend.reservation.discount')}}: {{ getFormatPrice(discount ) }}</ion-label>                                           
-                  </div>
-              </ion-item>
-              <ion-item > 
+              <div v-if="cart.length > 0">
+                  <ion-item > 
                     <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
-                      <ion-label :key="key+'T'" style="text-align: right;">{{i18n.t('frontend.order.taxe')}} ({{taxes.toFixed(2)}} %):  {{ getFormatPrice(taxes * finalSubTotal() / 100) }}</ion-label>                                           
+                      <ion-label :key="key+'St'" style="text-align: right;">{{i18n.t('frontend.order.subtotal')}}:  {{ getFormatPrice(finalTotal()) }}</ion-label>                                           
+                    </div>
+                </ion-item>
+                <ion-item  v-if="discount === 0"> 
+                  <div class="menu-col-12" style="padding: 20px 0;text-align: right;">   
+                    <a style="margin-left: auto;    display: block;" @click="showDiscount=!showDiscount">{{i18n.t('frontend.reservation.discount')}}</a>          
+                      <ion-button v-if="showDiscount" :disabled="spinnerDiscount" color="light" @click="getDiscountByCode()">
+                        <ion-input  placeholder="codigo de descuento" @input="theCodeToDiscount=$event.target.value">                      
+                        </ion-input>
+                        <span class="iconify" data-icon="websymbol:ok" data-inline="false" style="color: green;width: 15px;"></span>
+                      </ion-button>                                 
                   </div>
-              </ion-item>
-              <ion-item v-if="order.OrderType=='Delivery'" > 
-                    <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
-                      <ion-label :key="key+'Sh'" style="text-align: right;">{{i18n.t('frontend.order.deliver')}}:  {{getFormatPrice(shipping)}} </ion-label>                                           
-                  </div>
-              </ion-item>
-              <ion-item >
-                <div  class="menu-col-12" style="padding: 20px 0;font-weight: 600;" :key="keyTip" >
-                  
-                  <ion-input  class="menu-col-2" style="float: right; text-align: right;"
-                    :disabled="configuration.tipRequire"
-                    :value="getFormatPrice(tip * finalSubTotal() / 100)" 
-                    @change="changeTip($event.target.value)">
-                  </ion-input> 
-                  <ion-label class="menu-col-2" style="float: right;padding: 10px 0;" v-if="keyTip !==0">{{tip}} %</ion-label>
-                  <ion-select interface="popover" icon="add" class="menu-col-8" style="float: right;padding: 10px 5px;text-align: right;"                                         
-                    v-if="configuration.tips.length > 0"
-                    :ok-text="i18n.t('backoffice.form.messages.buttons.ok')"
-                    :cancel-text="i18n.t('backoffice.form.messages.buttons.dismiss')"
-                    :value="tip"
-                    :disabled="configuration.tipRequire"
-                    :placeholder="i18n.t('frontend.order.tip')"                        
-                    @ionChange="$event.target.value? (tip = $event.target.value): (tip=0,keyTip=0) ">
-                    <ion-select-option v-for="res in configuration.tips"                    
-                        :key="res" 
-                        :value="res" >{{i18n.t('frontend.order.tip')}} {{res.toFixed(2)}} %                         
-                    </ion-select-option> 
-                    <ion-select-option v-if="!configuration.tipRequire" value="0" >
-                          <ion-label >{{$t('frontend.order.other')}}</ion-label>                                           
-                    </ion-select-option>                                  
-                  </ion-select>    
-                </div>  
-              </ion-item>            
-              <ion-item  > 
-                    <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
-                      <ion-label :key="key+'FT'" style="text-align: right;">{{i18n.t('frontend.order.total')}}:  {{getFormatPrice(total)}} </ion-label>                                           
-                  </div>
-              </ion-item>  
-            </div>
-                        
+                </ion-item>  
+                <ion-item v-if="discount > 0"> 
+                      <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;text-align: right;"> 
+                        <ion-label class="menu-col-12" :key="key+'D'" style="text-align: right;display: contents;">{{i18n.t('frontend.reservation.discount')}}: {{ getFormatPrice(discount ) }}</ion-label>                                           
+                    </div>
+                </ion-item>              
+
+                  <ion-item v-for="(tax, index) in allTaxes" :key="index"> 
+                      <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
+                        <ion-label  style="text-align: right;">{{tax.Name}} ({{tax.Percentage}} %):  {{ getFormatPrice(tax.Percentage * finalSubTotal() / 100) }}</ion-label>                                           
+                    </div>
+                </ion-item>
+
+                <ion-item v-if="order.OrderType=='Delivery'" > 
+                      <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
+                        <ion-label :key="key+'Sh'" style="text-align: right;">{{i18n.t('frontend.order.deliver')}}:  {{getFormatPrice(shipping)}} </ion-label>                                           
+                    </div>
+                </ion-item>
+                <ion-item >
+                  <div  class="menu-col-12" style="padding: 20px 0;font-weight: 600;" :key="keyTip" >
+                    
+                    <ion-input  class="menu-col-2" style="float: right; text-align: right;"
+                      :disabled="configuration.tipRequire"
+                      :value="getFormatPrice(tip * finalSubTotal() / 100)" 
+                      @change="changeTip($event.target.value)">
+                    </ion-input> 
+                    <ion-label class="menu-col-2" style="float: right;padding: 10px 0;" v-if="keyTip !==0">{{tip}} %</ion-label>
+                    <ion-select interface="popover" icon="add" class="menu-col-8" style="float: right;padding: 10px 5px;text-align: right;"                                         
+                      v-if="configuration.tips.length > 0"
+                      :ok-text="i18n.t('backoffice.form.messages.buttons.ok')"
+                      :cancel-text="i18n.t('backoffice.form.messages.buttons.dismiss')"
+                      :value="tip"
+                      :disabled="configuration.tipRequire"
+                      :placeholder="i18n.t('frontend.order.tip')"                        
+                      @ionChange="$event.target.value? (tip = $event.target.value): (tip=0,keyTip=0) ">
+                      <ion-select-option v-for="res in configuration.tips"                    
+                          :key="res" 
+                          :value="res" >{{i18n.t('frontend.order.tip')}} {{res.toFixed(2)}} %                         
+                      </ion-select-option> 
+                      <ion-select-option v-if="!configuration.tipRequire" value="0" >
+                            <ion-label >{{$t('frontend.order.other')}}</ion-label>                                           
+                      </ion-select-option>                                  
+                    </ion-select>    
+                  </div>  
+                </ion-item>            
+                <ion-item  > 
+                      <div class="menu-col-12" style="padding: 20px 0;font-weight: 600;"> 
+                        <ion-label :key="key+'FT'" style="text-align: right;">{{i18n.t('frontend.order.total')}}:  {{getFormatPrice(total)}} </ion-label>                                           
+                    </div>
+                </ion-item>  
+              </div>
+
+              <div style="text-align: right;background: white;" v-if="cart.length > 0">        
+                <ion-button @click="showNote=!showNote" v-tooltip="i18n.t('frontend.order.notes')">
+                  {{i18n.t('frontend.order.notes')}} 
+                  <span class="iconify" data-icon="akar-icons:comment-add" data-inline="false" ></span>  
+                </ion-button> 
+                <ion-textarea v-if="showNote" :key="keyUpdateCart+'N'"
+                class="menu-textarea" :value="note"
+                @ionChange="changeOrderNote($event.target.value)" 
+                style="text-align: left;"></ion-textarea>
+              </div> 
           </ion-list> 
 
-          <div style="text-align: right;background: white;" v-if="cart.length > 0">        
-            <ion-button @click="showNote=!showNote" v-tooltip="i18n.t('frontend.order.notes')">
-              {{i18n.t('frontend.order.notes')}} 
-              <span class="iconify" data-icon="akar-icons:comment-add" data-inline="false" ></span>  
-            </ion-button> 
-            <ion-textarea v-if="showNote" 
-            class="menu-textarea" :value="note"
-            @ionChange="changeOrderNote($event.target.value)" 
-            style="text-align: left;"></ion-textarea>
-          </div> 
+          
 
           
 
@@ -254,11 +258,10 @@ export default {
     this.configuration = store.state.configuration;
     this.currency = store.state.restaurantActive.currency || '';
     this.products = store.state.products|| [];
-    this.variants = store.state.variants|| [];
-    this.taxes = parseFloat(store.state.tax.taxes) || 0;
+    this.variants = store.state.variants|| [];   
     this.shipping = store.state.shipping.shipping || 0; 
-    if(this.order.Tip) this.tip = this.order.Tip
-    if(this.order.Taxe) this.taxes = parseFloat(this.order.Taxe);    
+    this.allTaxes = store.state.allTaxes || [];
+    if(this.order.Tip) this.tip = this.order.Tip   
     else if(this.configuration.tips.length > 0) this.tip = this.configuration.tips[0] 
     if(this.order.Discount)
         this.discount = this.order.Discount
@@ -276,7 +279,7 @@ export default {
    
    total(){
     
-         let percent = ( (this.finalSubTotal() * this.taxes) / 100) ;  
+         let percent = ( (this.finalSubTotal() * this.getSumatoryTax()) / 100) ;  
          let tipPercent = ( (this.finalSubTotal() * this.tip) / 100) ;
          var t = 1    
         if(this.order.OrderType=='Delivery')  
@@ -315,10 +318,10 @@ export default {
       currency:  '',
       products: [],
       variants: [],
-      taxes : 0,
       shipping : 0,
       spinnerOrder: false,
       note: '',
+      allTaxes: [],
 
     }
   },
@@ -503,7 +506,8 @@ methods: {
 
       updateOrderInStore(t){
         this.order.Total = t.toFixed(2);
-        this.order.Taxe = this.taxes;
+        this.order.Taxe = this.getSumatoryTax();
+        this.order.AllTaxes = this.allTaxes;
         this.order.Tip = this.tip;
         this.order.SubTotal = this.finalSubTotal();
         if(this.shipping !=0) this.order.Shipping = this.shipping;
@@ -514,7 +518,7 @@ methods: {
       },
 
     finalTotal1(){
-         let percent = ( (this.finalSubTotal() * this.taxes) / 100) ;
+         let percent = ( (this.finalSubTotal() * this.getSumatoryTax()) / 100) ;
          let tipPercent = ( (this.finalSubTotal() * this.tip) / 100) ;         
          var t = 1    
         if(this.order.OrderType=='Delivery')  
@@ -524,7 +528,8 @@ methods: {
         t = t - this.discount;
 
         this.order.Total = t.toFixed(2);
-        this.order.Taxe = this.taxes;
+        this.order.Taxe = this.getSumatoryTax();
+        this.order.AllTaxes = this.allTaxes;
         this.order.Tip = this.tip;
         this.order.SubTotal = this.finalSubTotal();
         if(this.shipping !=0) this.order.Shipping = this.shipping;
@@ -629,6 +634,7 @@ methods: {
       const id = store.state.order._id;
       if(id){
         try {
+         
           this.spinnerOrder = true;
            const response = await Api.fetchById( 'Order', id)
           if(response.status === 200 ){          
@@ -636,7 +642,9 @@ methods: {
             store.commit('setCart', this.cart);
             this.order =JSON.parse(JSON.stringify(response.data)) ;
             store.commit('setOrder', this.order);
-            this.spinnerOrder = false;
+            this.spinnerOrder = false;            
+            this.note = this.order.Note
+            this.keyUpdateCart ++;
           } 
           this.spinnerOrder = false;          
          } catch (error) {         
@@ -675,6 +683,18 @@ methods: {
       })    
       return alert.present();
     },
+
+    getSumatoryTax(){
+      let total = 0;
+      this.allTaxes.forEach(t => { total += t.Percentage });
+      return total;
+
+    },
+    getSumatoryTaxName(){
+      let name = '| ';
+      this.allTaxes.forEach(t => { name += t.Name + ' | '});
+      return name;
+    }
 }
  
 

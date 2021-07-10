@@ -256,8 +256,8 @@
                      
 
                       <div style="padding: 20px 0; text-align: center" v-if="$store.state.allTickets.length === 0 && !isCatering">
-                         <ion-item v-if="( restaurantActive.payMethod==='SHIFT4' && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
-                          (restaurantActive.payMethod==='TSYS' && order.OrderType === 'On Table'  && staffName != '')">
+                         <ion-item v-if="( ['SHIFT4', 'NAB'].includes(restaurantActive.payMethod) && order.OrderType === 'On Table' && (clientId !='' || staffName != '') ) ||
+                          (['TSYS','PayFabric'].includes(restaurantActive.payMethod) && order.OrderType === 'On Table'  && staffName != '')">
                             <p style=" float: left;text-align: left;padding: 0" class="subtitles-order menu-col-4">{{$t('frontend.order.isTicket')}} </p>                               
                             <ion-toggle color="primary" :value="isTicket" @ionChange="isTicket = !isTicket"></ion-toggle>
                         </ion-item> 
@@ -363,9 +363,8 @@ export default {
         this.isCatering = true;
 
     this.staffName = this.$store.state.staffName || '';
-    this.staffId = this.$store.state.staffId || '';
-    this.taxesName = this.$store.state.tax.taxesName || ''; 
-    this.taxes = this.$store.state.tax.taxesName || 0;
+    this.staffId = this.$store.state.staffId || '';  
+    this.allTaxes = this.$store.state.allTaxes || [];
     this.shippingName = this.$store.state.shipping.shippingName || '';
     this.shipping = this.$store.state.shipping.shipping || 0; 
     this.restaurantSelectedId = this.$store.state.restaurantActive.restaurantId || ''; 
@@ -435,8 +434,7 @@ export default {
     return {
         staffName: '',
         staffId: '',
-        taxesName: '', 
-        taxes: 0,
+        allTaxes: [],
         shippingName: '',
         shipping: 0, 
         restaurantSelectedId: '', 
@@ -513,7 +511,7 @@ export default {
    
    total(){
     
-         let percent = ( (this.finalSubTotal() * this.taxes) / 100) ;  
+         let percent = ( (this.finalSubTotal() * this.getSumatoryTax()) / 100) ;  
          let tipPercent = ( (this.finalSubTotal() * this.tip) / 100) ;
          var t = 1    
         if(this.order.OrderType=='Delivery')  
@@ -533,7 +531,7 @@ export default {
    methods: {
 
     finalTotal(){
-         let percent = ( (this.finalSubTotal() * this.taxes) / 100) ;
+         let percent = ( (this.finalSubTotal() * this.getSumatoryTax()) / 100) ;
          let tipPercent = ( (this.finalSubTotal() * this.tip) / 100) ; 
          var t = 1    
         if(this.order.OrderType=='Delivery')  
@@ -725,8 +723,8 @@ export default {
                 order: this.order,   
                 canSplitPayment: !this.isTicket,                        
                 Total: tt,
-                Tax:  this.taxes.toString(),
-                TaxName: this.taxesName,     
+                Tax:  this.getSumatoryTax().toString(),
+                TaxName: this.getSumatoryTaxName(),     
                 restaurantId: this.restaurantSelectedId,
                 payMethod: this.restaurantActive.payMethod  ,  
                 RestaurantName: this.restaurantActive.restaurantName, 
@@ -780,9 +778,9 @@ export default {
         restaurantId: this.restaurantSelectedId,
         payMethod: this.restaurantActive.payMethod,
         total: this.order.Total,
-        tax: ((parseFloat(this.order.Taxe) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
+        tax: ((parseFloat(this.getSumatoryTax()) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
         tip: ((parseFloat(this.order.Tip) * parseFloat(this.order.SubTotal) )/ 100).toFixed(2),
-        taxName: this.taxesName,         
+        taxName: this.getSumatoryTaxName(),         
         products: this.$store.state.cart,  
         firstName : this.order.CustomerName        
       }
@@ -2035,6 +2033,19 @@ ValidateHour(value){
           return this.getFormatPrice(this.order.Total - count);
         return count
     },
+
+  getSumatoryTax(){
+      let total = 0;
+      this.allTaxes.forEach(t => { total += t.Percentage });
+      return total;
+
+    },
+
+  getSumatoryTaxName(){
+      let name = '| ';
+      this.allTaxes.forEach(t => { name += t.Name + ' | '});
+      return name;
+    }
 
 
  

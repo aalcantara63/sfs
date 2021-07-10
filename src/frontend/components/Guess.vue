@@ -168,7 +168,7 @@ export default {
 
     this.customerUpdated();
 
-    EventBus.$on('updateCustomer', (value) => {value; this.customerUpdated(); });
+    EventBus.$on('updateCustomerGuess', (value) => {value; this.customerUpdated(); });
 
     
      if(this.order.CateringEvent)

@@ -199,6 +199,11 @@ export default {
                 {
                     this.setVoid(restaurantID)
                 }
+            }
+
+            if (restaurant.data.PayMethod == 'PAYFABRIC')
+            {
+                //Payfabric Refund y Void
             }  
         }
 

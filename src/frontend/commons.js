@@ -156,6 +156,7 @@ export var Commons = {
         await this.getTax();  
         await this.getShipping();  
         await this.getSubscriptors();
+        await this.getAllTaxes();
        
        
         if(store.state.restaurantActive.payMethod === 'SHIFT4'){         
@@ -302,10 +303,26 @@ export var Commons = {
   
       },
 
+      getAllTaxes:async function(){      
+        await Api.fetchAll("Tax").then(response => {         
+          
+          const taxes = response.data.filter(t => t.Available === true)        
+          store.commit('setAllTaxes', JSON.parse(JSON.stringify(taxes)))     
+          })
+          .catch(e => {
+            e
+          });
+       },
+
     fetchProducts:async function(){
       
        await Api.fetchAll("Product").then(response => {
-        store.commit('setProducts', response.data)          
+         const allSpecialProd = response.data;
+         for (const prod of allSpecialProd) {
+           if(prod.SpecialPrice && prod.SpecialPrice > 0)
+              prod.SalePrice = prod.SpecialPrice           
+         }
+        store.commit('setProducts', allSpecialProd)          
         })
         .catch(e => {
           e
@@ -314,6 +331,14 @@ export var Commons = {
   
     fetchVariants: async function(){        
         await Api.fetchAll("Variantgroup").then(response => {
+          const allSpecialVariants = response.data;
+          for (const variant of allSpecialVariants) {
+            for (const prod of variant.Variants) {
+              if(prod.SpecialPrice && prod.SpecialPrice > 0)
+                prod.SalePrice = prod.SpecialPrice    
+            }            
+          }
+        
         store.commit('setVariants', response.data) ;
         })
         .catch(e => {        
@@ -524,7 +549,9 @@ export var Commons = {
         }
       }
       html += `<tr ><td colspan=5 ><p ><strong>${i18n.t('frontend.order.subtotal')}</strong></p></td> <td > <p > ${this.getFormatPrice(order.SubTotal)}</p></td></tr>`;
-      html += `<tr><td  colspan=5><p  ><strong>${i18n.t('frontend.order.taxe')} ${order.Taxe}%</strong></p></td> <td > <p >${ this.getFormatPrice(order.Taxe * order.SubTotal / 100) }</p> </td></tr>`;
+      for(var g = 0 ; g< order.AllTaxes.length ; g++){
+        html += `<tr><td  colspan=5><p  ><strong>${order.AllTaxes[g].Name} (${order.AllTaxes[g].Percentage}%) </strong></p></td> <td > <p >${ this.getFormatPrice(order.AllTaxes[g].Percentage * order.SubTotal / 100) }</p> </td></tr>`;
+      }
       if(order.OrderType == 'Delivery')
           html +=  `<tr ><td colspan=5 ><p  ><strong>${i18n.t('frontend.order.deliver')}</strong></p></td><td  ><p > ${this.getFormatPrice(order.Shipping) }</p></td></tr>`;
       if(order.Tip)
@@ -660,7 +687,7 @@ export var Commons = {
       if(reservation.Code)
         html += ` <h4> ${i18n.t('frontend.reservation.code')}: ${reservation.Code}</h4>`;
       if(reservation.QuotationPayment)
-        html += `<h4> ${i18n.t('frontend.order.quotationPayment')}:$ ${reservation.QuotationPayment.toFixed(2)}</h4>`;     
+        html += `<h4> ${i18n.t('frontend.reservation.dinnerPrePayment')}: ${ this.getFormatPrice(reservation.QuotationPayment)}</h4>`;     
       html += `</td></tr>`;  
 
       html += '<tr><td colspan=6 style=" text-align: center;">';
@@ -708,9 +735,9 @@ export var Commons = {
       if(flag){
         const toast = document.createElement('ion-toast');
         toast.message = mss + ' '+ store.state.restaurantActive.restaurantName;
-        toast.position = 'middle';
-        toast.color= "secondary";
-        toast.duration = 20000;
+        toast.position = 'botton';
+        toast.color= "dark";
+        toast.duration = 10000;
         toast.buttons = [
           {
               text: 'Ok', role: 'acept',handler: async () => {

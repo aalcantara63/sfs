@@ -57,7 +57,7 @@
                             </ion-label>
                                 <h2 v-if="reservation.QuotationPayment" style="width: 100%;float: left;font-size: 16px;
                                 text-align: left; padding-left: 40px;color: black;margin: 5px !important;">
-                                    {{$t('frontend.order.total')}}: <strong>  {{ getFormatPrice(reservation.QuotationPayment)}} </strong>  |
+                                    {{$t('frontend.reservation.dinnerPrePayment')}}: <strong>  {{ getFormatPrice(reservation.QuotationPayment)}} </strong>  |
                                     {{$t('frontend.order.transId')}}: <strong>  {{ reservation.PaymentTransId}} </strong>  |
                                     {{$t('frontend.order.paymentMethod')}}: <strong>  {{ reservation.PaymentMethod}} - </strong>  </h2>
                         </div>
@@ -142,7 +142,7 @@
                         <p v-if="reservation.QuotationPayment"> <ion-label class="ion-text-wrap" >
                             <h2  style="width: 100%;float: left;font-size: 16px;
                             text-align: left; padding-left: 20px;color: black;margin: 5px !important;">
-                            {{$t('frontend.order.quotationPayment')}}:<strong> $  {{reservation.QuotationPayment.toFixed(2)}} </strong> </h2>
+                            {{$t('frontend.reservation.dinnerPrePayment')}}:<strong> {{getFormatPrice(reservation.QuotationPayment)}} </strong> </h2>
                         </ion-label></p>
 
                          <p v-if="reservation.restaurantNotes"> <ion-label class="ion-text-wrap" >
@@ -156,7 +156,7 @@
                     <ion-card :style="scope.isSmall || scope.isMedium || scope.noMatch? '' :'width: 80%; margin: 0 auto;'" v-if="configuration.hasReservationQuotation && configuration.payForReservationQuotation > 0 && (reservation.State === 1 || reservation.State === 2)"> 
              
                         <ion-label class="ion-text-wrap" >
-                                <p class="titles-order" style="text-align: left;color: red">{{$t('frontend.order.quotationMessage1') + getFormatPrice(configuration.payForReservationQuotation) +' ' + $t('frontend.order.quotationMessage2')}}  </p> 
+                                <p class="titles-order" style="text-align: left;color: red">{{$t('frontend.reservation.quotationMessage1') + getFormatPrice(configuration.payForReservationQuotation) +' ' + $t('frontend.reservation.quotationMessage2')}}  </p> 
                         </ion-label>
 
                         <ion-item >
@@ -313,42 +313,15 @@ export default {
                         Tip: 0,
                         SubTotal: this.configuration.payForReservationQuotation.toFixed(2),
                         Products: []
-                    },             
-                    Acept: this.$t('frontend.home.acept'),
-                    Cancel: this.$t('frontend.home.cancel'),
+                    }, 
                     Total: this.configuration.payForReservationQuotation.toFixed(2),
                     Tax:  "1.00",
                     TaxName: '',     
                     restaurantId: this.restaurantSelectedId,
-                    payMethod: this.restaurantActive.payMethod  ,                
-                    errorPaymentHeader: this.$t('frontend.order.transictionTitle'),
-                    errorPaymentMss: this.$t('frontend.order.transictionError'),
-                    gooPaymentHeader: this.$t('frontend.order.transictionTitle'),
-                    gooPaymentMss: this.$t('frontend.order.transictionOk'),
-                    notValidEmail: this.$t('frontend.home.notValidEmail'),
-                    codeNotValid: this.$t('frontend.home.zipCodeNotValid'),
-                    notValidCC: this.$t('frontend.order.notValidCC'),
-                    dataRequired: this.$t('frontend.home.errorRequired'),
-                    paymentByCard: this.$t('frontend.order.paymentByCard'),
-                    totalForPay: this.$t('frontend.order.totalForPay'),
+                    payMethod: this.restaurantActive.payMethod  ,   
                     currency: this.restaurantActive.currency,
-                    ccard: this.$t('frontend.order.ccard'),
-                    expcard: this.$t('frontend.order.expcard'),
-                    ccode: this.$t('frontend.order.ccode'),
-                    cityText: this.$t('frontend.home.city'),
-                    stateText: this.$t('frontend.home.state'),
-                    firstNameText: this.$t('frontend.order.firstName'),
-                    lastNameText: this.$t('frontend.order.lastName'),
-                    postalCode: this.$t('frontend.order.postalCode'),
-                    addressLine1: this.$t('frontend.order.addressLine1'),
-                    payText: this.$t('frontend.order.pay'),
-                    verifyText: this.$t('frontend.order.verify'),
-                    returnTo: 'ReservationState',
-                    qrPayment: this.$t('frontend.payment.qrPayment'),
-                    cardPayment: this.$t('frontend.payment.tjtPayment'),
-                    cashPayment: this.parent.$t('frontend.payment.cashPayment'),
+                    returnTo: 'ReservationState',   
                     googleData: this.googleData,
-                    doingPayment: this.$t('frontend.payment.doingPayment'),
                     staffName: '',
                     deviceTransactionType: '01',
                     deviceData: {
@@ -363,12 +336,9 @@ export default {
                             'traceInformation':{
                                 'TransactionNumber': ''
                             }
-                    },                   
-                    shareText1: this.$t('frontend.payment.shareText1a'),
-                    shareText2: this.$t('frontend.payment.shareText2'),
+                    },   
                     customerName: this.reservation.CustomerName,
                     restaurantName: this.restaurantActive.restaurantName,
-
               },
                 },
             })

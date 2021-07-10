@@ -313,6 +313,8 @@ export default {
                 if(location.length > 0)
                     this.embebedMap += location[1];
             }
+
+            EventBus.$emit('startFrontCounter', true);
         },
 
 

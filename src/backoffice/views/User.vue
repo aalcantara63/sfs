@@ -60,6 +60,7 @@
                   <ion-label>
                       <h2>{{ user.FirstName }} {{user.LastName}}</h2>
                       <h3>{{ user.Email }}</h3>
+                      <h3><b>{{getStaffOcuppations(user.OccupationId)}}</b></h3>
                   </ion-label>
                   <span slot="end" class="iconify" data-icon="mdi:backburger" data-inline="false"></span>
                 </ion-item>
@@ -105,6 +106,9 @@
                   <ion-label>
                       <h2>{{ user.FirstName }} {{user.LastName}}</h2>
                       <h3>{{ user.Email }}</h3>
+                  </ion-label>
+                  <ion-label>
+                      <h3><b>{{getStaffOcuppations(user.OccupationId)}}</b></h3>
                   </ion-label>
                 <ion-item-group v-if="!isForDriversSupervisor" side="end">
                   <ion-button v-if="hasPermission('canEditUser')" color="primary" @click="editUser(user._id)">
@@ -153,6 +157,8 @@ export default {
 
     //console.log(screen.width)
     this.screenWidth = screen.width;
+    //Get Occupation
+    this.fetchOccupations()
     this.fetchUsers();
 
     window.onresize = function() {
@@ -170,6 +176,7 @@ export default {
       // fileName: '',
 
       paginate: ['languages'],
+      staffOcuppations: [],
 
       spinner: false,
       screenWidth: 0,
@@ -310,6 +317,7 @@ export default {
                   else
                       this.users = this.users.filter(usr => !usr.IsExternalDriver)
                   this.filterUsers = this.users
+
                   loading.dismiss()
                 })
                 .catch(e => {
@@ -318,6 +326,25 @@ export default {
                   this.ifErrorOccured(this.fetchUsers)
                 });
             })
+        })
+    },
+    getStaffOcuppations(OccuppationId){
+        const occ = this.staffOcuppations.filter(ocupp => ocupp._id === OccuppationId)
+        if (occ.length > 0)
+        {
+            console.log(occ[0].Name)
+            return occ[0].Name
+        }
+        
+        return ''
+    },
+    fetchOccupations(){
+        Api.fetchAll('Occupation')
+        .then(response => {
+            this.staffOcuppations = response.data
+        })
+        .catch(e => {
+            console.log(e)
         })
     },
     editUser: function(id){

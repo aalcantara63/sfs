@@ -86,6 +86,10 @@
             </ion-input>
             </ion-item>
 
+            <ion-item v-if="specialPrice">
+                <ion-label>Special price: <span style="color: red">{{ SpecialPrice }}</span></ion-label>
+            </ion-item>
+
             <ion-item>
               <ion-card v-if="checkImage()" >
                   <ion-img :src="file"></ion-img>
@@ -93,12 +97,7 @@
               <ion-card v-else>
                   {{ $t('backoffice.form.titles.imageText')}}
               </ion-card>
-              <!-- <ion-label position="floating"><span style="color: red">*</span>{{$t('backoffice.form.fields.image')}}</ion-label>
-              <ion-input type="file" accept=".jpg,.png,.gif" name="file"
-              @change="handleImage">
-              </ion-input> -->
             </ion-item>
-
             <ion-item>
                 <div>
                     <ion-label>{{$t('backoffice.form.fields.image')}}</ion-label>
@@ -393,6 +392,7 @@ export default {
       barCode: "",
       costPrice: 0,
       salePrice: 0,
+      specialPrice: null,
       available: false,
       epos: null,
 
@@ -665,10 +665,12 @@ export default {
                 setTimeout(() => {  // Some AJAX call occurs
                     Api.fetchById(this.modelName, this.id)
                     .then(response => {
+                        console.log(response.data)
                         this.name = response.data.Name;
                         this.description = response.data.Description;
                         this.costPrice = response.data.CostPrice;
-                        this.salePrice = response.data.SalePrice
+                        this.salePrice = response.data.SalePrice;
+                        this.specialPrice = response.data.SpecialPrice;
                         this.categoryId = response.data.CategoryId;
                         this.barCode = response.data.BarCode;
                         this.file = response.data.ImageUrl;

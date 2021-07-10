@@ -12,6 +12,7 @@
         </p>      
       </ion-toolbar>
       <ion-toolbar style="display: flow-root;padding: 5px;" color="primary" v-if="!spinner">
+       
             <ion-button @click="changePayment(), cardPay = true" :style="cardPay? 'float: left;border: solid' : 'float: left'"
              v-tooltip="i18n.t('frontend.payment.tjtPayment')"
               v-if="payMethod!=='PayFabric'"
@@ -19,8 +20,9 @@
             <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>
             </ion-button> 
 
-            <ion-button @click="changePayment(), fabricPay = true,getUrlPayFabric()" :style="fabricPay? 'float: left;border: solid' : 'float: left'"
+            <ion-button @click="changePayment(), fabricPay = true" :style="fabricPay? 'float: left;border: solid' : 'float: left'"
              v-tooltip="i18n.t('frontend.payment.tjtPayment')"
+             v-if="payMethod==='PayFabric'"
             :class="fabricPay? 'button-menu-hover button button-solid ion-activatable ion-focusable hydrated': 'button-menu button button-solid ion-activatable ion-focusable hydrated'" >
             <span class="iconify" data-icon="ion:card-outline" data-inline="false"></span>
             </ion-button>
@@ -156,11 +158,12 @@
 
         </ion-card>  
 
-          <ion-card v-if="fabricPay">   
+          <ion-card v-if="fabricPay" class="scroll" style="height: auto" >   
 
             <PayFabricPayment 
             :urlPayFabric="urlPayFabric"
             :parent="this"
+            :isSplit="true"
             :total="Total"></PayFabricPayment>
             
         </ion-card> 
@@ -608,6 +611,8 @@ export default {
     },
 
     async responsePayFabric(response){
+
+      console.log('resonse in Payment SPLITED responsePayFabric')
      
         let mss = this.i18n.t('frontend.payment.doingPayment');
         if(this.isTicket)
@@ -708,6 +713,7 @@ export default {
           cardSecurityCode: this.cardCode,
           cardExpirationDateF1: moment(this.expirationCard).format('MMYY'),
           cardExpirationDateF2: moment(this.expirationCard).format('YYYY-MM'),
+          cardExpirationDateF3: moment(this.expirationCard).format('YYMM'),
           products: this.order.Products,
         }
       } 

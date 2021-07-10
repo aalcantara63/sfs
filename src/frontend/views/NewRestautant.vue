@@ -278,6 +278,9 @@ export default {
     name: 'NewRestaurant',
     created: async function(){
         await this.getUTC(); 
+        setInterval(() => {
+               this.getUTC(); 
+            }, 480000);
         await this.fetchRestaurantType();     
     }, 
     components:{
@@ -333,10 +336,9 @@ export default {
            merchantCity: '',
            merchantState: '',
            utc: '',
-           api_access_id: '442f701ee5d25cf1b4ab6592d0b670a5',
-           api_secure_key: 'c477ce46b6fcbad91bb30ebd5f69488f',
-           srcToForte: 'https://swp.paymentsgateway.net/co/default.aspx',
-           location_id: "277674",
+           api_access_id: '11d6e10cec7e239aa76e7f456b8e9e5d', // '442f701ee5d25cf1b4ab6592d0b670a5',
+           api_secure_key: '08ad49c5c0c4fa9e33d98103ac77ca7b', //  'c477ce46b6fcbad91bb30ebd5f69488f',
+           location_id: '186209', // "277674",
            paymentRes: '',
            paySpinner: false,
            restaurantType: [],
@@ -511,11 +513,9 @@ export default {
         },
        
         async getUTC(){
-            try {
-              
-               const response = await Api.getUtc();
-              
-               let resp = response.data.replace('(', '');
+            try {                             
+                const response = await Api.getUtc();
+                let resp = response.data.replace('(', '');
                 resp = resp.replace(')', '');
                 resp = resp.replace(';', '');
                 this.utc = resp

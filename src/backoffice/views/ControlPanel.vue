@@ -46,7 +46,7 @@
                         </div>                        
                     </ion-card>
 
-                    <ion-card>
+                    <ion-card v-if="vClockin">
 
                         <ion-card-header>
                             {{$t('backoffice.titles.controlPanel')}} 
@@ -74,6 +74,10 @@
                                 <ion-chip v-tooltip="$t('backoffice.controlPanel.services')" v-if="hasPermission('canViewProduct')" @click="$router.push('/product/service')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
                                     <span class="iconify" data-icon="dashicons:businessman" data-inline="false"></span>
                                     <ion-label style=" width: 80%; text-align: center;">{{ $t('backoffice.options.manageServices') }}</ion-label>   
+                                </ion-chip>
+                                <ion-chip v-tooltip="$t('frontend.specialsPrice.titles')" v-if="hasPermission('canViewSpecialPrices')"  @click="$router.push('/specialsprice')"  color="secondary" style=" width: 70%;border: 1px solid grey;">
+                                    <span class="iconify" data-icon="ic:baseline-price-check" data-inline="false"></span>
+                                    <ion-label style=" width: 80%; text-align: center;">{{ $t('frontend.specialsPrice.titles') }}</ion-label>  
                                 </ion-chip>
 
                                 <div v-if="hasPermission('canViewUser') || 
@@ -212,6 +216,11 @@
                         </div>
 
                     </ion-card>
+                    <ion-card v-else>
+                        <ion-title style="color: rgb(172, 14, 14)">
+                        <span class="iconify" data-icon="mdi:account-clock" data-inline="false"></span>
+                        {{$t('backoffice.form.fields.mustClockinMss')}} <router-link to="/assistance" style="cursor: pointer; text-decoration: none; color: black;">{{$t('backoffice.form.fields.mustClockin2Mss')}}</router-link></ion-title>
+                    </ion-card>
                 </div>
             </v-breakpoint>
            
@@ -222,9 +231,10 @@
 <script>
 import { Api } from '../api/api.js';
 import ECharts from 'vue-echarts';
-import { VBreakpoint } from 'vue-breakpoint-component'
+import { VBreakpoint } from 'vue-breakpoint-component';
 import Modal from './SetDeviceDataModal.vue';
-import Moment from 'moment'
+import Moment from 'moment';
+import { EventBus } from '../../frontend/event-bus';
 import 'echarts';
 // import SHA256 from "crypto-js/sha256";
 
@@ -321,18 +331,45 @@ export default {
             
             item: 0,
             online: false,
+            vClockin: false,
         }
     },
-    created: function(){  
+    created: async function(){
+        console.log(this.$store.state.user._id)
         this.init()
+        this.vClockin = await this.verifyClockin()
+        EventBus.$emit('clockIn', this.vClockin);
+        console.log(this.vClockin)
     }, 
     components: {
         vChart: ECharts ,
         VBreakpoint: VBreakpoint,
     },
-    methods: {    
-        showHint(){
-            alert("Hint")
+    methods: {
+        async verifyClockin(){
+            
+            try{
+                const Attendance = await Api.fetchAll('Attendance')
+                let attendanceDay = Attendance.data
+                let StaffId = this.$store.state.user._id
+                //Los registro del staff en cuestion
+                attendanceDay = attendanceDay.filter(att => att.StaffId == StaffId)
+                //Sean del mismo día
+                attendanceDay = attendanceDay.filter(att => Moment(att.DateTime).format('YYYYMMDD') == Moment().format('YYYYMMDD'))
+                if (attendanceDay.length == 0)
+                {
+                    if (!this.hasPermission('canIgnoreClockin'))
+                    {
+                        return false
+                    }
+                    return true
+                }
+                return true
+            }
+            catch(e){
+                console.log(e)
+                return false
+            }
         },
         showSetDeviceModal(){
             return this.$ionic.modalController
@@ -419,11 +456,10 @@ export default {
 
                         //Load modal set device
                         //console.log("PASA")
-                        if (this.$route.params.firstLogin)
-                            this.showSetDeviceModal();
+                        // if (this.$route.params.firstLogin)
+                        //     this.showSetDeviceModal();
 
-                        this.spinner = false;   
-                                
+                        this.spinner = false;           
                     }  
                 })
                 .catch(e => {
@@ -630,6 +666,12 @@ export default {
                             break;
                         case 'canViewPayments':
                             res = roles[index].canViewPayments;
+                            break;
+                        case 'canIgnoreClockin':
+                            res = roles[index].canIgnoreClockin;
+                            break;
+                        case 'canViewSpecialPrices':
+                            res = roles[index].canViewSpecialPrices;
                             break;
                         default:    
                             break;

@@ -339,11 +339,6 @@ export var Api = {
     },
 
     generateKeyTsys: async function(item, restaurantId){
-            //item = {
-            //  "mid": "",
-            //  "userID": "",
-            //  "password": ""
-            // }
         return await axios.post(this.endPointURL + 'payment?generateKeyTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
@@ -368,11 +363,8 @@ export var Api = {
         return await axios.get(this.endPointURL + 'payment?invoiceTsys=' + invoice, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
-    returnWithReferenceTsys: async function(item, restaurantId){
-        //item = {
-        //  "transactionID": ""
-        // }
-    return await axios.post(this.endPointURL + 'payment?returnWithReferenceTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
+    returnWithReferenceTsys: async function(item, restaurantId){      
+        return await axios.post(this.endPointURL + 'payment?returnWithReferenceTsys=1', item, {headers: {'Authorization':this.token, 'restaurantid': restaurantId}})
     },
 
     voidTsys: async function(item, restaurantId){
@@ -450,6 +442,31 @@ export var Api = {
     processPayFabric: async function(data){       
         return await axios.post(this.endPointURL + 'payment?processPayFabric=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
     },
+
+    payNAB: async function(data){       
+        return await axios.post(this.endPointURL + 'payment?payNAB=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    authorizeNAB: async function(data){       
+        return await axios.post(this.endPointURL + 'payment?authorizeNAB=1', data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    incrementAuthorizeNAB: async function(data, invoice){       
+        return await axios.post(this.endPointURL + 'payment?incrementAuthorizeNAB='+invoice, data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    captureNAB: async function(data, invoice){       
+        return await axios.post(this.endPointURL + 'payment?captureNAB='+invoice, data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    refundNAB: async function(data, invoice){       
+        return await axios.post(this.endPointURL + 'payment?refundNAB='+invoice, data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
+    voidNAB: async function(data, invoice){       
+        return await axios.post(this.endPointURL + 'payment?voidNAB='+invoice, data, {headers: {'Authorization':this.defaultToken, 'restaurantid': this.restaurantId}})
+    },
+
 
 
 
